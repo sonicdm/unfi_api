@@ -3,8 +3,8 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from catalogboss.utils import strings_to_numbers, simple_round_retail
-from catalogboss.utils.upc import stripcheckdigit
+from .utils import strings_to_numbers, simple_round_retail
+from .utils.upc import stripcheckdigit
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, user_id, \
     promo_url, product_attribute_url
 from unfi_api.tools import combine_dicts, Threading
