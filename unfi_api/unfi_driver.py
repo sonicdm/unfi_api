@@ -1,6 +1,6 @@
 # selenium
 
-from seleniumrequests import Chrome
+from seleniumrequests import Chrome, PhantomJS
 from unfi_api import unfi_web_queries, unfi_product_api
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -27,17 +27,30 @@ class UnfiDriver:
     def __init__(self, options=None):
         if not options:
             options = Options()
+            # options.add_argument("--disable-gpu")
+            # options.add_argument("--disable-extensions")
+            # options.add_argument('--window-size=800,600')
+            # options.add_argument("--start-maximized")
+            # options.add_argument("--hide-scrollbars")
+            options.add_argument("--log-level=3")
+            # options.add_argument(
+            #     r'--user-agent="Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE) '
+            #     r'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166"')
+            # # options.headless = True
+            options.add_argument("--window-size=1920,1080")
             options.add_argument("--disable-gpu")
             options.add_argument("--disable-extensions")
-            options.add_argument('--window-size=800,600')
+            options.add_experimental_option("useAutomationExtension", False)
+            options.add_argument("--proxy-server='direct://'")
+            options.add_argument("--proxy-bypass-list=*")
             options.add_argument("--start-maximized")
-            options.add_argument("--hide-scrollbars")
-            options.add_argument("--log-level=1")
-            options.add_argument(
-                '--user-agent="Mozilla/5.0 (Windows Phone 10.0; Android 4.2.1; Microsoft; Lumia 640 XL LTE) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.135 Mobile Safari/537.36 Edge/12.10166"')
-            # options.headless = True
-        self.driver = Chrome(executable_path=r'C:\webdrivers\chromedriver.exe', options=options,
-                             service_args=["--verbose", "--log-path=C:\\scriptlogs\cd.log"])
+            options.add_argument("--headless")
+
+        self.driver = Chrome(
+            executable_path=r'C:\\webdrivers\\chromedriver.exe', options=options,
+            service_args=["--verbose", "--log-path=C:\\scriptlogs\cd.log"]
+        )
+        # self.driver = PhantomJS(executable_path=r'C:\webdrivers\phantomjs.exe')
         self.account = ""
 
     def login(self, user, password):

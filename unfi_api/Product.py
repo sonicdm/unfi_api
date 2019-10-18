@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from .utils import strings_to_numbers, simple_round_retail
 from .utils.upc import stripcheckdigit
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, user_id, \
-    promo_url, product_attribute_url
+    promo_url, product_attribute_url, api_thread_limit
 from unfi_api.tools import combine_dicts, Threading
 
 
@@ -48,7 +48,7 @@ def product_info(product_list, token, xdock=False):
     """
     products = {}
     i = 1
-    threading = Threading()
+    threading = Threading(max_workers=api_thread_limit)
     products['fields'] = []
 
     def _compile_product(product):

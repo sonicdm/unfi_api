@@ -3,6 +3,8 @@ import unittest
 
 import catalogboss.catalog.product
 from unfi_api import unfi_invoice
+from unfi_web_queries import pull_invoices, get_invoice_list
+from unfi_driver import UnfiDriver
 from catalogboss.catalogio import read_workbook
 
 TEST_INVOICE = r"C:\Users\Administrator\Desktop\UNFI SCRIPTS\CatalogBoss\Test_Invoices\066463179-003.xlsx"
@@ -33,10 +35,9 @@ class InvoiceTests(unittest.TestCase):
         inventory = unfi_invoice.Inventory(invwb, 750)
 
     def test_parse_invoices(self):
-        inventorywb = read_workbook(TEST_INVENTORY)
-        inventory = unfi_invoice.Inventory(inventorywb, 750)
-        invoicebook = read_workbook(TEST_INVOICE_BOOK)
-        unfi_invoice.parse_invoices(invoicebook, inventory)
+        from unfi_invoice import parse_invoices
+        invoicedict = read_workbook(r'F:\Recieving\UNFI Check In\09-06-2019\invoices.xlsx')
+        parse_invoices(invoicedict)
 
     def test_make_invoice_workbook(self):
         inventorywb = read_workbook(TEST_INVENTORY)
@@ -50,6 +51,30 @@ class InvoiceTests(unittest.TestCase):
     def test_write_report(self):
         report = unfi_invoice.InventoryReport(TEST_INVENTORY, TEST_INVOICE_BOOK)
         report.write(TEST_OUTPUT_PATH)
+
+    def test_create_invoice_workbook(self):
+        from datetime import datetime, date
+        from unfi_web_queries import create_invoice_workbook
+
+        driver = UnfiDriver()
+        print("Logging In...")
+        driver.login("grocery@capellamarket.com", "Organic1")
+        driver.set_account("001014")
+        token = driver.get_token()
+        invdate = date(2019,9,6)
+        invoices = pull_invoices(token, invdate)
+        invoice_wb = create_invoice_workbook(invoices)
+
+        pass
+
+    def test_get_invoice_list(self):
+        driver = UnfiDriver()
+        print("Logging In...")
+        driver.login("grocery@capellamarket.com", "Organic1")
+        driver.set_account("001014")
+        token = driver.get_token()
+        invoice_list = get_invoice_list(token, datetime.datetime.today())
+        pass
 
 
 if __name__ == "__main__":

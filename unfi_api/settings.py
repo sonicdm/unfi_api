@@ -3,6 +3,7 @@ xdock_warehouse = 2
 ridgefield_cust_num = "001014"
 ridgefield_warehouse = 6
 user_id = "34653"
+api_thread_limit = 8
 unfi_invoice_list_xhr = 'https://ordermanagement.unfi.com/api/OrderHistory/GetGridItem?' \
                         'custNum={custnum}++++&' \
                         'UserId={userid}&' \
@@ -12,7 +13,9 @@ unfi_invoice_list_xhr = 'https://ordermanagement.unfi.com/api/OrderHistory/GetGr
                         'PONO=&' \
                         'ReqBy=&' \
                         'InvoiceNo=&' \
-                        'pageSize=30&pageNumber=1&sortExpression=&sortDirection='
+                        'pageSize=1000&' \
+                        'pageNumber=1&' \
+                        'sortExpression=&sortDirection='
 
 invoice_xhr = "https://ordermanagement.unfi.com/api/OrderHistory/" \
               "GetCreditInvoiceDetailForWest?" \
@@ -33,7 +36,7 @@ search_url = 'https://ordermanagement.unfi.com/api/Brands/GetProductsByFullText?
              '&accountNumber={custnum}++++' \
              '&userId={userid}' \
              '&isAdminOrAccountManager=true' \
-             '&pageSize=500' \
+             '&pageSize=5000' \
              '&pageNumber=1'
 product_detail_url = "https://ordermanagement.unfi.com/api/ProductDetail/GetProductDetailByProductIntId" \
                      "?productintId={product_id}" \

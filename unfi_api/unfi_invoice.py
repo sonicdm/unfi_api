@@ -71,6 +71,8 @@ def go():
 def parse_invoices(invwb, inventory=None):
     invoices = {}
     for ws, idx in sorted(invwb['sheetindex'].items(), key=lambda k: k[0].title):
+        if ws.title == "All Invoices":
+            continue
         invoice = Invoice(invwb['workbook'][idx], ws.title, inventory=inventory)
         invoices[ws.title] = invoice
 
@@ -351,14 +353,14 @@ class InventoryReport(object):
     """
 
     def __init__(self, inventorypath=None, invoicepath=None, date=None, batch=None,
-                 department=None, web_result=None, outputpath=None):
+                 department=None, web_result=None, outputpath=None, invoice_date=None):
         self.inventorypath = inventorypath
         self.invoicepath = invoicepath
         self.outputpath = outputpath
         self.report_date = date
 
         if web_result:
-            self.invoiceworkbook = create_invoice_workbook(web_result, self.outputpath)
+            self.invoiceworkbook = create_invoice_workbook(web_result, self.outputpath, invoice_date)
             if not inventorypath:
                 return
         else:
@@ -457,7 +459,7 @@ class InventoryReport(object):
                 retail = float(product.retail)
                 srp = float(product.srp)
                 if srp != retail:
-                    if abs(retail - srp) > .09:
+                    if abs((retail - srp) / srp) > .05 and product.department in [11, 12, 13, 14, 15]:
                         cells = build_cells(product)
                         rows[i] = make_row(i, cells, product)
                         i += 1

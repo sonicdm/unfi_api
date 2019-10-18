@@ -76,15 +76,29 @@ def get_invoice_list(token, dateobj, num_days=1, xdock=False):
             userid=user_id,
             custnum=ridgefield_cust_num
         )
-    invoice_date = dateobj - datetime.timedelta(days=num_days)
+    invoice_date = dateobj - datetime.timedelta(days=0)
     invoice_date_string = invoice_date.strftime('%m/%d/%Y')
     response = requests.get(invoice_list_url, headers=header)
-    invoices = json.loads(response.content)
-    invoice_nums = []
-    for invoice in invoices:
-        if invoice['InvoiceDate'] == invoice_date_string:
-            invoice_nums.append(invoice['InvoiceNumber'])
+    invoice_search_result = json.loads(response.content)
+    invoice_dict = {}
+    for invoice in invoice_search_result:
+        invoice_date = datetime.datetime.strptime(invoice['InvoiceDate'], '%m/%d/%Y')
+        invoice_day = invoice_dict.get(invoice_date, [])
+        invoice_day.append(invoice['InvoiceNumber'])
+        invoice_dict[invoice_date] = invoice_day
+
+    invoice_nums = invoice_dict[get_most_recent_date(invoice_dict.keys(), dateobj)]
     return invoice_nums
+
+
+def get_most_recent_date(items, dateobj):
+    found_date = None
+    for day in items:
+        if (dateobj - day).days < 0:
+            continue
+        if found_date is None or found_date < day:
+            found_date = day
+    return found_date
 
 
 def get_invoice(invoice_number, token, xdock=False, callback=None):
@@ -123,7 +137,7 @@ def get_invoice(invoice_number, token, xdock=False, callback=None):
     return tablerows
 
 
-def create_invoice_workbook(invoicedict, outputpath=None):
+def create_invoice_workbook(invoicedict, outputpath=None, invdate=None):
     """
     Compile a dict of invoices numbers and rows into an xlsx workbook.
     save if requested (makes re-running the report much faster)
@@ -134,8 +148,15 @@ def create_invoice_workbook(invoicedict, outputpath=None):
     wb = Workbook()
     defaultws = wb.active
     i = 1
+    combined = []
+    if not invdate:
+        invdate = datetime.date.today()
     for invoice, rows in sorted(invoicedict.items()):
         if i == 1:
+            header = rows[2].copy()
+            header.insert(0, "Invoice #")
+            header.insert(1, "Invoice Date")
+            combined.append(header)
             ws = wb.active
             ws.title = invoice
             i += 1
@@ -144,6 +165,14 @@ def create_invoice_workbook(invoicedict, outputpath=None):
         for row in rows:
             ws.append(strings_to_numbers(row))
         size_cols(ws)
+        for l in rows[3:]:
+            l.insert(0, invoice[:-4])
+            l.insert(1, invdate.strftime("%m/%d/%y"))
+            combined.append(l)
+
+    combws = wb.create_sheet("All Invoices", 0)
+    for l in combined:
+        combws.append(l)
 
     sheets = {k: v for v, k in enumerate(wb.worksheets)}
     # sheets = sort_dict(sheets)
@@ -154,10 +183,11 @@ def create_invoice_workbook(invoicedict, outputpath=None):
         for row in ws.rows:
             rowlist.append([cell.value for cell in row])
         workbook.append(rowlist)
+
     if outputpath:
         wb.save(outputpath + r"\invoices.xlsx")
 
-    return dict(sheetindex=sheets, workbook=workbook, original=wb)
+    return dict(sheetindex=sheets, workbook=workbook, original=wb, combined=combined)
 
 
 def set_default_account(userid, account, token, region="West"):
@@ -170,8 +200,12 @@ def make_query_list(query):
     # split query by white space and remove non text
     import re
     query_list = re.split(r'\s', query)
-    query_list.remove("")
-    return strings_to_numbers([re.sub('\W', "", x) for x in query_list])
+    query_list = [re.sub(r'\W+', "", x) for x in query_list]
+    try:
+        query_list.remove("")
+    except ValueError:
+        pass
+    return strings_to_numbers(query_list)
 
 
 def run_query(query_list, token, xdock=False):
@@ -224,6 +258,7 @@ def run_query(query_list, token, xdock=False):
         return products
     else:
         print('No results for your search.')
+        return None
 
 
 def search_products(query, token, xdock=False):
