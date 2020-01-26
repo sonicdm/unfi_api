@@ -52,3 +52,5 @@ product_attribute_url = "https://products.unfi.com/api/Products/{product_id}/att
 promo_url = "https://ordermanagement.unfi.com/api/Brands/GetProductDetailsFromService" \
             "?custNum={custnum}" \
             "&prodCode={product_code}"
+
+

@@ -79,7 +79,6 @@ def main():
     products.update(run_query(query_list, token, False))
     wb = make_xlsx_workbook(products)
     write_xlsx(wb, "C:\\query.xlsx")
-    print("Setting account to Ridgefield")
     input("Complete. Press Enter to exit.")
 
 
