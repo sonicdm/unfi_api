@@ -46,6 +46,34 @@ class Brands(object):
         return brands.get_brands(token, region, warehouse, account_number, page_size=page_size, page_number=page_number,
                                  brand_prefix=brand_prefix, **kwargs)
 
+    def get_products_by_brand_id(self, brand_id, sort_order='ASC', sort_description="BrandName", category_id='',
+                                 category_name='', brand_name='', product_type='', upc='', product_code='',
+                                 product_description='', brand_ids='', category_ids='', all_words='',
+                                 at_least_one_word='', exact_phrase='', exclude_words='',
+                                 search_product_in_product_description='', search_product_in_product_ingredients='',
+                                 search_product_in_product_attribbutes='', search_product_in_additional_info='',
+                                 page_size=1000, page_number=1, _type='brand', is_private_label='false'):
+        token = self.api.auth_token
+        region = self.api.account_region
+        warehouse = self.api.warehouse,
+        account_number = self.api.account
+        user_id = self.api.user_id
+        return brands.get_products_by_brand_id(
+            token, account_number, user_id, warehouse, region, brand_id,
+            sort_order,
+            sort_description, category_id, category_name,
+            brand_name,
+            product_type, upc, product_code, product_description,
+            brand_ids,
+            category_ids, all_words, at_least_one_word, exact_phrase,
+            exclude_words,
+            search_product_in_product_description,
+            search_product_in_product_ingredients,
+            search_product_in_product_attribbutes,
+            search_product_in_additional_info,
+            page_size, page_number, _type, is_private_label
+        )
+
 
 class Categories(object):
     """
