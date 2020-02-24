@@ -8,5 +8,6 @@ setup(
     license='',
     author='Allan',
     author_email='',
-    description=''
+    description='',
+    install_requires=['bs4', 'requests', 'mock', 'future']
 )
