@@ -98,6 +98,22 @@ class UnfiAPI(object):
     def change_account(self):
         pass
 
+    def refresh_metadata(self):
+        home_url = 'https://customers.unfi.com/pages/Home.aspx'
+        home = self.session.post(home_url)
+        home_soup = BeautifulSoup(home.content, features="lxml")
+        validator_tag = home_soup.select_one("#hfTokValidator")
+        if validator_tag:
+            self.auth_token = validator_tag['value']
+            self.logged_in = True
+        else:
+            self.logged_in = False
+            raise Exception("Login Failed")
+
+        # get page claims
+        claims = json.loads(home_soup.select_one("#claims")['value'])
+        self.usermeta = claims
+
     def search(self, query, ):
         pass
 
