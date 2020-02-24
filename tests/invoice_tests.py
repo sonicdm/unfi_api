@@ -4,7 +4,7 @@ import unittest
 import catalogboss.catalog.product
 from unfi_api import unfi_invoice
 from unfi_web_queries import pull_invoices, get_invoice_list
-from unfi_driver import UnfiDriver
+from unfi_api.unfi_driver import UnfiDriver
 from catalogboss.catalogio import read_workbook
 
 TEST_INVOICE = r"C:\Users\Administrator\Desktop\UNFI SCRIPTS\CatalogBoss\Test_Invoices\066463179-003.xlsx"
