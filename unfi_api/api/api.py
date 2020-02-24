@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import json
 from .order_management import OrderManagement
+from .admin_backend import AdminBackend
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
@@ -14,6 +15,7 @@ class UnfiAPI(object):
         self.usermeta = {}
         self.login(user, password)
         self._order_management = OrderManagement(self)
+        self._admin_backend = AdminBackend(self)
 
     def login(self, user, passwd):
         login_page_result = self.session.get(login_page)
@@ -95,7 +97,8 @@ class UnfiAPI(object):
         claims = json.loads(home_soup.select_one("#claims")['value'])
         self.usermeta = claims
 
-    def change_account(self):
+    def change_account(self, account_number):
+        # self.admin_backend.user.insert_selected_account_as_default(account_number)
         pass
 
     def refresh_metadata(self):
@@ -144,6 +147,10 @@ class UnfiAPI(object):
     @property
     def order_management(self):
         return self._order_management
+
+    @property
+    def admin_backend(self):
+        return self._admin_backend
 
 
 def get_context_info(session):
