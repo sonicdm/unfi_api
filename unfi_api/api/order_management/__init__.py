@@ -34,12 +34,17 @@ class Brands(object):
         region = self.api.account_region
         warehouse = self.api.warehouse,
 
-        return brands.get_products_by_full_text(self.api.auth_token, query, account_number, user_id,
+        return brands.get_products_by_full_text(token, query, account_number, user_id,
                                                 region, warehouse)
 
+    def get_brands(self, page_size=9999, page_number=1, brand_prefix='A', **kwargs):
+        token = self.api.auth_token
+        region = self.api.account_region
+        warehouse = self.api.warehouse,
+        account_number = self.api.account
 
-
-    get_products_by_full_text.__doc__ = brands.get_products_by_full_text.__doc__
+        return brands.get_brands(token, region, warehouse, account_number, page_size=page_size, page_number=page_number,
+                                 brand_prefix=brand_prefix, **kwargs)
 
 
 class Categories(object):
