@@ -1,5 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
+import json
 
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
@@ -9,13 +10,10 @@ class UnfiAPI(object):
     def __init__(self, user, password):
         self.session = requests.session()
         self.hfTokValidator = None
-        self.user_id = None
-        self.account_id = None
-        self.account_number = None
-        self.warehouse_id = None
-        self.region = None
         self.logged_in = False
+        self.usermeta = {}
         self.login(user, password)
+
 
     def login(self, user, passwd):
         login_page_result = self.session.get(login_page)
@@ -93,8 +91,36 @@ class UnfiAPI(object):
             self.logged_in = False
             raise Exception("Login Failed")
 
+        # get page claims
+        claims = json.loads(home_soup.select_one("#claims")['value'])
+        self.usermeta = claims
+
+
     def change_account(self):
         pass
+
+    def search(self, query, ):
+        pass
+
+    @property
+    def account(self):
+        return self.usermeta['LastSelectedAccount']
+
+    @property
+    def user_id(self):
+        return self.usermeta["UserId"]
+
+    @property
+    def warehouse_id(self):
+        return self.usermeta["WarehouseId"]
+
+    @property
+    def account_region(self):
+        return self.usermeta['LastSelectedAccountRegion']
+
+    @property
+    def customer_number(self):
+        return self.usermeta["CustomerNumber"]
 
 
 def get_context_info(session):
