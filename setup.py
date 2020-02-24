@@ -1,13 +1,12 @@
-from distutils.core import setup
+from setuptools import setup
 
 setup(
-    name='unfi_api',
+    name='UNFI Api',
     version='',
     packages=['unfi_api', 'unfi_api.api', 'unfi_api.tests', 'unfi_api.tests.Product', 'unfi_api.utils'],
     url='',
     license='',
-    author='Allan',
-    author_email='',
-    description='',
-    install_requires=['bs4', 'requests', 'mock', 'future']
+    author='Allan Barcellos',
+    author_email='sonicdm@gmail.com',
+    description=''
 )
