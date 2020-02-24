@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import json
-
+from .order_management import OrderManagement
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
@@ -9,11 +9,11 @@ class UnfiAPI(object):
 
     def __init__(self, user, password):
         self.session = requests.session()
-        self.hfTokValidator = None
+        self.auth_token = None
         self.logged_in = False
         self.usermeta = {}
         self.login(user, password)
-
+        self._order_management = OrderManagement(self)
 
     def login(self, user, passwd):
         login_page_result = self.session.get(login_page)
@@ -85,7 +85,7 @@ class UnfiAPI(object):
         home_soup = BeautifulSoup(home.content, features="lxml")
         validator_tag = home_soup.select_one("#hfTokValidator")
         if validator_tag:
-            self.hfTokValidator = validator_tag['value']
+            self.auth_token = validator_tag['value']
             self.logged_in = True
         else:
             self.logged_in = False
@@ -94,7 +94,6 @@ class UnfiAPI(object):
         # get page claims
         claims = json.loads(home_soup.select_one("#claims")['value'])
         self.usermeta = claims
-
 
     def change_account(self):
         pass
@@ -115,12 +114,20 @@ class UnfiAPI(object):
         return self.usermeta["WarehouseId"]
 
     @property
+    def warehouse(self):
+        return self.usermeta["Warehouse"]
+
+    @property
     def account_region(self):
         return self.usermeta['LastSelectedAccountRegion']
 
     @property
     def customer_number(self):
         return self.usermeta["CustomerNumber"]
+
+    @property
+    def order_management(self):
+        return self._order_management
 
 
 def get_context_info(session):
