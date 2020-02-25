@@ -12,7 +12,7 @@ from openpyxl.styles import PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
 from catalogboss.formatter import size_cols
-from catalogboss.catalog.product import Product
+from catalogboss.catalog.products import Product
 from catalogboss.catalogio import read_workbook
 from catalogboss.utils import \
     strings_to_numbers, find_most_common_member, sort_dict

@@ -1,10 +1,11 @@
 import datetime
 import unittest
 
-import catalogboss.catalog.product
+import catalogboss.catalog.products
 from unfi_api import unfi_invoice
-from unfi_web_queries import pull_invoices, get_invoice_list
-from unfi_driver import UnfiDriver
+from unfi_api.unfi_invoice import parse_invoices
+from unfi_api.unfi_web_queries import pull_invoices, get_invoice_list, create_invoice_workbook
+from unfi_api import UnfiAPI
 from catalogboss.catalogio import read_workbook
 
 TEST_INVOICE = r"C:\Users\Administrator\Desktop\UNFI SCRIPTS\CatalogBoss\Test_Invoices\066463179-003.xlsx"
@@ -28,14 +29,13 @@ class InvoiceTests(unittest.TestCase):
         invoice = unfi_invoice.Invoice(invwb['workbook'][0], 123, "grocery")
 
     def test_create_product(self):
-        product = catalogboss.catalog.product.Product(7341002619)
+        product = catalogboss.catalog.products.Product(7341002619)
 
     def test_inventory(self):
         invwb = read_workbook(TEST_INVENTORY)
         inventory = unfi_invoice.Inventory(invwb, 750)
 
     def test_parse_invoices(self):
-        from unfi_invoice import parse_invoices
         invoicedict = read_workbook(r'F:\Recieving\UNFI Check In\09-06-2019\invoices.xlsx')
         parse_invoices(invoicedict)
 
@@ -54,25 +54,19 @@ class InvoiceTests(unittest.TestCase):
 
     def test_create_invoice_workbook(self):
         from datetime import datetime, date
-        from unfi_web_queries import create_invoice_workbook
-
-        driver = UnfiDriver()
         print("Logging In...")
-        driver.login("grocery@capellamarket.com", "Organic1")
-        driver.set_account("001014")
-        token = driver.get_token()
+        api = UnfiAPI("grocery@capellamarket.com", "Organic1")
+        token = api.auth_token
         invdate = date(2019,9,6)
         invoices = pull_invoices(token, invdate)
         invoice_wb = create_invoice_workbook(invoices)
-
         pass
 
     def test_get_invoice_list(self):
-        driver = UnfiDriver()
         print("Logging In...")
-        driver.login("grocery@capellamarket.com", "Organic1")
-        driver.set_account("001014")
-        token = driver.get_token()
+        api = UnfiAPI("grocery@capellamarket.com", "Organic1")
+        token = api.auth_token
+
         invoice_list = get_invoice_list(token, datetime.datetime.today())
         pass
 

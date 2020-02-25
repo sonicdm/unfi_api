@@ -1,17 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='unfi_api',
+    name='UNFI Api',
     version='',
-    packages=['QueryGui', 'QueryGui.pages', 'QueryGui.widgets', 'unfi_api', 'unfi_api.tests', 'unfi_api.tests.Product',
-              'unfi_api.utils', '', 'tests', 'tests.Product', 'utils'],
-    package_dir={'': 'unfi_api'},
+    packages=['unfi_api', 'unfi_api.api', 'unfi_api.tests', 'unfi_api.tests.Product', 'unfi_api.utils'],
     url='',
     license='',
-    author='Administrator',
-    author_email='',
-    description='',
-    install_requires=['openpyxl', 'xlrd', 'titlecase', 'bs4',
-                      'requests', 'mock', 'future', 'tqdm', 'psutil', 'selenium', 'selenium-requests'],
-
+    author='Allan Barcellos',
+    author_email='sonicdm@gmail.com',
+    description=''
 )
