@@ -1,5 +1,5 @@
 import requests
-
+from unfi_api.utils.http import response_to_json
 
 def insert_selected_account_as_default(token, user_id, account, region):
     """
@@ -31,6 +31,7 @@ def insert_selected_account_as_default(token, user_id, account, region):
 
     response = requests.post(endpoint_url, headers=headers, json=data)
     pass
+
 
 def get_users_data(token, user_id):
     endpoint_url = 'https://adminbackend.unfi.com/api/User/GetUsersData'
@@ -66,3 +67,5 @@ def get_users_data(token, user_id):
     )
 
     response = requests.get(endpoint_url, headers=headers, params=params)
+    return response_to_json(response)
+

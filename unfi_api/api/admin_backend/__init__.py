@@ -31,6 +31,10 @@ class User(object):
         account_result = user.insert_selected_account_as_default(token, user_id, account_number, region)
         return account_result
 
+    def get_users_data(self):
+        token = self.api.auth_token
+        user_id = self.api.user_id
+        return user.get_users_data(token, user_id)
 
 class Reports(object):
     """
