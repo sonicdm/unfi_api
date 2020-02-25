@@ -5,8 +5,8 @@ import sys
 
 from openpyxl import Workbook
 
-from unfi_api.unfi_driver import UnfiDriver
 from unfi_api.unfi_web_queries import run_query, make_query_list
+from unfi_api import UnfiAPI
 
 try:
     from past.builtins import raw_input
@@ -49,60 +49,38 @@ TEST_QUERY = """
 
 TOKEN = None
 
-XDOCK = False
-
 default_token = None
-UNFI_DRIVER = None
 
 
 def uncaught_exception_handler(type, value, tb):
-    UNFI_DRIVER.quit()
     print(type, value, tb)
     input("PROCESS FAILED PRESS ENTER TO QUIT")
 
 
+sys.excepthook = uncaught_exception_handler
+
+
 def main():
-    global TOKEN
-    global XDOCK
-    global UNFI_DRIVER
     tkroot = tk.Tk()
     tkroot.withdraw()
     query = simpledialog.askstring("Search For Products", "Search For: ")
     query_list = make_query_list(query)
     print("Loading UNFI Driver")
-    UNFI_DRIVER = UnfiDriver()
-    sys.excepthook = uncaught_exception_handler
-    UNFI_DRIVER.login("CapellaAPI", "CapellaAPI2489")
-    print("Setting account to Ridgefield")
-    UNFI_DRIVER.set_account("001014")
+    api = UnfiAPI("CapellaAPI", "CapellaAPI2489")
+    token = api.auth_token
 
-    TOKEN = UNFI_DRIVER.get_token()
     products = {}
     search = True
 
     # TOKEN = simpledialog.askstring("Enter your Ridgefield token", "Enter your Ridgefield token: ")
-    if not TOKEN:
-        TOKEN = default_token
+    if not token:
+        token = default_token
 
-    products.update(run_query(query_list, TOKEN, False))
-    # xdock_query = list(filter(lambda x: x not in products.keys(), query_list))
-    # if xd and len(xdock_query) > 0:
-    #     print("Setting Account to Auburn X-Dock")
-    #     UNFI_DRIVER.set_account("001016")
-    #     # TOKEN = simpledialog.askstring("Enter your Cross Dock token", "Enter your Cross Dock token:")
-    #     xdock_products = run_query(xdock_query, TOKEN, xd)
-    #     if xdock_products:
-    #         products.update(xdock_products)
-    # search = mb.askyesno("Run another Query?", "Run another Query")
-
-    # ws = make_worksheet(products)
-    # write_csv(ws, 'C:\\query.csv')
-    UNFI_DRIVER.quit()
+    products.update(run_query(query_list, token, False))
     wb = make_xlsx_workbook(products)
     write_xlsx(wb, "C:\\query.xlsx")
     print("Setting account to Ridgefield")
     input("Complete. Press Enter to exit.")
-    pass
 
 
 def write_csv(ws, path):

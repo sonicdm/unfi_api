@@ -44,7 +44,7 @@ def last_friday(year, month):
     return last_fri
 
 
-def fuzzy_date(datestr):
+def fuzzy_date(datestr, verbose=False):
     dateobj = None
     for word in datestr.replace('_', ' ').replace('-', ' ').strip(' ').split(' '):
         try:
@@ -321,7 +321,7 @@ def is_cur_col(key, cur_cols):
     return len(set(key.lower().split(' ')).intersection(cur_cols)) > 0
 
 
-def index_header(ws, header_row=0, header_end=0):
+def index_header(ws, header_row=0, header_end=0, verbose=False):
     """
     :param header_end:
     :param ws: REQUIRED worksheet data
