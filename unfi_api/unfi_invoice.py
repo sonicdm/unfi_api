@@ -303,6 +303,8 @@ class Invoice(object):
         self.rows[i] = header
         for idx, row in enumerate(ws[header_row + 1:]):
             upc = row[upcidx]
+            if len(str(upc)) > 13:
+                upc = str(upc)[-13:]
             if upc:
                 i += 1
                 upc = int(stripcheckdigit(upc))
