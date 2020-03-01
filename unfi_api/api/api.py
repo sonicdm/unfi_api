@@ -3,6 +3,8 @@ from bs4 import BeautifulSoup
 import json
 from .order_management import OrderManagement
 from .admin_backend import AdminBackend
+from .products import Products
+
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
@@ -16,6 +18,7 @@ class UnfiAPI(object):
         self.login(user, password)
         self._order_management = OrderManagement(self)
         self._admin_backend = AdminBackend(self)
+        self._products = Products(self)
 
     def login(self, user, passwd):
         login_page_result = self.session.get(login_page)
@@ -151,6 +154,10 @@ class UnfiAPI(object):
     @property
     def admin_backend(self):
         return self._admin_backend
+
+    @property
+    def products(self):
+        return self._products
 
 
 def get_context_info(session):
