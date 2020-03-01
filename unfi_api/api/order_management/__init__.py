@@ -13,6 +13,7 @@ class OrderManagement(object):
         self.categories = Categories(api)
         self.interactive_reports = InteractiveReports(api)
         self.order_history = OrderHistory(api)
+        self.product_detail = ProductDetail(api)
         pass
 
 
@@ -96,8 +97,42 @@ class InteractiveReports(object):
         self.api = api
         pass
 
+    def get_products_by_top_sellers(self, start_date=None, end_date=None,
+                                    brand_id='', sort_order='QuantitySold', sort_description='DESC', category_id='',
+                                    category_name='', brand_name='', product_type='', upc='', product_code='',
+                                    product_description='', brand_ids='', category_ids='', all_words='',
+                                    at_least_one_word='', exact_phrase='', exclude_words='',
+                                    search_product_in_product_description='', search_product_in_product_ingredients='',
+                                    search_product_in_additional_info='', search_product_in_product_attributes='',
+                                    is_admin_or_account_manager='true', page_size=50, page_number=1, _type='TopSellers',
+                                    is_private_label='false', department_id='', top_rank='', apply_channel='',
+                                    **kwargs):
+        # token, account_number, user_id, region, warehouse,
+        result = interactive_reports.get_products_by_top_sellers(
+            self.api.auth_token, self.api.account, self.api.user_id, self.api.account_region, self.api.warehouse, start_date, end_date,
+            brand_id, sort_order, sort_description, category_id, category_name, brand_name, product_type, upc,
+            product_code, product_description, brand_ids, category_ids, all_words, at_least_one_word, exact_phrase,
+            exclude_words, search_product_in_product_description, search_product_in_product_ingredients,
+            search_product_in_additional_info, search_product_in_product_attributes, is_admin_or_account_manager,
+            page_size, page_number, _type, is_private_label, department_id, top_rank, apply_channel, **kwargs,
+
+        )
+
+        return result
+
 
 class OrderHistory(object):
+    """
+
+    :type api: `unfi_api.api.UnfiAPI`
+    """
+
+    def __init__(self, api):
+        self.api = api
+        pass
+
+
+class ProductDetail(object):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
