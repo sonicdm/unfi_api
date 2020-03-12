@@ -131,6 +131,11 @@ class OrderHistory(object):
         self.api = api
         pass
 
+    def get_invoice_list(self, order_no=None, po_no=None, req_by=None, invoice_no=None,
+                         page_size=1000, page_number=1, sort_expression=None, sort_direction=None):
+        return order_history.get_grid_item(self.api.auth_token, self.api.account, self.api.user_id,
+                                           self.api.account_region, transaction_type=1)
+
 
 class ProductDetail(object):
     """
