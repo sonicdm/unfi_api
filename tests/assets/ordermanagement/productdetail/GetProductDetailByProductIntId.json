@@ -1,0 +1,31 @@
+[
+  {
+    "StockAvail": -140,
+    "StockOH": 0,
+    "PerUnitPrice": 32.00,
+    "BrandId": 11270,
+    "BrandName": "ANNIE`S HOMEGROWN",
+    "ProductIntID": 180266,
+    "ProductCode": "08345",
+    "ProductName": "Organic Mac & Cheese Pasta w/White Cheddar",
+    "Discount": null,
+    "UPC": "013562-300631",
+    "PackSize": "12/6 OZ",
+    "Price": 32.00,
+    "UnitsInFullCase": 12,
+    "MINQTY": 0,
+    "InnerCaseUPC": "00000000000000",
+    "MasterCaseUPC": "10013562300638",
+    "PLU": null,
+    "PVLabelCode": "0",
+    "MemberApplicableFee": 0.00,
+    "OrganicCode": "OG2",
+    "SubHeader": "Organic Mac & Cheese",
+    "CategoryID": 495,
+    "CategoryName": "GROCERY - PASTA - ENTREES",
+    "CountryOfOriginID": null,
+    "CountryOfOriginName": null,
+    "WarehouseMessage": "Potential ST MFG OOS",
+    "IsNew": false
+  }
+]

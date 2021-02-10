@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='UNFI Api',
     version='',
-    packages=['unfi_api', 'unfi_api.api', 'unfi_api.tests', 'unfi_api.tests.Product', 'unfi_api.utils'],
+    packages=['unfi_api'],
     url='',
     license='',
     author='Allan Barcellos',

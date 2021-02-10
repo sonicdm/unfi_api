@@ -1,100 +1,89 @@
-from __future__ import print_function
-
-import csv
 import sys
+import re
+import tkinter as tk
+from tkinter import messagebox as mb
+from tkinter import simpledialog
 
 from openpyxl import Workbook
 
-from unfi_api.unfi_web_queries import run_query, make_query_list
 from unfi_api import UnfiAPI
-
-try:
-    from past.builtins import raw_input
-except ImportError:
-    pass
-
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter import messagebox as mb
-    from tkinter import simpledialog
-
-except ImportError:
-    import Tkinter as tk
-    from Tkinter import ttk
-    import tkMessageBox as mb
-    import tkSimpledialog as simpledialog
-
-LARGE_FONT = ("Arial", 16, "bold")
-SUBTITLE_FONT = ("Arial", 12, 'bold')
-CONTENT_FONT = ("Arial", 10)
-LARGE_LBL_ARGS = {'padx': 10, 'pady': 10}
-
-TEST_QUERY = """
-042563-60307
-052603-06756
-850348-00328
-850348-00328
-850348-00328
-853715-00358
-853982-00458
-853982-00462
-858195-00327
-858195-00329
-858234-00665
-858234-00665
-862284-00001
-862284-00001
-"""
-
-TOKEN = None
-
-default_token = None
+from unfi_api.unfi_web_queries import run_query, make_query_list
 
 
-def uncaught_exception_handler(type, value, tb):
-    print(type, value, tb)
+def uncaught_exception_handler(etype, value, tb):
+    print(etype, value, tb)
     input("PROCESS FAILED PRESS ENTER TO QUIT")
 
 
 sys.excepthook = uncaught_exception_handler
+output_path = r"F:\pos\unfi\query.xlsx"
+description_regex = re.compile(r'(?: at least.*| 100% Organic)', re.IGNORECASE)
 
 
 def main():
     tkroot = tk.Tk()
     tkroot.withdraw()
+    query = ask_query()
+    if query:
+        print("Loading UNFI Driver")
+        api = UnfiAPI("CapellaAPI", "CapellaAPI2489")
+        search = True
+        products = {}
+        fields = set()
+        # result = do_query(query, api)
+        # products.update(result)
+        # search = mb.askyesno("Run again?", "Run another search?")
+        while search:
+            if not query:
+                query = ask_query()
+            if query:
+                result = do_query(query, api)
+                fields.update(result.get('fields'))
+                products.update(result.get('items'))
+                query = None
+                if mb.askyesno("Save Workbook", "Would you like to save the workbook?"):
+                    save_workbook(products, fields)
+                search = mb.askyesno("Run again?", "Run another search?")
+            else:
+                if not mb.askyesno("Empty Search", "Your search was empty. Retry?"):
+                    search = False
+                    save_workbook(products, fields)
+
+    else:
+        if mb.askyesno("Empty Query", "Re-run search?"):
+            main()
+
+    mb.showinfo("Quit", "Process Ended.")
+
+
+def save_workbook(products, fields):
+    print("Creating Workbook for {} products..".format(len(products)))
+    wb = make_xlsx_workbook(products, fields)
+    print("Saving workbook to: ", output_path)
+    write_xlsx(wb, output_path)
+
+
+def ask_query():
     query = simpledialog.askstring("Search For Products", "Search For: ")
+    return query
+
+
+def do_query(query, api):
     query_list = make_query_list(query)
-    print("Loading UNFI Driver")
-    api = UnfiAPI("CapellaAPI", "CapellaAPI2489")
     token = api.auth_token
-
-    products = {}
-    search = True
-
-    # TOKEN = simpledialog.askstring("Enter your Ridgefield token", "Enter your Ridgefield token: ")
-    if not token:
-        token = default_token
-
-    products.update(run_query(query_list, token, False))
-    wb = make_xlsx_workbook(products)
-    write_xlsx(wb, "C:\\query.xlsx")
-    input("Complete. Press Enter to exit.")
+    # products = {}
+    result = run_query(query_list, token, api=api)
+    # if result:
+    #     products.update(result)
+    return result
 
 
-def write_csv(ws, path):
-    with open(path, 'w', newline='') as csvfile:
-        csvw = csv.writer(csvfile, 'excel')
-        for row in ws:
-            csvw.writerow(row)
-    return True
-
-
-def write_xlsx(wb, path):
+def write_xlsx(wb, filepath):
     """
+    :param filepath:
     :type wb: Workbook
     """
-    wb.save(path)
+    wb.save(filepath)
 
 
 def make_worksheet(products):
@@ -109,16 +98,29 @@ def make_worksheet(products):
     return rows
 
 
-def make_xlsx_workbook(products):
+def make_xlsx_workbook(products, fields):
     wb = Workbook()
     ws = wb.active
-    header = sorted(products.pop('fields'))
-    ws.append(header)
+    # header = products.get('fields')
+    ws.append(list(fields))
     for upc, product in products.items():
+        if upc == "fields":
+            continue
         row = []
-        for col in header:
-            p = product.get(col)
-            row.append(p)
+        for col in fields:
+            val = product.get(col)
+            if col == "productname":
+                val = description_regex.sub("", val)
+                val = val.replace(",", " ").replace("  ", " ").replace("  ", " ").replace("'S", "'s").replace("`", "'")
+            if col == "organiccode":
+                if val in ["OG2", "OG1"]:
+                    val = "Y"
+                else:
+                    val = val.replace("'S", "'s").replace("`", "'")
+            if col == "brandname":
+                val = val.replace(",", " ").replace("  ", " ").replace("  ", " ").replace("'S", "'s").replace("`", "'")
+
+            row.append(val)
         ws.append(row)
     return wb
 

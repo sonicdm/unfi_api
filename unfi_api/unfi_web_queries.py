@@ -1,5 +1,5 @@
 from __future__ import print_function
-
+import sys
 import datetime
 import json
 from html import escape
@@ -7,6 +7,7 @@ from html import escape
 import requests
 from bs4 import BeautifulSoup
 from openpyxl import Workbook
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from catalogboss.formatter import size_cols
 from catalogboss.utils import strings_to_numbers
@@ -21,13 +22,22 @@ from unfi_api.settings import \
     invoice_xhr, \
     set_default_account_xhr, search_url
 from unfi_api.tools import Threading
+from unfi_api.utils import divide_chunks
 
 
 def run():
     pass
 
 
-def pull_invoices(token, date, xdock=False):
+def uncaught_exception_handler(type, value, tb):
+    print(type, value, tb)
+    input("PROCESS FAILED PRESS ENTER TO QUIT")
+
+
+sys.excepthook = uncaught_exception_handler
+
+
+def pull_invoices(token, date, xdock=False, api=None):
     invoice_dict = {}
     threading = Threading()
     if xdock:
@@ -37,13 +47,15 @@ def pull_invoices(token, date, xdock=False):
         num_days = 1
         dock = "Ridgefield"
 
-    invoices = get_invoice_list(token, date, num_days=num_days, xdock=xdock)
+    invoices = get_invoice_list(token, date, num_days=num_days, xdock=xdock, api=api)
     print("Downloading {COUNT} {DOCK} invoices...".format(DOCK=dock, COUNT=len(invoices)))
 
     def _add_invoice_to_dict(i):
-        invoice_dict[i] = get_invoice(i, token, xdock)
+        invoice_dict[i] = get_invoice(i, token, xdock, api=api)
 
     threading.thread_with_progressbar(_add_invoice_to_dict, invoices)
+    # for invoice in invoices:
+    #     _add_invoice_to_dict(invoice)
 
     # if xdock:
     #     print("Downloading XDOCK Invoices...")
@@ -61,9 +73,13 @@ def pull_invoices(token, date, xdock=False):
     return invoice_dict
 
 
-def get_invoice_list(token, dateobj, num_days=1, xdock=False):
+def get_invoice_list(token, dateobj, num_days=1, xdock=False, api=None):
+    """
+
+    :type api: 'unfi_api.api.api.UnfiAPI'
+    """
     header = {
-        'authorization': '{token}'.format(token=token, )
+        'authorization': '{token}'.format(token=api.auth_token, )
     }
 
     if xdock:
@@ -78,8 +94,10 @@ def get_invoice_list(token, dateobj, num_days=1, xdock=False):
         )
     invoice_date = dateobj - datetime.timedelta(days=0)
     invoice_date_string = invoice_date.strftime('%m/%d/%Y')
-    response = requests.get(invoice_list_url, headers=header)
-    invoice_search_result = json.loads(response.content)
+    invoices = api.order_management.order_history.get_invoice_list()
+    response = api.session.get(invoice_list_url)
+    # invoice_search_result = json.loads(response.content)
+    invoice_search_result = invoices['data']
     invoice_dict = {}
     for invoice in invoice_search_result:
         invoice_date = datetime.datetime.strptime(invoice['InvoiceDate'], '%m/%d/%Y')
@@ -101,7 +119,7 @@ def get_most_recent_date(items, dateobj):
     return found_date
 
 
-def get_invoice(invoice_number, token, xdock=False, callback=None):
+def get_invoice(invoice_number, token, xdock=False, callback=None, api=None):
     if xdock:
         invoice_url = invoice_xhr.format(invoicenum=invoice_number.strip(), custnum=xdock_cust_num)
     else:
@@ -109,8 +127,10 @@ def get_invoice(invoice_number, token, xdock=False, callback=None):
     header = {
         'authorization': '{token}'.format(token=token)
     }
-    invoice = requests.get(invoice_url, headers=header)
-    invoicesoup = BeautifulSoup(invoice.content, "html.parser")
+    invoice = api.session.get(invoice_url)
+    # invoice = api.order_management.order_history.get_invoice(invoice_number)
+    # invoicesoup = BeautifulSoup(invoice['data'], "html.parser")
+    invoicesoup = BeautifulSoup(invoice.text, 'html.parser')
     tablerows = []
     eof = False
     tables = invoicesoup.findAll('table')
@@ -208,13 +228,14 @@ def make_query_list(query):
     return strings_to_numbers(query_list)
 
 
-def run_query(query_list, token, xdock=False):
+def run_query(query_list, token, xdock=False, api=None):
     """
     Search unfi web site for queries
     :type xdock: bool
     :param xdock: whether or not to search cross dock
-    :param token: authorization token
-    :type token: str
+
+    :param api: authorization token
+    :type api: `unfi_api.api.api.UnfiAPI`
     :type query_list: list
     :param query_list: List of upc to search for
     """
@@ -227,41 +248,68 @@ def run_query(query_list, token, xdock=False):
         pass
 
     query_len = len(query_list)
+    remaining_terms = query_len
+    query_chunks = list(divide_chunks(query_list, 120))
     product_list = []
     warehouse = "Cross Dock" if xdock else "Ridgefield"
-    print("Running query for %d terms from %s." % (query_len, warehouse))
-    # run through query list until no items remain.
+    print("Running query for %d terms from %s. Spawning %s threads." % (query_len, warehouse, len(query_chunks)))
 
-    search = True
-    while search:
-        search = False
-        query = []
-        for i in range(120):
-            try:
-                query.append(str(query_list.pop()))
-            except IndexError:
-                pass
-        if len(query) > 0:
-            join_query = " ".join(query)
-            if len(query_list) > 0:
-                print("Searching for {} terms out of remaining {} terms".format(len(query), query_len - num_queried))
-            else:
-                print("Searching for remaining {} terms.".format(len(query)))
-            num_queried += len(query)
-            search_result = search_products(join_query, token, xdock)
+    # token = token
+    # run through query list until no items remain.
+    def _search_chunk(c):
+
+        return search_products(c, token, xdock, api)
+
+    with ThreadPoolExecutor(max_workers=len(query_chunks)) as e:
+        futures = []
+        for chunk in query_chunks:
+            join_query = " ".join(str(x) for x in chunk)
+            # print("Searching for {} terms out of {}  remaining terms".format(len(chunk), remaining_terms))
+            # search_result = search_products(join_query, token, xdock)
+            # product_list.extend(search_result.get('TopProducts'))
+            # search_results.append(search_result)
+            # print("Found {} of {} items".format(len(product_list), query_len))
+            print("Searching for {} terms.".format(len(chunk)))
+            # search_products(_search_chunk,token,xdock)
+            futures.append(e.submit(_search_chunk, join_query))
+
+        for r in as_completed(futures):
+            search_result = r.result()
             product_list.extend(search_result.get('TopProducts'))
             search_results.append(search_result)
-            search = True
+            print("Found {} of {} items".format(len(product_list), query_len))
+            remaining_terms -= len(chunk)
+
+    # search = True
+    # while search:
+    #     search = False
+    #     query = []
+    #     for i in range(120):
+    #         try:
+    #             query.append(str(query_list.pop()))
+    #         except IndexError:
+    #             pass
+    #     if len(query) > 0:
+    #         join_query = " ".join(query)
+    #         if len(query_list) > 0:
+    #             print("Searching for {} terms out of remaining {} terms".format(len(query), query_len - num_queried))
+    #         else:
+    #             print("Searching for remaining {} terms.".format(len(query)))
+    #         num_queried += len(query)
+    #         search_result = search_products(join_query, token, xdock)
+    #         product_list.extend(search_result.get('TopProducts'))
+    #         search_results.append(search_result)
+    #         search = True
     print("Found {} of {} items".format(len(product_list), query_len))
     if product_list:
-        products = product_info(product_list, token, xdock=xdock)
+        products = product_info(product_list, token, xdock=xdock, api=api)
         return products
     else:
         print('No results for your search.')
         return None
 
 
-def search_products(query, token, xdock=False):
+def search_products(query, token, xdock=False, api=None):
     """
     Poll the UNFI API for a query string. Returns the json response.
     :param query:
@@ -287,7 +335,7 @@ def search_products(query, token, xdock=False):
             custnum=ridgefield_cust_num,
             warehouse=ridgefield_warehouse
         )
-    print("Searching Database....")
+    # print("Searching Database....")
     response = requests.get(query_url, headers=header)
     results = json.loads(response.content)
     print('Found: ', results['TotalHits'], " results.")

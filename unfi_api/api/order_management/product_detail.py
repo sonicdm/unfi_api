@@ -6,8 +6,7 @@ from unfi_api.utils.http import response_to_json
 product_detail_endpoint = 'https://ordermanagement.unfi.com/api/ProductDetail/'
 
 
-def get_product_detail_by_int_id(token, product_int_id, region, account_number, warehouse, user_id):
-
+def get_product_detail_by_int_id(session, token, product_int_id, region, account_number, warehouse, user_id):
     header = {
         'authorization': token
     }
@@ -21,6 +20,6 @@ def get_product_detail_by_int_id(token, product_int_id, region, account_number, 
         'userId': user_id
     }
 
-    result = requests.get(url, headers=header, params=params)
+    result = session.get(url, headers=header, params=params)
     return response_to_json(result)
 

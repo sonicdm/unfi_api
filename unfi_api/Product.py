@@ -3,20 +3,23 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
-from .utils import strings_to_numbers, simple_round_retail
+from .utils import strings_to_numbers, simple_round_retail, isnumber
 from .utils.upc import stripcheckdigit
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, user_id, \
     promo_url, product_attribute_url, api_thread_limit
 from unfi_api.tools import combine_dicts, Threading
 
 
-def get_attributes(product_id, header):
-    result = fetch_attributes_from_api(product_id, header)
-    out = parse_attributes(result)
-    return out
+def get_attributes(product_id, header, api=None):
+    result = fetch_attributes_from_api(product_id, header, api)
+    if result:
+        out = parse_attributes(result)
+        return out
+    else:
+        return None
 
 
-def fetch_attributes_from_api(product_id, header):
+def fetch_attributes_from_api(product_id, header, api=None):
     """
     Query the API for the attributes of a product_id.
     :param product_id:
@@ -24,8 +27,9 @@ def fetch_attributes_from_api(product_id, header):
     :return:
     """
     attribute_url = product_attribute_url.format(product_id=product_id)
-    attribute_response = requests.get(attribute_url, header)
-    attribute_result = json.loads(attribute_response.content)
+    attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id)['data']
+    # attribute_response = requests.get(attribute_url, header)
+    # attribute_result = json.loads(attribute_response.content)
     return attribute_result
 
 
@@ -38,7 +42,7 @@ def parse_attributes(result):
     return {r["AttributeName"]: "Y" for r in result}
 
 
-def product_info(product_list, token, xdock=False):
+def product_info(product_list, token, xdock=False, api=None):
     """
     Take a search result and turn it into a list of products and their metadata.
     Will return a dict of all of the possible fields from the combined dicts.
@@ -50,12 +54,13 @@ def product_info(product_list, token, xdock=False):
     i = 1
     threading = Threading(max_workers=api_thread_limit)
     products['fields'] = []
+    products['items'] = {}
 
     def _compile_product(product):
         upc = strings_to_numbers(stripcheckdigit(product['UPC']))
         product_id = product['ProductIntID']
         product_code = product['ProductCode']
-        p = get_product_info(product_id, product_code, token, xdock)
+        p = get_product_info(product_id, product_code, token, xdock, api=api)
         # get the product listing part of the search result
         p['listing'] = product
         md = combine_dicts(*p.values())
@@ -63,8 +68,10 @@ def product_info(product_list, token, xdock=False):
         if xdock:
             md['xdock'] = "Y"
         products['fields'].extend(md.keys())
-        products[upc] = md
+        products['items'][upc] = md
 
+    # for product in product_list:
+    #     _compile_product(product)
     threading.thread_with_progressbar(_compile_product, product_list)
     products['fields'] = set([f for f in products['fields']])
     return products
@@ -123,7 +130,11 @@ def parse_pricing(response_content):
         if not price_type:
             pricing['retail_case_cost'] = row[-4]
             pricing['retail_unit_cost'] = row[-3]
-            pricing['retail_srp'] = simple_round_retail(row[-2])
+            srp = row[-2]
+            if isnumber(srp):
+                pricing['retail_srp'] = simple_round_retail(row[-2])
+            else:
+                pricing['retail_srp'] = 0
             continue
         else:
             promo_price = row[-2]
@@ -141,9 +152,11 @@ def parse_pricing(response_content):
     return pricing
 
 
-def get_product_info(product_id, product_code, token, xdock=False, callback=None):
+def get_product_info(product_id, product_code, token, xdock=False, callback=None, api=None):
     """
     Query and find all metadata for a given product.
+    :type api: `unfi_api.api.api.UnfiAPI`
+    :param api:
     :param product_id:
     :param product_code:
     :param token:
@@ -158,10 +171,19 @@ def get_product_info(product_id, product_code, token, xdock=False, callback=None
         custnum = xdock_cust_num
     else:
         custnum = ridgefield_cust_num
-    data_result = pull_main_data(product_code, custnum, header)
+
+    # NEW API
+    data_result = api.products.get_west_product_data(product_code)['data']
+    # attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id)['data']
+    detail_result = api.order_management.product_detail.get_product_detail_by_int_id(product_id)['data'][0]
+
+    # detail_result = api.products.get_product_by_int_id(product_id)['data']
+    # data_result = pull_main_data(product_code, custnum, header)
     detail_result = fetch_product_detail_from_api(product_id, custnum, user_id, header)
-    attribute_result = get_attributes(product_id, header)
-    detail_result.update(attribute_result)
+    attribute_result = get_attributes(product_id, header, api=api)
+    if attribute_result:
+        detail_result.update(attribute_result)
+
     pricing = get_pricing(custnum, product_code, header)
 
     product = {"detail": detail_result, "data": data_result, 'pricing': pricing}

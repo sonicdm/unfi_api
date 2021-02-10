@@ -186,10 +186,15 @@ class Threading:
                 for f in tbar:
                     pass
 
+                for future in as_completed(futures):
+                    future.result()
+
             elif self.debug:
                 result_limit = 100
                 result_count = 0
                 for future in as_completed(futures, timeout=300):
+                    print(future)
+
                     if result_count <= result_limit:
                         print(future.result())
                     result_count += 1

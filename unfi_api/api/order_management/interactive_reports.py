@@ -13,7 +13,8 @@ from unfi_api.utils import fuzzy_date
 endpoint = r'https://ordermanagement.unfi.com/api/InteractiveReports/'
 
 
-def get_products_by_top_sellers(token, account_number, user_id, region, warehouse, start_date=None, end_date=None,
+def get_products_by_top_sellers(session, token, account_number, user_id, region, warehouse, start_date=None,
+                                end_date=None,
                                 brand_id='', sort_order='QuantitySold', sort_description='DESC', category_id='',
                                 category_name='', brand_name='', product_type='', upc='', product_code='',
                                 product_description='', brand_ids='', category_ids='', all_words='',
@@ -114,5 +115,5 @@ def get_products_by_top_sellers(token, account_number, user_id, region, warehous
     }
     params.update(**kwargs)
     echo_url = "http://localhost:8000"
-    response = requests.get(url, headers=headers, params=params)
+    response = session.get(url, headers=headers, params=params)
     return response_to_json(response)

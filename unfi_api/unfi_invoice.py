@@ -147,7 +147,7 @@ def build_cells(product):
         COLS_BY_NAME['Retail']: getattr(product, 'retail', None),
         COLS_BY_NAME['SRP']: getattr(product, 'srp', None),
         COLS_BY_NAME['Cost']: getattr(product, 'cost', None),
-        COLS_BY_NAME['Prod ID']: getattr(product, 'prod_id', None),
+        COLS_BY_NAME['Prod ID']: str(getattr(product, 'prod_id', None)).zfill(5),
         COLS_BY_NAME['Our Size']: getattr(product, 'size', None),
         COLS_BY_NAME['Invoice Pack']: getattr(product, 'invoice_pack', None),
         COLS_BY_NAME['Category']: getattr(product, 'category', None),

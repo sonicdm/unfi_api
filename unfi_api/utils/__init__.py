@@ -480,3 +480,14 @@ def yesno(text, default=True):
             return yes
 
     return yes
+
+
+def divide_chunks(l, n):
+    # looping till length l
+    for i in range(0, len(l), n):
+        yield l[i:i + n]
+
+
+def camel_to_snake_case(s):
+    regex = r"([a-z]+)([A-Z]+)"
+    return re.sub(regex, r"\1_\2", s).lower()
