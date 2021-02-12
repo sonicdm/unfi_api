@@ -1,4 +1,5 @@
 import sys
+import os
 import re
 import tkinter as tk
 from tkinter import messagebox as mb
@@ -8,6 +9,7 @@ from openpyxl import Workbook
 
 from unfi_api import UnfiAPI
 from unfi_api.unfi_web_queries import run_query, make_query_list
+from unfi_api.settings import image_output_path
 
 
 def uncaught_exception_handler(etype, value, tb):
@@ -18,6 +20,7 @@ def uncaught_exception_handler(etype, value, tb):
 sys.excepthook = uncaught_exception_handler
 output_path = r"F:\pos\unfi\query.xlsx"
 description_regex = re.compile(r'(?: at least.*| 100% Organic)', re.IGNORECASE)
+fetch_images = True
 
 
 def main():
@@ -41,6 +44,9 @@ def main():
                 fields.update(result.get('fields'))
                 products.update(result.get('items'))
                 query = None
+                if fetch_images:
+                    for upc, product in products.items():
+                        download_product_image(api, product, image_output_path)
                 if mb.askyesno("Save Workbook", "Would you like to save the workbook?"):
                     save_workbook(products, fields)
                 search = mb.askyesno("Run again?", "Run another search?")
@@ -54,6 +60,22 @@ def main():
             main()
 
     mb.showinfo("Quit", "Process Ended.")
+
+
+def download_product_image(api, product, output_path):
+    if product['imageavailable']:
+        intid = product['productintid']
+        upc = product['upc'][:-1]
+        image_path = os.path.join(output_path, upc + ".jpg")
+        if not os.path.exists(image_path):
+            with open(os.path.join(output_path, upc + ".jpg"), "wb") as img_file:
+                product_name = " ".join([product['brandname'], product['productname']])
+                print("Fetching Image for {}".format(product_name))
+                image_result = api.products.get_product_image(intid)
+                if not image_result.get('error'):
+                    image_data = image_result.get('data')
+                    if image_data:
+                        img_file.write(image_data)
 
 
 def save_workbook(products, fields):

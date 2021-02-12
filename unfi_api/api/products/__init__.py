@@ -72,7 +72,7 @@ class Products(object):
         # response = requests.get(product_data_url, headers=header, params=params)
         return response_to_json(response)
 
-    def get_product_image(self, token, product_int_id):
+    def get_product_image(self, product_int_id):
         url = f"https://products.unfi.com/api/Images/{product_int_id}"
         response = self.api.session.get(url)
         error = None

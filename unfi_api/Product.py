@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 from .utils import strings_to_numbers, simple_round_retail, isnumber
 from .utils.upc import stripcheckdigit
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, user_id, \
-    promo_url, product_attribute_url, api_thread_limit, product_image_directory
+    promo_url, product_attribute_url, api_thread_limit, image_output_path
 from unfi_api.tools import combine_dicts, Threading
 
 
@@ -57,7 +57,6 @@ def product_info(product_list, token, xdock=False, api=None, get_images=True):
     products['items'] = {}
 
     def _compile_product(product):
-        image_url_base = "https://products.unfi.com/api/Images/{intid}"
         upc = strings_to_numbers(stripcheckdigit(product['UPC']))
         product_id = product['ProductIntID']
         product_code = product['ProductCode']
@@ -70,19 +69,6 @@ def product_info(product_list, token, xdock=False, api=None, get_images=True):
             md['xdock'] = "Y"
         products['fields'].extend(md.keys())
         products['items'][upc] = md
-        if get_images:
-            if md['imageavailable']:
-                image_url = image_url_base.format(intid=md["productintid"])
-                upc = md['upc'][:-1]
-                image_path = os.path.join(product_image_directory, upc + ".jpg")
-                if not os.path.exists(image_path):
-                    with open(os.path.join(product_image_directory, upc + ".jpg"), "wb") as img_file:
-                        product_name = " ".join([md['brandname'], md['productname']])
-                        print("Fetching Image for {}\nFrom {}".format(product_name, image_url))
-                        image_result = api.session.get(image_url)
-                        if image_result:
-                            img_file.write(image_result.content)
-            pass
 
     # for product in product_list:
     #     _compile_product(product)
