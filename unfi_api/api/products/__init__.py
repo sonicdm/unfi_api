@@ -72,6 +72,31 @@ class Products(object):
         # response = requests.get(product_data_url, headers=header, params=params)
         return response_to_json(response)
 
+    def get_product_image(self, token, product_int_id):
+        url = f"https://products.unfi.com/api/Images/{product_int_id}"
+        response = self.api.session.get(url)
+        error = None
+        data = None
+        status = None
+        if not isinstance(response, requests.Response):
+            error = f"response value must be type %r got %r instead" % (requests.Response, response)
+        else:
+            status = response.status_code
+            if not response.status_code == 200:
+                data = None
+                error = response.reason
+            else:
+                data = response.content
+
+        result = {
+            "error": error,
+            "status": status,
+            "data": data,
+            "content": response.content,
+            "response": response
+        }
+        return result
+
     def product(self, product_code, product_int_id):
         product = None
         product_info = None

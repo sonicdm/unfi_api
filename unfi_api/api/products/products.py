@@ -78,6 +78,3 @@ def get_product_by_int_id(token, product_int_id):
     url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id))
     response = requests.get(url)
     return response_to_json(response)
-
-
-
