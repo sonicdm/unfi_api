@@ -1,9 +1,9 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name='UNFI Api',
     version='',
-    packages=['unfi_api'],
+    packages=find_packages(),
     url='',
     license='',
     author='Allan Barcellos',
