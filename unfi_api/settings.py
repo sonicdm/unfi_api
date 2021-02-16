@@ -4,6 +4,7 @@ ridgefield_cust_num = "001014"
 ridgefield_warehouse = 6
 user_id = "34653"
 api_thread_limit = 8
+image_output_path = r"F:\Signs\product_images"
 unfi_invoice_list_xhr = 'https://ordermanagement.unfi.com/api/OrderHistory/GetGridItem?' \
                         'custNum={custnum}++++&' \
                         'UserId={userid}&' \
