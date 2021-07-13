@@ -1,13 +1,13 @@
 import json
-import os
+
 import requests
 from bs4 import BeautifulSoup
 
+from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, promo_url, \
+    product_attribute_url, api_thread_limit
+from unfi_api.tools import combine_dicts, Threading
 from .utils import strings_to_numbers, simple_round_retail, isnumber
 from .utils.upc import stripcheckdigit
-from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, user_id, \
-    promo_url, product_attribute_url, api_thread_limit, image_output_path
-from unfi_api.tools import combine_dicts, Threading
 
 
 def get_attributes(product_id, header, api=None):
@@ -179,7 +179,7 @@ def get_product_info(product_id, product_code, token, xdock=False, callback=None
 
     # detail_result = api.products.get_product_by_int_id(product_id)['data']
     # data_result = pull_main_data(product_code, custnum, header)
-    detail_result = fetch_product_detail_from_api(product_id, custnum, user_id, header)
+    # detail_result = fetch_product_detail_from_api(product_id, custnum, user_id, header)
     attribute_result = get_attributes(product_id, header, api=api)
     if attribute_result:
         detail_result.update(attribute_result)

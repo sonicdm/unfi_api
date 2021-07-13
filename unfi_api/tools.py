@@ -1,14 +1,13 @@
-from catalogboss.utils import strings_to_numbers, isnumber
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 import os
 import re
 import sys
+import traceback
+from concurrent.futures import as_completed, ProcessPoolExecutor, ThreadPoolExecutor
+from operator import itemgetter
+
 import psutil
 import tqdm
-import traceback
-from operator import itemgetter
-from concurrent.futures import as_completed, ProcessPoolExecutor, ThreadPoolExecutor
+from catalogboss.utils import strings_to_numbers, isnumber
 
 
 def setpriority():
@@ -272,21 +271,22 @@ def combine_dicts(*args):
     """
     master_dict = {}
     for d in args:
-        for k, v in d.items():
-            key = str(k).lower()
-            v = strings_to_numbers(v)
-            if key in master_dict:
-                value = strings_to_numbers(master_dict[key])
-                if not v:
-                    continue
-                elif isnumber(v):
-                    if isnumber(value):
-                        if v > value:
-                            master_dict[key] = v
+        if isinstance(d, dict):
+            for k, v in d.items():
+                key = str(k).lower()
+                v = strings_to_numbers(v)
+                if key in master_dict:
+                    value = strings_to_numbers(master_dict[key])
+                    if not v:
+                        continue
+                    elif isnumber(v):
+                        if isnumber(value):
+                            if v > value:
+                                master_dict[key] = v
+                    else:
+                        master_dict[key] = v
                 else:
                     master_dict[key] = v
-            else:
-                master_dict[key] = v
     return master_dict
 
 

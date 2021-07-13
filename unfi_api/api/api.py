@@ -16,7 +16,7 @@ from .products import Products
 
 warnings.filterwarnings("ignore")
 
-selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 9222)
+selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 4444)
 
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
@@ -35,6 +35,7 @@ class UnfiAPI(object):
         self._products = Products(self)
         self._brands = Brands(self)
         self._order_management = OrderManagement(self)
+        self.driver = None
         self.login(user, password)
 
     def login(self, user, passwd):
@@ -114,30 +115,33 @@ class UnfiAPI(object):
             self.session.headers['authorization'] = self.auth_token
             # try to check for an incapsula block.
             # test product.
-            test = self.products.get_product_by_int_id(187126)
-            if test['error']:
-                error_content = BeautifulSoup(test['content'], features="lxml")
-                if error_content.select('meta[name="ROBOTS"]') or error_content.select('meta[name="robots"]'):
-                    self.incapsula = True
-                    # iframe_src = error_content.iframe['src']
-                    # split = urllib.parse.urlsplit(self.products.api_endpoint)
-                    # newsplit = urllib.parse.SplitResult(scheme=split.scheme, netloc=split.netloc, path=iframe_src,
-                    #                                     query='', fragment='')
+            # test = self.products.get_product_by_int_id(187126)
+            # if test['error']:
+            #     error_content = BeautifulSoup(test['content'], features="lxml")
+            #     if error_content.select('meta[name="ROBOTS"]') or error_content.select('meta[name="robots"]'):
+            #         self.incapsula = True
+            #         # iframe_src = error_content.iframe['src']
+            #         # split = urllib.parse.urlsplit(self.products.api_endpoint)
+            #         # newsplit = urllib.parse.SplitResult(scheme=split.scheme, netloc=split.netloc, path=iframe_src,
+            #         #                                     query='', fragment='')
             url = self.products.api_endpoint + str(187126)
             chrome_options = ChromeOptions()
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--no-proxy-server')
-            # chrome = Chrome(chrome_options=chrome_options)
+            # chrome_options.debugger_address = "192.168.1.161:9222"
+            # chrome
+            # driver = Chrome(chrome_options=chrome_options)
             dc = DesiredCapabilities.HTMLUNIT
-            # driver = Remote(desired_capabilities=dc)
+            # driver = Remote(selenium_server)
             # driver = PhantomJS(service_log_path=os.path.devnull)
-            driver = Remote(selenium_server)
-            driver.get("https://products.unfi.com/187126")
+            self.driver = Remote(selenium_server, desired_capabilities=chrome_options.to_capabilities())
+            # self.driver.delete_all_cookies()
+            self.driver.get("https://products.unfi.com/187126")
             session_cookies = [{'name': name, 'value': value} for name, value in self.session.cookies.items()]
-            # c = [driver.add_cookie(x) for x in session_cookies]
-            driver.get(url)
-            cookies = driver.get_cookies()
-            driver.quit()
+            # c = [self.driver.add_cookie(x) for x in session_cookies]
+            self.driver.get(url)
+            self.driver.get(url)
+            page_source = self.driver.page_source
+            cookies = self.driver.get_cookies()
+            self.driver.quit()
             if cookies:
                 for cookie in cookies:
                     self.session.cookies.set(cookie['name'], cookie['value'], domain=cookie['domain'])
