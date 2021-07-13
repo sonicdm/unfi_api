@@ -1,23 +1,22 @@
+import json
+import warnings
+
 import requests
-from selenium.webdriver import Chrome, ChromeOptions, Remote, PhantomJS
-from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
-from http import cookiejar
-import webbrowser
-import urllib.parse
 # from incapsula import IncapSession, RecaptchaBlocked
 # session = IncapSession()
 from bs4 import BeautifulSoup
-import json
-from .order_management import OrderManagement, Brands
+from selenium.webdriver import ChromeOptions
+from selenium.webdriver import Remote
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
+
 from .admin_backend import AdminBackend
+from .order_management import Brands
+from .order_management import OrderManagement
 from .products import Products
-import sys
-import warnings
-import os
 
 warnings.filterwarnings("ignore")
 
-selenium_server = "http://%s:%s/wd/hub" % ("127.0.0.1", 4444)
+selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 9222)
 
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
@@ -131,8 +130,9 @@ class UnfiAPI(object):
             # chrome = Chrome(chrome_options=chrome_options)
             dc = DesiredCapabilities.HTMLUNIT
             # driver = Remote(desired_capabilities=dc)
-            driver = PhantomJS(service_log_path=os.path.devnull)
-            driver.get("https://products.unfi.com/blahhs")
+            # driver = PhantomJS(service_log_path=os.path.devnull)
+            driver = Remote(selenium_server)
+            driver.get("https://products.unfi.com/187126")
             session_cookies = [{'name': name, 'value': value} for name, value in self.session.cookies.items()]
             # c = [driver.add_cookie(x) for x in session_cookies]
             driver.get(url)

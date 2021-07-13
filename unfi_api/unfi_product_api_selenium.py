@@ -1,4 +1,4 @@
-import sys
+import os
 import os
 import re
 import tkinter as tk
@@ -8,16 +8,16 @@ from tkinter import simpledialog
 from openpyxl import Workbook
 
 from unfi_api import UnfiAPI
-from unfi_api.unfi_web_queries import run_query, make_query_list
 from unfi_api.settings import image_output_path
+from unfi_api.unfi_web_queries import run_query, make_query_list
+
+# def uncaught_exception_handler(etype, value, tb):
+#     # print(etype, value, tb)
+#     traceback.print_exc()
+#     input("PROCESS FAILED PRESS ENTER TO QUIT")
 
 
-def uncaught_exception_handler(etype, value, tb):
-    print(etype, value, tb)
-    input("PROCESS FAILED PRESS ENTER TO QUIT")
-
-
-sys.excepthook = uncaught_exception_handler
+# sys.excepthook = uncaught_exception_handler
 output_path = r"F:\pos\unfi\query.xlsx"
 description_regex = re.compile(r'(?: at least.*| 100% Organic)', re.IGNORECASE)
 fetch_images = True
