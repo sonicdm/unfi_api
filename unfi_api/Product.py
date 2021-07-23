@@ -3,10 +3,11 @@ import json
 import requests
 from bs4 import BeautifulSoup
 
+from unfi_api import UnfiAPI
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, promo_url, \
     product_attribute_url, api_thread_limit
 from unfi_api.tools import combine_dicts, Threading
-from .utils import strings_to_numbers, simple_round_retail, isnumber
+from .utils import strings_to_numbers, isnumber
 from .utils.upc import stripcheckdigit
 
 
@@ -19,12 +20,13 @@ def get_attributes(product_id, header, api=None):
         return None
 
 
-def fetch_attributes_from_api(product_id, header, api=None):
+def fetch_attributes_from_api(product_id: int, header: dict, api: UnfiAPI) -> dict:
     """
     Query the API for the attributes of a product_id.
-    :param product_id:
-    :param header:
-    :return:
+    :param api: UnfiAPI object
+    :param product_id: product int id
+    :param header: http headers
+    :return: attributes of the product
     """
     attribute_url = product_attribute_url.format(product_id=product_id)
     attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id)['data']
@@ -70,14 +72,20 @@ def product_info(product_list, token, xdock=False, api=None, get_images=True):
         products['fields'].extend(md.keys())
         products['items'][upc] = md
 
-    # for product in product_list:
-    #     _compile_product(product)
-    threading.thread_with_progressbar(_compile_product, product_list)
+    for product in product_list:
+        _compile_product(product)
+    # threading.thread_with_progressbar(_compile_product, product_list)
     products['fields'] = set([f for f in products['fields']])
     return products
 
 
-def pull_main_data(product_code, custnum, header):
+def pull_main_data(product_code: int, custnum: int, header: dict) -> dict:
+    """
+    :param product_code: product int id
+    :param custnum: customer number
+    :param header: http headers
+    :return: json response_content:
+    """
     # Pulling the main data
     data_url = product_data_url.format(product_code=product_code, custnum=custnum)
     data_response = requests.get(data_url, headers=header)
@@ -132,7 +140,8 @@ def parse_pricing(response_content):
             pricing['retail_unit_cost'] = row[-3]
             srp = row[-2]
             if isnumber(srp):
-                pricing['retail_srp'] = simple_round_retail(row[-2])
+                pricing['retail_srp'] = row[-2]
+                # pricing['retail_srp'] = simple_round_retail(row[-2])
             else:
                 pricing['retail_srp'] = 0
             continue

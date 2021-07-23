@@ -1,5 +1,4 @@
 import os
-import os
 import re
 import tkinter as tk
 from tkinter import messagebox as mb
@@ -29,7 +28,7 @@ def main():
     query = ask_query()
     if query:
         print("Loading UNFI Driver")
-        api = UnfiAPI("CapellaAPI", "CapellaAPI2489")
+        api = UnfiAPI("CapellaAPI", "CapellaAPI2489", incapsula_retry=True)
         search = True
         products = {}
         fields = set()

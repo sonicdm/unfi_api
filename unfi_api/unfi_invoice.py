@@ -17,7 +17,7 @@ from catalogboss.catalogio import read_workbook
 from catalogboss.utils import \
     strings_to_numbers, find_most_common_member, sort_dict
 from catalogboss.utils.db import AbbrRepl
-from catalogboss.utils import index_header, simple_round_retail
+from catalogboss.utils import index_header
 from catalogboss.utils.upc import stripcheckdigit, isnumber
 from unfi_api.unfi_web_queries import create_invoice_workbook
 
@@ -325,7 +325,7 @@ class Invoice(object):
                 srp = row[srpidx]
                 if isnumber(srp):
                     srp = float(row[srpidx])
-                    product.srp = simple_round_retail(srp)
+                    product.srp = srp
                 cost = float(row[costidx]) if isnumber(row[srpidx]) else None
                 product.ordered += int(ordered)
                 product.shipped += int(shipped)
