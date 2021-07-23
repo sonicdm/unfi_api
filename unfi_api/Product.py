@@ -72,9 +72,9 @@ def product_info(product_list, token, xdock=False, api=None, get_images=True):
         products['fields'].extend(md.keys())
         products['items'][upc] = md
 
-    for product in product_list:
-        _compile_product(product)
-    # threading.thread_with_progressbar(_compile_product, product_list)
+    # for product in product_list:
+    #     _compile_product(product)
+    threading.thread_with_progressbar(_compile_product, product_list)
     products['fields'] = set([f for f in products['fields']])
     return products
 
