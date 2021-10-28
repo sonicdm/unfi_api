@@ -1,17 +1,19 @@
 from __future__ import print_function
-import sys
+
 import datetime
 import json
+import sys
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from html import escape
 
 import requests
 from bs4 import BeautifulSoup
-from openpyxl import Workbook
-from concurrent.futures import ThreadPoolExecutor, as_completed
-
 from catalogboss.formatter import size_cols
 from catalogboss.utils import strings_to_numbers
-from unfi_api.Product import product_info
+from openpyxl import Workbook
+
+import unfi_api
+from unfi_api.old_product import product_info
 from unfi_api.settings import \
     xdock_cust_num, \
     xdock_warehouse, \
@@ -119,11 +121,11 @@ def get_most_recent_date(items, dateobj):
     return found_date
 
 
-def get_invoice(invoice_number, token, xdock=False, callback=None, api=None):
+def get_invoice(invoice_number, token, xdock=False, callback=None, api: unfi_api.UnfiAPI = None):
     if xdock:
         invoice_url = invoice_xhr.format(invoicenum=invoice_number.strip(), custnum=xdock_cust_num)
     else:
-        invoice_url = invoice_xhr.format(invoicenum=invoice_number.strip(), custnum=ridgefield_cust_num)
+        invoice_url = invoice_xhr.format(invoicenum=invoice_number.strip(), custnum=api.account)
     header = {
         'authorization': '{token}'.format(token=token)
     }

@@ -5,7 +5,7 @@ import re
 try:
     from past.builtins import unicode
 except ImportError:
-    pass
+    unicode = unicode
 import calendar
 import datetime
 import string
@@ -491,3 +491,10 @@ def divide_chunks(l, n):
 def camel_to_snake_case(s):
     regex = r"([a-z]+)([A-Z]+)"
     return re.sub(regex, r"\1_\2", s).lower()
+
+
+def string_to_snake(string: str) -> str:
+    """
+    Converts a string to lower case snake case.
+    """
+    return string.lower().replace(" ", "_")

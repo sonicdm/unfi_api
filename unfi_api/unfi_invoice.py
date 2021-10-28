@@ -474,11 +474,18 @@ class InventoryReport(object):
 
         # Price Change Check
         yellow_fill = PatternFill('solid', start_color='ffff00', end_color='ffff00')
+        green_fill = PatternFill('solid', start_color='339966', end_color='339966')
         srp_idx = get_column_letter(COLS_BY_NAME['SRP'])
         retail_idx = get_column_letter(COLS_BY_NAME['Retail'])
-        srp_rule = CellIsRule(operator='notEqual', formula=['{}1'.format(retail_idx)], fill=yellow_fill)
+        # srp_rule = CellIsRule(operator='notEqual', formula=['{}1'.format(retail_idx)], fill=yellow_fill)
+        # retail_rule = CellIsRule(operator='notEqual', formula=['{}1'.format(srp_idx)], fill=yellow_fill)
+        srp_rule = CellIsRule(formula=['(({srp}1-{retail}1)/{srp}1)>0.02'.format(retail=retail_idx, srp=srp_idx)],
+                              fill=yellow_fill)
+        srp_decrease_rule = CellIsRule(
+            formula=['(({srp}1-{retail}1)/{srp}1)<-0.1'.format(retail=retail_idx, srp=srp_idx)], fill=yellow_fill)
         retail_rule = CellIsRule(operator='notEqual', formula=['{}1'.format(srp_idx)], fill=yellow_fill)
         self._apply_rule_to_col(ws, srp_idx, srp_rule, maxrow)
+        # self._apply_rule_to_col(ws, srp_idx, srp_decrease_rule, maxrow)
         self._apply_rule_to_col(ws, retail_idx, retail_rule, maxrow)
 
         # Shipping Error Check

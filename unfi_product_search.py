@@ -2,14 +2,12 @@ from __future__ import print_function
 
 import csv
 import random
-import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import tqdm
 from openpyxl import Workbook
 
-from unfi_api import UnfiAPI
 from unfi_api.utils import strings_to_numbers, divide_chunks
 from unfi_api.utils.upc import stripcheckdigit
 
@@ -17,18 +15,12 @@ try:
     from past.builtins import raw_input
 except ImportError:
     pass
+import tkinter as tk
+from tkinter import ttk
+from tkinter import messagebox as mb
+from tkinter import simpledialog
 
-try:
-    import tkinter as tk
-    from tkinter import ttk
-    from tkinter import messagebox as mb
-    from tkinter import simpledialog
 
-except ImportError:
-    import Tkinter as tk
-    from Tkinter import ttk
-    import tkMessageBox as mb
-    import tkSimpledialog as simpledialog
 
 LARGE_FONT = ("Arial", 16, "bold")
 SUBTITLE_FONT = ("Arial", 12, 'bold')
@@ -37,7 +29,6 @@ LARGE_LBL_ARGS = {'padx': 10, 'pady': 10}
 
 TEST_QUERY = """
 86170300011
-
 013562-11172
 013562-11366
 013562-11367
@@ -70,8 +61,8 @@ TEST_QUERY = """
 859908-00383
 891756-00015
 """
-username = "CapellaAPI"
-password = "CapellaAPI2489"
+username = "Grocery@capellamarket.com"
+password = "Organic1"
 
 
 def uncaught_exception_handler(etype, value, tb):
@@ -79,7 +70,7 @@ def uncaught_exception_handler(etype, value, tb):
     input("PROCESS FAILED PRESS ENTER TO QUIT")
 
 
-sys.excepthook = uncaught_exception_handler
+# sys.excepthook = uncaught_exception_handler
 
 
 def main():

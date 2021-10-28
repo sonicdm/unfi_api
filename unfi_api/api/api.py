@@ -22,14 +22,13 @@ login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 class UnfiAPI(object):
 
-    def __init__(self, user, password, incapsula_retry=False, incapsula_retry_limit=10, cookiestxt=None):
+    def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):
         self.incapsula_retry_count = 0
         self.incapsula_retry_limit = incapsula_retry_limit
         self.incapsula_retry = incapsula_retry
         self.session = requests.session()
-        self.incapsula = False
+        self.incapsula = incapusla
         self.cookiejar = None
-        self.cookiestxt = cookiestxt
         self.auth_token = None
         self.logged_in = False
         self.usermeta = {}
@@ -39,7 +38,8 @@ class UnfiAPI(object):
         self._order_management = OrderManagement(self)
         self.driver = None
         self.login(user, password)
-        self._load_incapsula_cookies()
+        if self.incapsula:
+            self._load_incapsula_cookies()
         # if not self._test_incapsula():
         #     self._load_incapsula_cookies()
 

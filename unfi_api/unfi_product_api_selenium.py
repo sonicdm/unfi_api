@@ -137,7 +137,7 @@ def make_xlsx_workbook(products, fields):
                 if val in ["OG2", "OG1"]:
                     val = "Y"
                 else:
-                    val = val.replace("'S", "'s").replace("`", "'")
+                    val = ""
             if col == "brandname":
                 val = val.replace(",", " ").replace("  ", " ").replace("  ", " ").replace("'S", "'s").replace("`", "'")
 

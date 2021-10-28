@@ -1,7 +1,21 @@
 import inspect
 import re
-from unfi_api.utils import strings_to_numbers
+from datetime import date
+from typing import Optional
+
 from dateutil.parser import parse as date_parse
+from pydantic import BaseModel, validator
+
+from unfi_api.utils import strings_to_numbers
+
+
+def camel_to_snake_case(s):
+    regex = r"([a-z]+)([A-Z]+)"
+    return re.sub(regex, r"\1_\2", s).lower()
+
+
+def to_camel(string: str) -> str:
+    return ''.join(word.capitalize() for word in string.split('_'))
 
 
 class UnfiObject(object):
@@ -359,16 +373,9 @@ class Marketing(object):
             self.__advertising_description = value.strip().title()
 
 
-class NutritionFacts(object):
+class NutritionFacts:
     """
-    if (Att.NutrientName == 'servingSize')
-    else if (Att.NutrientName == 'servingsContainer')
-    else if (Att.NutrientName == 'calories')
-    else if (Att.NutrientName == 'fromFat')
-    $("#txtServingSize").html(Att.Amount);
-    $("#txtServingsPerContainer").html(Att.Amount);
-    $("#txtCalories").html(Att.Amount);
-    $("#txtCaloriesFromFat").html(Att.Amount);
+    representation of nutrition Facts
     """
 
     def __init__(self, results=None):
@@ -415,10 +422,27 @@ class NutritionFacts(object):
         return "<%s: {%s}>" % (self.__class__.__name__, ', '.join(items))
 
 
-class Nutrient(object):
+class Nutrient(BaseModel):
+    """
+    Data model for unfi nutition facts
     """
 
-    """
+    nutrient_name: Optional[str]
+    nutrition_fact_id: Optional[str]
+    product_int_id: Optional[str]
+    nutrient_id: Optional[str]
+    amount: Optional[str]
+    percent_dv: Optional[str]
+    label_order: Optional[str]
+    created_by: Optional[str]
+    created_date: Optional[date]
+    modified_by: Optional[str]
+    modified_date: Optional[date]
+    active: Optional[str]
+    display_panel: Optional[str]
+    display_panel_new: Optional[str]
+    nutrient: Optional[str]
+
     UNIT_MAP = {
         'iron': '%',
         'calcium': '%',
@@ -434,30 +458,16 @@ class Nutrient(object):
         'totalFat': 'g',
         'cholesterol': 'mg',
         'addedSugar': 'g',
+        'potassium': 'g',
     }
 
-    def __init__(self, **kwargs):
-        self.nutrient_name = None
-        self.nutrition_fact_id = None
-        self.product_int_id = None
-        self.nutrient_id = None
-        self.__amount = None
-        self.percent_dv = None
-        self.label_order = None
-        self.created_by = None
-        self.created_date = None
-        self.modified_by = None
-        self.modified_date = None
-        self.active = None
-        self.display_panel = None
-        self.display_panel_new = None
-        self.nutrient = None
-        if kwargs:
-            self.create(kwargs)
+    class Config:
+        alias_generator = to_camel
 
-    def create(self, d):
-        for k, v in d.items():
-            setattr(self, camel_to_snake_case(k), v)
+    @validator("modified_date", "created_date", pre=True)
+    def parse_date_string(cls, v):
+        if isinstance(v, str):
+            return date_parse(v).date()
 
     @property
     def name(self):
@@ -467,20 +477,8 @@ class Nutrient(object):
             return None
 
     @property
-    def amount(self):
-        return self.__amount
-
-    @amount.setter
-    def amount(self, value):
-        self.__amount = value
-
-    @property
     def unit(self):
         return self.UNIT_MAP.get(self.nutrient_name)
-
-    def __repr__(self):
-        items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
-        return "<%s: {%s}>" % (self.__class__.__name__, ', '.join(items))
 
     def __str__(self):
         return str({
@@ -491,19 +489,14 @@ class Nutrient(object):
         })
 
 
-class Ingredients(object):
+class Ingredients(BaseModel):
+    ingredients: Optional[str]
+    modified_date: Optional[date]
 
-    def __init__(self, **kwargs):
-        self.ingredients = None
-        self.modified_date = None
-        if kwargs:
-            self.create(kwargs)
+    class Config:
+        alias_generator = to_camel
 
-    def create(self, d):
-        for k, v in d.items():
-            setattr(self, camel_to_snake_case(k), v)
-
-
-def camel_to_snake_case(s):
-    regex = r"([a-z]+)([A-Z]+)"
-    return re.sub(regex, r"\1_\2", s).lower()
+    @validator("modified_date", pre=True)
+    def parse_date_string(cls, v):
+        if isinstance(v, str):
+            return date_parse(v).date()
