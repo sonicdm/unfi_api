@@ -1,0 +1,31 @@
+[
+    {
+        "StockAvail": 70,
+        "StockOH": 70,
+        "PerUnitPrice": 40.25,
+        "BrandId": 15432,
+        "BrandName": "FIELD DAY",
+        "ProductIntID": 400233,
+        "ProductCode": "49456",
+        "ProductName": "Cereal, Golden Rice Crisps",
+        "Discount": "S",
+        "UPC": "042563-602918",
+        "PackSize": "14/12 OZ",
+        "Price": 40.25,
+        "UnitsInFullCase": 14,
+        "MINQTY": 0,
+        "InnerCaseUPC": "00000000000000",
+        "MasterCaseUPC": "20042563602912",
+        "PLU": null,
+        "PVLabelCode": "0",
+        "MemberApplicableFee": 0.00,
+        "OrganicCode": "OG2",
+        "SubHeader": "",
+        "CategoryID": 353,
+        "CategoryName": "GROCERY - CEREAL - COLD",
+        "CountryOfOriginID": 253,
+        "CountryOfOriginName": "USA, RHODE ISLAND",
+        "WarehouseMessage": null,
+        "IsNew": false
+    }
+]

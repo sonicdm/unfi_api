@@ -1,7 +1,8 @@
 from datetime import date
 from dateutil.parser import parse as date_parse
-from typing import Any, Optional, List, Dict
+from typing import Any, Iterator, Optional, List, Dict
 from pydantic import Field, BaseModel, validator
+from pydantic.class_validators import root_validator
 from pydantic.utils import to_camel
 import re
 
@@ -54,17 +55,33 @@ class Attribute(BaseModel):
         return string_to_bool(v)
 
 
-class Attributes:
+class Attributes(BaseModel):
     """
     BaseModel for attributes from the UNFIApi
     """
-    attributes: Optional[list] = Field([Attribute], default_value=[])
+    __root__: List[Attribute] = []
 
-    def __init__(self, attributes: Optional[dict] = None):
-        self.attributes: List[Attribute] = []
-        if attributes:
-            for attribute in attributes:
-                self.add_attribute(attribute)
+    # def __init__(self, attributes: Optional[dict] = None):
+    #     self.attributes: List[Attribute] = []
+    #     if attributes:
+    #         for attribute in attributes:
+    #             self.add_attribute(attribute)
+
+    # root_validator("attributes", allow_reuse=True, pre=True)
+    # def attribute_validator(self, v) -> List[Attribute]:
+    #     if not isinstance(v, list):
+    #         raise ValueError(f'{v} is not a list')
+    #     for attribute in v:
+    #         if not isinstance(attribute, dict):
+    #             raise ValueError(f'{attribute} is not a dict')
+    #     return v
+            
+    @property
+    def attributes(self) -> List[Attribute]:
+        """
+        Get the attributes
+        """
+        return self.__root__
 
     def add_attribute(self, attribute: dict) -> None:
         """
@@ -104,4 +121,33 @@ class Attributes:
         Get the number of attributes
         """
         return len(self.attributes)
-    
+
+    def __len__(self) -> int:
+        """
+        Get the number of attributes
+        """
+        return len(self.attributes)
+
+    def __iter__(self) -> Iterator[Attribute]:
+        """
+        Iterate through the attributes
+        """
+        return iter(self.attributes)
+
+    def __getitem__(self, index: int) -> Attribute:
+        """
+        Get an attribute by index
+        """
+        return self.attributes[index]
+
+    def __repr__(self) -> str:
+        """
+        Get a string representation of the attributes
+        """
+        return str(self.attributes)
+
+    def __str__(self) -> str:
+        """
+        Get a string representation of the attributes
+        """
+        return str(self.attributes)

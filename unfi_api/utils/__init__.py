@@ -13,6 +13,7 @@ from collections import Counter, OrderedDict
 
 from dateutil import parser
 
+
 # Date Utils
 def last_thursday(year, month):
     c = calendar.Calendar(firstweekday=calendar.SUNDAY)
@@ -53,7 +54,8 @@ def fuzzy_date(datestr, verbose=False):
             if dateobj.strftime('%B').lower() in fname \
                     or dateobj.strftime('%b').lower() in fname:
                 if verbose:
-                    print('{word} matched to {month:%B}'.format(word=word, month=dateobj))
+                    print('{word} matched to {month:%B}'.format(
+                        word=word, month=dateobj))
                 break
         except ValueError:
             pass
@@ -290,8 +292,6 @@ def round_retails(price):
                     tenth = 9
             else:
                 tenth -= 1
-
-
 
         if 6 < hund < 10:
             hund = 9

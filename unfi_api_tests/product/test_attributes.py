@@ -31,15 +31,25 @@ class TestAttributes(TestCase):
         attempt to create an attributes object using the attributes json array
         """
         attributes_json = self.products_files.attributes_json
-        attributes: Attributes = Attributes(attributes_json)
+        print(attributes_json)
+        attributes: Attributes = Attributes.parse_obj(attributes_json)
         self.assertEqual(attributes.count(), len(attributes_json))
-        for idx,attribute in enumerate(attributes.attributes):
+        for idx,attribute in enumerate(attributes):
             self.assertEqual(attribute.attribute_name, attributes_json[idx]['AttributeName'])
             self.assertEqual(attribute.attribute_id, attributes_json[idx]['AttributeID'])
         
         # see if all attribute names are in the json array
         for json_attribute in attributes_json:
             self.assertTrue(json_attribute['AttributeName'] in attributes.get_attribute_names())
+    
+    def test_print_attributes(self):
+        """
+        attempt to print the attributes object
+        """
+        attributes_json = self.products_files.attributes_json
+        attributes: Attributes = Attributes.parse_obj(attributes_json)
+        print(attributes)
         
+
 
 

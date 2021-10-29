@@ -6,9 +6,9 @@ from typing import Optional
 
 from pydantic.main import BaseModel
 
-def snake_to_pascal_case(snake_str: str) -> str:
-    components = snake_str.split('_')
-    return ''.join(x.title() for x in components)
+# def snake_to_pascal_case(snake_str: str) -> str:
+#     components = snake_str.split('_')
+#     return ''.join(x.title() for x in components)
 
 class Ingredients(BaseModel):
     """

@@ -1,0 +1,1514 @@
+[
+    {
+        "CategoryID": 512,
+        "CategoryName": "A/ D/ E VITS & BETA CAROTENE"
+    },
+    {
+        "CategoryID": 351,
+        "CategoryName": "ACCESSORIES"
+    },
+    {
+        "CategoryID": 456,
+        "CategoryName": "AFRICAN AMERICAN"
+    },
+    {
+        "CategoryID": 622,
+        "CategoryName": "AIR FRESHENERS"
+    },
+    {
+        "CategoryID": 262,
+        "CategoryName": "ALMOND"
+    },
+    {
+        "CategoryID": 490,
+        "CategoryName": "ALOE & SUN CARE"
+    },
+    {
+        "CategoryID": 620,
+        "CategoryName": "ALOE VERA SUPPS"
+    },
+    {
+        "CategoryID": 572,
+        "CategoryName": "AMINO ACIDS"
+    },
+    {
+        "CategoryID": 288,
+        "CategoryName": "ANTIOXIDANTS"
+    },
+    {
+        "CategoryID": 571,
+        "CategoryName": "ANTISTRESS & RELAXATION"
+    },
+    {
+        "CategoryID": 677,
+        "CategoryName": "APPLE SAUCE/ PUDDING/ JELLO"
+    },
+    {
+        "CategoryID": 650,
+        "CategoryName": "AROMATHERAPY"
+    },
+    {
+        "CategoryID": 294,
+        "CategoryName": "ARTHRITIS & JOINT HEALTH"
+    },
+    {
+        "CategoryID": 378,
+        "CategoryName": "ASEPTIC"
+    },
+    {
+        "CategoryID": 570,
+        "CategoryName": "ASEPTIC SOUPS & BROTHS"
+    },
+    {
+        "CategoryID": 499,
+        "CategoryName": "ASIAN"
+    },
+    {
+        "CategoryID": 625,
+        "CategoryName": "ASIAN COOKING OIL"
+    },
+    {
+        "CategoryID": 345,
+        "CategoryName": "ASIAN MARINADE/SAUCE"
+    },
+    {
+        "CategoryID": 434,
+        "CategoryName": "ASIAN MEAL STARTERS"
+    },
+    {
+        "CategoryID": 392,
+        "CategoryName": "ASIAN MEALS/SOUPS ON THE GO"
+    },
+    {
+        "CategoryID": 310,
+        "CategoryName": "ASIAN NOODLES"
+    },
+    {
+        "CategoryID": 270,
+        "CategoryName": "ASIAN RICE"
+    },
+    {
+        "CategoryID": 670,
+        "CategoryName": "ASIAN SEASONING"
+    },
+    {
+        "CategoryID": 420,
+        "CategoryName": "ASIAN SNACKS SALTY"
+    },
+    {
+        "CategoryID": 546,
+        "CategoryName": "ASIAN SOUP STARTERS"
+    },
+    {
+        "CategoryID": 618,
+        "CategoryName": "ASIAN SOY SAUCE"
+    },
+    {
+        "CategoryID": 393,
+        "CategoryName": "ASIAN VEGETABLE"
+    },
+    {
+        "CategoryID": 274,
+        "CategoryName": "ASSORTED"
+    },
+    {
+        "CategoryID": 555,
+        "CategoryName": "B VITS / B COMPLEX"
+    },
+    {
+        "CategoryID": 477,
+        "CategoryName": "BABY"
+    },
+    {
+        "CategoryID": 678,
+        "CategoryName": "BABY"
+    },
+    {
+        "CategoryID": 654,
+        "CategoryName": "BABY & CHILD"
+    },
+    {
+        "CategoryID": 681,
+        "CategoryName": "BABY DIAPERS & WIPES"
+    },
+    {
+        "CategoryID": 281,
+        "CategoryName": "BABY FOOD"
+    },
+    {
+        "CategoryID": 404,
+        "CategoryName": "BAGS"
+    },
+    {
+        "CategoryID": 547,
+        "CategoryName": "BAKING ADDITIVES"
+    },
+    {
+        "CategoryID": 634,
+        "CategoryName": "BAKING ADDITIVES"
+    },
+    {
+        "CategoryID": 215,
+        "CategoryName": "BAKING INGREDIENTS & MIXES"
+    },
+    {
+        "CategoryID": 439,
+        "CategoryName": "BARS - ENERGY/NUTRITION/DIET/CEREAL/SNAC"
+    },
+    {
+        "CategoryID": 322,
+        "CategoryName": "BATH & SHOWER"
+    },
+    {
+        "CategoryID": 510,
+        "CategoryName": "BEANS"
+    },
+    {
+        "CategoryID": 573,
+        "CategoryName": "BEAUTY TOOLS"
+    },
+    {
+        "CategoryID": 593,
+        "CategoryName": "BEE PRODUCTS"
+    },
+    {
+        "CategoryID": 271,
+        "CategoryName": "BEEF"
+    },
+    {
+        "CategoryID": 599,
+        "CategoryName": "BEEF"
+    },
+    {
+        "CategoryID": 362,
+        "CategoryName": "BLACK"
+    },
+    {
+        "CategoryID": 332,
+        "CategoryName": "BOOKS & PRINTED MATERIALS"
+    },
+    {
+        "CategoryID": 286,
+        "CategoryName": "BOTTLED"
+    },
+    {
+        "CategoryID": 467,
+        "CategoryName": "BOTTLED"
+    },
+    {
+        "CategoryID": 397,
+        "CategoryName": "BOUILLON & BROTH MIXES"
+    },
+    {
+        "CategoryID": 253,
+        "CategoryName": "BREAD & BREAD MIXES"
+    },
+    {
+        "CategoryID": 644,
+        "CategoryName": "BREADED MEATS"
+    },
+    {
+        "CategoryID": 426,
+        "CategoryName": "BREAKFAST MEAT ALTERNATIVES"
+    },
+    {
+        "CategoryID": 395,
+        "CategoryName": "BULK"
+    },
+    {
+        "CategoryID": 553,
+        "CategoryName": "BUNS /ROLLS /BAGELS /MUFFINS"
+    },
+    {
+        "CategoryID": 375,
+        "CategoryName": "BURRITOS & POCKETS"
+    },
+    {
+        "CategoryID": 488,
+        "CategoryName": "BUTTER"
+    },
+    {
+        "CategoryID": 503,
+        "CategoryName": "C VITS / C COMPLEX"
+    },
+    {
+        "CategoryID": 460,
+        "CategoryName": "CANDLES"
+    },
+    {
+        "CategoryID": 516,
+        "CategoryName": "CANDLES & INCENSE"
+    },
+    {
+        "CategoryID": 600,
+        "CategoryName": "CANDY & COATED CONFECTIONS"
+    },
+    {
+        "CategoryID": 398,
+        "CategoryName": "CANNED"
+    },
+    {
+        "CategoryID": 379,
+        "CategoryName": "CANNED & BOTTLED FOODS"
+    },
+    {
+        "CategoryID": 452,
+        "CategoryName": "CANNED BROTHS"
+    },
+    {
+        "CategoryID": 276,
+        "CategoryName": "CANNED FRUIT"
+    },
+    {
+        "CategoryID": 336,
+        "CategoryName": "CANNED SOUPS"
+    },
+    {
+        "CategoryID": 291,
+        "CategoryName": "CANNED TOMATOES"
+    },
+    {
+        "CategoryID": 630,
+        "CategoryName": "CANNED VEGETABLES"
+    },
+    {
+        "CategoryID": 399,
+        "CategoryName": "CANOLA"
+    },
+    {
+        "CategoryID": 660,
+        "CategoryName": "CARBONATED & SPARKLING"
+    },
+    {
+        "CategoryID": 381,
+        "CategoryName": "CAROB"
+    },
+    {
+        "CategoryID": 478,
+        "CategoryName": "CARRIBEAN"
+    },
+    {
+        "CategoryID": 524,
+        "CategoryName": "CASHEW & MACADAMIA"
+    },
+    {
+        "CategoryID": 494,
+        "CategoryName": "CAT FOOD"
+    },
+    {
+        "CategoryID": 655,
+        "CategoryName": "CEREAL & GRANOLA"
+    },
+    {
+        "CategoryID": 610,
+        "CategoryName": "CEREAL & GRANOLA BARS"
+    },
+    {
+        "CategoryID": 556,
+        "CategoryName": "CHAI"
+    },
+    {
+        "CategoryID": 594,
+        "CategoryName": "CHEESE BLUE"
+    },
+    {
+        "CategoryID": 427,
+        "CategoryName": "CHEESE CHEDDAR"
+    },
+    {
+        "CategoryID": 671,
+        "CategoryName": "CHEESE CHEDDAR GRATED SLICED"
+    },
+    {
+        "CategoryID": 498,
+        "CategoryName": "CHEESE DUTCH"
+    },
+    {
+        "CategoryID": 371,
+        "CategoryName": "CHEESE FRESH"
+    },
+    {
+        "CategoryID": 518,
+        "CategoryName": "CHEESE FRESH CREAM CHEESE SOUR CREAM"
+    },
+    {
+        "CategoryID": 257,
+        "CategoryName": "CHEESE GOAT"
+    },
+    {
+        "CategoryID": 603,
+        "CategoryName": "CHEESE GOAT CHEDDAR"
+    },
+    {
+        "CategoryID": 324,
+        "CategoryName": "CHEESE HARD"
+    },
+    {
+        "CategoryID": 476,
+        "CategoryName": "CHEESE HARD GRATED SHREDDED"
+    },
+    {
+        "CategoryID": 656,
+        "CategoryName": "CHEESE MOZZARELLA"
+    },
+    {
+        "CategoryID": 333,
+        "CategoryName": "CHEESE MOZZARELLA GRATED SHREDDED"
+    },
+    {
+        "CategoryID": 484,
+        "CategoryName": "CHEESE SEMI-SOFT SEMI-HARD"
+    },
+    {
+        "CategoryID": 269,
+        "CategoryName": "CHEESE SWISS"
+    },
+    {
+        "CategoryID": 531,
+        "CategoryName": "CHEESE SWISS GRATED SHREDDED"
+    },
+    {
+        "CategoryID": 338,
+        "CategoryName": "CHEESE VEGAN NON-DAIRY"
+    },
+    {
+        "CategoryID": 282,
+        "CategoryName": "CHINESE"
+    },
+    {
+        "CategoryID": 323,
+        "CategoryName": "CHOCOLATE"
+    },
+    {
+        "CategoryID": 450,
+        "CategoryName": "CHOCOLATE & DESSERTS"
+    },
+    {
+        "CategoryID": 317,
+        "CategoryName": "CHRISTMAS"
+    },
+    {
+        "CategoryID": 340,
+        "CategoryName": "CHRISTMAS"
+    },
+    {
+        "CategoryID": 425,
+        "CategoryName": "CHRISTMAS"
+    },
+    {
+        "CategoryID": 443,
+        "CategoryName": "CHRISTMAS"
+    },
+    {
+        "CategoryID": 504,
+        "CategoryName": "CLEANERS & SOAPS HOUSEHOLD"
+    },
+    {
+        "CategoryID": 403,
+        "CategoryName": "COCKTAIL MIXES"
+    },
+    {
+        "CategoryID": 300,
+        "CategoryName": "COCONUT WATER"
+    },
+    {
+        "CategoryID": 505,
+        "CategoryName": "COFFEE"
+    },
+    {
+        "CategoryID": 458,
+        "CategoryName": "COFFEE SUBSTITUTES"
+    },
+    {
+        "CategoryID": 353,
+        "CategoryName": "COLD"
+    },
+    {
+        "CategoryID": 643,
+        "CategoryName": "CONCENTRATES"
+    },
+    {
+        "CategoryID": 415,
+        "CategoryName": "CONDIMENTS, DRESSINGS, PICKLES"
+    },
+    {
+        "CategoryID": 491,
+        "CategoryName": "COOKIES"
+    },
+    {
+        "CategoryID": 665,
+        "CategoryName": "CORN / TORTILLA"
+    },
+    {
+        "CategoryID": 463,
+        "CategoryName": "COSMETICS & NAIL"
+    },
+    {
+        "CategoryID": 329,
+        "CategoryName": "COTTAGE CHEESE & SOUR CREAM"
+    },
+    {
+        "CategoryID": 454,
+        "CategoryName": "COUGH & COLD"
+    },
+    {
+        "CategoryID": 330,
+        "CategoryName": "CRACKERS"
+    },
+    {
+        "CategoryID": 314,
+        "CategoryName": "CREAM CHEESE"
+    },
+    {
+        "CategoryID": 352,
+        "CategoryName": "DAIRY"
+    },
+    {
+        "CategoryID": 563,
+        "CategoryName": "DAIRY MILK"
+    },
+    {
+        "CategoryID": 303,
+        "CategoryName": "DEAL PACKS & EMPTYS"
+    },
+    {
+        "CategoryID": 428,
+        "CategoryName": "DEAL PACKS & EMPTYS"
+    },
+    {
+        "CategoryID": 533,
+        "CategoryName": "DELI SLICES AND DOGS"
+    },
+    {
+        "CategoryID": 283,
+        "CategoryName": "DEODORANTS & MISTS"
+    },
+    {
+        "CategoryID": 409,
+        "CategoryName": "DESSERTS, NOVELTIES"
+    },
+    {
+        "CategoryID": 631,
+        "CategoryName": "DETOX & LIVER"
+    },
+    {
+        "CategoryID": 432,
+        "CategoryName": "DIET PRESERVES/HONEY/SYRUPS"
+    },
+    {
+        "CategoryID": 455,
+        "CategoryName": "DIGESTION AIDS"
+    },
+    {
+        "CategoryID": 440,
+        "CategoryName": "DIPS"
+    },
+    {
+        "CategoryID": 658,
+        "CategoryName": "DIPS, HUMMUS, SALSA, PESTOS"
+    },
+    {
+        "CategoryID": 535,
+        "CategoryName": "DISHWASH SUPPLIES"
+    },
+    {
+        "CategoryID": 406,
+        "CategoryName": "DISPLAYS"
+    },
+    {
+        "CategoryID": 469,
+        "CategoryName": "DISPLAYS"
+    },
+    {
+        "CategoryID": 485,
+        "CategoryName": "DISPLAYS"
+    },
+    {
+        "CategoryID": 638,
+        "CategoryName": "DOG FOOD"
+    },
+    {
+        "CategoryID": 501,
+        "CategoryName": "DRESSINGS"
+    },
+    {
+        "CategoryID": 482,
+        "CategoryName": "DRIED FRUITS"
+    },
+    {
+        "CategoryID": 521,
+        "CategoryName": "DRIED FRUITS & VEGETABLES"
+    },
+    {
+        "CategoryID": 346,
+        "CategoryName": "DRIED FRUITS - PACKAGED"
+    },
+    {
+        "CategoryID": 511,
+        "CategoryName": "DRINK MIXES"
+    },
+    {
+        "CategoryID": 557,
+        "CategoryName": "DRY"
+    },
+    {
+        "CategoryID": 258,
+        "CategoryName": "EASTER"
+    },
+    {
+        "CategoryID": 315,
+        "CategoryName": "EFAS/ EPOS/ FISH OILS"
+    },
+    {
+        "CategoryID": 384,
+        "CategoryName": "EGGS"
+    },
+    {
+        "CategoryID": 619,
+        "CategoryName": "ENERGY / NUTRITION / DIET"
+    },
+    {
+        "CategoryID": 495,
+        "CategoryName": "ENTREES"
+    },
+    {
+        "CategoryID": 645,
+        "CategoryName": "ENTREES & SIDES"
+    },
+    {
+        "CategoryID": 289,
+        "CategoryName": "ENTREES /ETHNIC DISHES /BOWLS"
+    },
+    {
+        "CategoryID": 339,
+        "CategoryName": "ENTREES, KIDS MEALS, SOUPS"
+    },
+    {
+        "CategoryID": 548,
+        "CategoryName": "FACIAL CARE"
+    },
+    {
+        "CategoryID": 292,
+        "CategoryName": "FEMALE HYGEINE/ CONTRACEPTION"
+    },
+    {
+        "CategoryID": 679,
+        "CategoryName": "FLAVORED OR ICED TEA MIXES"
+    },
+    {
+        "CategoryID": 602,
+        "CategoryName": "FLAVORED WATERS"
+    },
+    {
+        "CategoryID": 308,
+        "CategoryName": "FLOURS & POWDERS"
+    },
+    {
+        "CategoryID": 464,
+        "CategoryName": "FLOURS & POWDERS"
+    },
+    {
+        "CategoryID": 254,
+        "CategoryName": "FOOD SUPPLEMENTS"
+    },
+    {
+        "CategoryID": 320,
+        "CategoryName": "FOOD SUPPLEMENTS"
+    },
+    {
+        "CategoryID": 615,
+        "CategoryName": "FOOT & LEG CARE"
+    },
+    {
+        "CategoryID": 530,
+        "CategoryName": "FRESH PASTA & BREAD PRODUCTS"
+    },
+    {
+        "CategoryID": 468,
+        "CategoryName": "FRUIT"
+    },
+    {
+        "CategoryID": 595,
+        "CategoryName": "FRUIT"
+    },
+    {
+        "CategoryID": 528,
+        "CategoryName": "FRUIT JUICE"
+    },
+    {
+        "CategoryID": 601,
+        "CategoryName": "FRUIT JUICES AND TEAS"
+    },
+    {
+        "CategoryID": 480,
+        "CategoryName": "FRUIT LEATHER"
+    },
+    {
+        "CategoryID": 588,
+        "CategoryName": "FUNCTIONAL FOODS"
+    },
+    {
+        "CategoryID": 255,
+        "CategoryName": "FUNCTIONAL GELS/SHOTS/GUMMYS"
+    },
+    {
+        "CategoryID": 534,
+        "CategoryName": "GALLON"
+    },
+    {
+        "CategoryID": 363,
+        "CategoryName": "GARLIC"
+    },
+    {
+        "CategoryID": 354,
+        "CategoryName": "GERMAN"
+    },
+    {
+        "CategoryID": 507,
+        "CategoryName": "GINSENG & ENERGY"
+    },
+    {
+        "CategoryID": 357,
+        "CategoryName": "GLANDULAR"
+    },
+    {
+        "CategoryID": 589,
+        "CategoryName": "GOAT MILK / OTHER MILKS"
+    },
+    {
+        "CategoryID": 313,
+        "CategoryName": "GRAHAM CRACKERS"
+    },
+    {
+        "CategoryID": 309,
+        "CategoryName": "GRAIN"
+    },
+    {
+        "CategoryID": 604,
+        "CategoryName": "GRAINS"
+    },
+    {
+        "CategoryID": 457,
+        "CategoryName": "GRAINS/OATS/SEEDS"
+    },
+    {
+        "CategoryID": 508,
+        "CategoryName": "GRANOLA / MUESLI"
+    },
+    {
+        "CategoryID": 470,
+        "CategoryName": "GRATED / SLICED"
+    },
+    {
+        "CategoryID": 558,
+        "CategoryName": "GRAVY"
+    },
+    {
+        "CategoryID": 646,
+        "CategoryName": "GREEN"
+    },
+    {
+        "CategoryID": 298,
+        "CategoryName": "GREEN FOODS"
+    },
+    {
+        "CategoryID": 663,
+        "CategoryName": "GUM & MINTS"
+    },
+    {
+        "CategoryID": 250,
+        "CategoryName": "HAIR ENHANCEMENTS"
+    },
+    {
+        "CategoryID": 444,
+        "CategoryName": "HAND & BODY LOTIONS"
+    },
+    {
+        "CategoryID": 435,
+        "CategoryName": "HAND HELD ICE CREAM"
+    },
+    {
+        "CategoryID": 251,
+        "CategoryName": "HEART & CIRCULATION"
+    },
+    {
+        "CategoryID": 564,
+        "CategoryName": "HEMP"
+    },
+    {
+        "CategoryID": 376,
+        "CategoryName": "HERBAL"
+    },
+    {
+        "CategoryID": 551,
+        "CategoryName": "HERBAL FORMULAS & BLENDS"
+    },
+    {
+        "CategoryID": 466,
+        "CategoryName": "HERBS"
+    },
+    {
+        "CategoryID": 617,
+        "CategoryName": "HOMEOPATHY"
+    },
+    {
+        "CategoryID": 686,
+        "CategoryName": "HOT"
+    },
+    {
+        "CategoryID": 608,
+        "CategoryName": "HOUSE WARES"
+    },
+    {
+        "CategoryID": 355,
+        "CategoryName": "ICE CREAM & FROZEN YOGURT"
+    },
+    {
+        "CategoryID": 304,
+        "CategoryName": "IMMUNE"
+    },
+    {
+        "CategoryID": 451,
+        "CategoryName": "INDIAN"
+    },
+    {
+        "CategoryID": 418,
+        "CategoryName": "IRISH"
+    },
+    {
+        "CategoryID": 674,
+        "CategoryName": "ITALIAN"
+    },
+    {
+        "CategoryID": 613,
+        "CategoryName": "ITALIAN COOKIES"
+    },
+    {
+        "CategoryID": 334,
+        "CategoryName": "ITALIAN OILS"
+    },
+    {
+        "CategoryID": 343,
+        "CategoryName": "ITALIAN PASTA"
+    },
+    {
+        "CategoryID": 278,
+        "CategoryName": "ITALIAN PICKLES/PEPPERS/RELISH"
+    },
+    {
+        "CategoryID": 447,
+        "CategoryName": "ITALIAN SAUCES"
+    },
+    {
+        "CategoryID": 387,
+        "CategoryName": "ITALIAN SPICES/SEASONINGS"
+    },
+    {
+        "CategoryID": 492,
+        "CategoryName": "ITALIAN VEGETABLES"
+    },
+    {
+        "CategoryID": 537,
+        "CategoryName": "ITALIAN VINEGARS/COOKING WINES"
+    },
+    {
+        "CategoryID": 489,
+        "CategoryName": "JARRED SOUPS"
+    },
+    {
+        "CategoryID": 368,
+        "CategoryName": "JARRED VEGGIES"
+    },
+    {
+        "CategoryID": 341,
+        "CategoryName": "JERKY"
+    },
+    {
+        "CategoryID": 689,
+        "CategoryName": "LAUNDRY SUPPLIES"
+    },
+    {
+        "CategoryID": 326,
+        "CategoryName": "LEGUMES & BEANS"
+    },
+    {
+        "CategoryID": 437,
+        "CategoryName": "LIFESTYLE ACCESSORIES"
+    },
+    {
+        "CategoryID": 661,
+        "CategoryName": "LIP BALMS"
+    },
+    {
+        "CategoryID": 369,
+        "CategoryName": "LIQUID EXTRACTS"
+    },
+    {
+        "CategoryID": 429,
+        "CategoryName": "LOOSE"
+    },
+    {
+        "CategoryID": 675,
+        "CategoryName": "MARGARINE"
+    },
+    {
+        "CategoryID": 391,
+        "CategoryName": "MASSAGE"
+    },
+    {
+        "CategoryID": 471,
+        "CategoryName": "MATE"
+    },
+    {
+        "CategoryID": 277,
+        "CategoryName": "MAYO / MUSTARD / CATSUP"
+    },
+    {
+        "CategoryID": 486,
+        "CategoryName": "MEAT"
+    },
+    {
+        "CategoryID": 364,
+        "CategoryName": "MEAT / SEAFOOD / POULTRY"
+    },
+    {
+        "CategoryID": 305,
+        "CategoryName": "MEAT ALTERNATIVES"
+    },
+    {
+        "CategoryID": 664,
+        "CategoryName": "MEAT ALTERNATIVES"
+    },
+    {
+        "CategoryID": 266,
+        "CategoryName": "MEAT ALTERNATIVES - BREAKFAST"
+    },
+    {
+        "CategoryID": 543,
+        "CategoryName": "MEAT ALTERNATIVES TEMPEH AND SEITAN"
+    },
+    {
+        "CategoryID": 633,
+        "CategoryName": "MEATLESS BURGERS"
+    },
+    {
+        "CategoryID": 382,
+        "CategoryName": "MEATLESS DELI SLICES"
+    },
+    {
+        "CategoryID": 394,
+        "CategoryName": "MEATLESS JERKY"
+    },
+    {
+        "CategoryID": 306,
+        "CategoryName": "MEATLESS WIENERS"
+    },
+    {
+        "CategoryID": 642,
+        "CategoryName": "MEATS"
+    },
+    {
+        "CategoryID": 554,
+        "CategoryName": "MEDICINAL"
+    },
+    {
+        "CategoryID": 359,
+        "CategoryName": "MEDICINAL / OINTMENTS"
+    },
+    {
+        "CategoryID": 412,
+        "CategoryName": "MEMORY & MENTAL CLARITY"
+    },
+    {
+        "CategoryID": 532,
+        "CategoryName": "MENS HEALTH"
+    },
+    {
+        "CategoryID": 559,
+        "CategoryName": "MEXICAN AND CANNED CHILI"
+    },
+    {
+        "CategoryID": 423,
+        "CategoryName": "MEXICAN PICKLES/PEPPERS/RELISH"
+    },
+    {
+        "CategoryID": 321,
+        "CategoryName": "MEXICAN SALSA"
+    },
+    {
+        "CategoryID": 590,
+        "CategoryName": "MEXICAN SAUCES"
+    },
+    {
+        "CategoryID": 662,
+        "CategoryName": "MEXICAN SNACKS AND DIPS"
+    },
+    {
+        "CategoryID": 260,
+        "CategoryName": "MEXICAN SPICES SEASONINGS"
+    },
+    {
+        "CategoryID": 529,
+        "CategoryName": "MIDDLE EASTERN/EAST EUROPEAN FOODS"
+    },
+    {
+        "CategoryID": 400,
+        "CategoryName": "MILK"
+    },
+    {
+        "CategoryID": 680,
+        "CategoryName": "MINERALS & MINERAL COMPLEX"
+    },
+    {
+        "CategoryID": 389,
+        "CategoryName": "MISOS, MOCHI"
+    },
+    {
+        "CategoryID": 327,
+        "CategoryName": "MIXES"
+    },
+    {
+        "CategoryID": 424,
+        "CategoryName": "MIXES"
+    },
+    {
+        "CategoryID": 576,
+        "CategoryName": "MULTIVITAMINS"
+    },
+    {
+        "CategoryID": 502,
+        "CategoryName": "NON DAIRY"
+    },
+    {
+        "CategoryID": 414,
+        "CategoryName": "NON DAIRY YOGURT"
+    },
+    {
+        "CategoryID": 506,
+        "CategoryName": "NONDAIRY ICE CREAM & FRZN YOG"
+    },
+    {
+        "CategoryID": 575,
+        "CategoryName": "NONWHEAT"
+    },
+    {
+        "CategoryID": 372,
+        "CategoryName": "NUT"
+    },
+    {
+        "CategoryID": 624,
+        "CategoryName": "NUT / SEED / OTHER & DISPLAYS"
+    },
+    {
+        "CategoryID": 649,
+        "CategoryName": "NUT BUTTERS"
+    },
+    {
+        "CategoryID": 577,
+        "CategoryName": "NUTRITIONAL / SPORT / ENERGY"
+    },
+    {
+        "CategoryID": 473,
+        "CategoryName": "NUTS & SEEDS"
+    },
+    {
+        "CategoryID": 413,
+        "CategoryName": "OILS / VINEGARS / CONDIMENTS"
+    },
+    {
+        "CategoryID": 441,
+        "CategoryName": "OLIVE"
+    },
+    {
+        "CategoryID": 538,
+        "CategoryName": "ORAL CARE"
+    },
+    {
+        "CategoryID": 311,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 328,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 383,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 419,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 459,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 597,
+        "CategoryName": "OTHER"
+    },
+    {
+        "CategoryID": 342,
+        "CategoryName": "OTHER DIET"
+    },
+    {
+        "CategoryID": 401,
+        "CategoryName": "OTHER INTERNATIONAL"
+    },
+    {
+        "CategoryID": 377,
+        "CategoryName": "OTHER MEATS"
+    },
+    {
+        "CategoryID": 295,
+        "CategoryName": "OTHER NONFOODS"
+    },
+    {
+        "CategoryID": 365,
+        "CategoryName": "OTHER SOY PRODUCTS"
+    },
+    {
+        "CategoryID": 267,
+        "CategoryName": "OTHER SPECIFIC FORMULAS"
+    },
+    {
+        "CategoryID": 565,
+        "CategoryName": "OTHER TOMATO & PALLETS"
+    },
+    {
+        "CategoryID": 307,
+        "CategoryName": "OTHER VITAMINS"
+    },
+    {
+        "CategoryID": 410,
+        "CategoryName": "OUTDOOR"
+    },
+    {
+        "CategoryID": 290,
+        "CategoryName": "OYSTERS / CRABS / CLAMS"
+    },
+    {
+        "CategoryID": 583,
+        "CategoryName": "PACKAGED"
+    },
+    {
+        "CategoryID": 436,
+        "CategoryName": "PACKAGED NUTS & SEEDS"
+    },
+    {
+        "CategoryID": 636,
+        "CategoryName": "PAPER & PICNIC"
+    },
+    {
+        "CategoryID": 348,
+        "CategoryName": "PASTA"
+    },
+    {
+        "CategoryID": 687,
+        "CategoryName": "PASTA"
+    },
+    {
+        "CategoryID": 621,
+        "CategoryName": "PASTA SAUCES"
+    },
+    {
+        "CategoryID": 302,
+        "CategoryName": "PASTA SIDE DISHES"
+    },
+    {
+        "CategoryID": 544,
+        "CategoryName": "PEANUT"
+    },
+    {
+        "CategoryID": 349,
+        "CategoryName": "PESTO SAUCES"
+    },
+    {
+        "CategoryID": 626,
+        "CategoryName": "PETFOOD"
+    },
+    {
+        "CategoryID": 683,
+        "CategoryName": "PHARMACY"
+    },
+    {
+        "CategoryID": 545,
+        "CategoryName": "PICKLES & RELISHES"
+    },
+    {
+        "CategoryID": 500,
+        "CategoryName": "PIZZA"
+    },
+    {
+        "CategoryID": 465,
+        "CategoryName": "PIZZA SAUCES"
+    },
+    {
+        "CategoryID": 517,
+        "CategoryName": "PLAIN BOTTLED WATER"
+    },
+    {
+        "CategoryID": 360,
+        "CategoryName": "PORK"
+    },
+    {
+        "CategoryID": 682,
+        "CategoryName": "POT PIES & BOWLS"
+    },
+    {
+        "CategoryID": 279,
+        "CategoryName": "POTATO"
+    },
+    {
+        "CategoryID": 386,
+        "CategoryName": "POTATO & MEAL CUPS"
+    },
+    {
+        "CategoryID": 361,
+        "CategoryName": "POTATO / RICE / COUSCOUS"
+    },
+    {
+        "CategoryID": 405,
+        "CategoryName": "POTATOES"
+    },
+    {
+        "CategoryID": 433,
+        "CategoryName": "POULTRY"
+    },
+    {
+        "CategoryID": 539,
+        "CategoryName": "POULTRY"
+    },
+    {
+        "CategoryID": 522,
+        "CategoryName": "POWDERED"
+    },
+    {
+        "CategoryID": 445,
+        "CategoryName": "PRETZELS"
+    },
+    {
+        "CategoryID": 640,
+        "CategoryName": "PROBIOTICS NONREFRIG"
+    },
+    {
+        "CategoryID": 448,
+        "CategoryName": "PUDDING / COOKIE DOUGH"
+    },
+    {
+        "CategoryID": 614,
+        "CategoryName": "PUFFED / POPCORN"
+    },
+    {
+        "CategoryID": 540,
+        "CategoryName": "RAMENS & INSTANT NOODLES"
+    },
+    {
+        "CategoryID": 560,
+        "CategoryName": "REFRIG MILK ALTERNATIVES"
+    },
+    {
+        "CategoryID": 416,
+        "CategoryName": "REFRIGERATED SUPPLEMENTS"
+    },
+    {
+        "CategoryID": 578,
+        "CategoryName": "RICE"
+    },
+    {
+        "CategoryID": 685,
+        "CategoryName": "RICE"
+    },
+    {
+        "CategoryID": 483,
+        "CategoryName": "RICE / ALTERNATIVE"
+    },
+    {
+        "CategoryID": 446,
+        "CategoryName": "RICE / CORN / SOY"
+    },
+    {
+        "CategoryID": 496,
+        "CategoryName": "SAFFLOWER"
+    },
+    {
+        "CategoryID": 566,
+        "CategoryName": "SALMON & OTHER FISH"
+    },
+    {
+        "CategoryID": 285,
+        "CategoryName": "SALSAS"
+    },
+    {
+        "CategoryID": 523,
+        "CategoryName": "SALTS"
+    },
+    {
+        "CategoryID": 407,
+        "CategoryName": "SARDINES"
+    },
+    {
+        "CategoryID": 402,
+        "CategoryName": "SAUCES / MARINADES"
+    },
+    {
+        "CategoryID": 567,
+        "CategoryName": "SAUCES / PESTOS / SOUPS"
+    },
+    {
+        "CategoryID": 627,
+        "CategoryName": "SAUSAGE & BREAKFAST MEATS"
+    },
+    {
+        "CategoryID": 472,
+        "CategoryName": "SEAFOOD"
+    },
+    {
+        "CategoryID": 552,
+        "CategoryName": "SEASONED"
+    },
+    {
+        "CategoryID": 422,
+        "CategoryName": "SEASONING BLENDS"
+    },
+    {
+        "CategoryID": 641,
+        "CategoryName": "SEASONINGS & BLENDS"
+    },
+    {
+        "CategoryID": 579,
+        "CategoryName": "SHAMPOO & CONDITIONER"
+    },
+    {
+        "CategoryID": 514,
+        "CategoryName": "SHAVING"
+    },
+    {
+        "CategoryID": 442,
+        "CategoryName": "SINGLE HERBS"
+    },
+    {
+        "CategoryID": 287,
+        "CategoryName": "SINGLE SERVE"
+    },
+    {
+        "CategoryID": 653,
+        "CategoryName": "SINUS & ALLERGY"
+    },
+    {
+        "CategoryID": 561,
+        "CategoryName": "SNACK"
+    },
+    {
+        "CategoryID": 493,
+        "CategoryName": "SNACK STYLE / MIXES"
+    },
+    {
+        "CategoryID": 509,
+        "CategoryName": "SNACKS"
+    },
+    {
+        "CategoryID": 632,
+        "CategoryName": "SNACKS"
+    },
+    {
+        "CategoryID": 582,
+        "CategoryName": "SOAP / LIQUID & CLEANSING CREAM"
+    },
+    {
+        "CategoryID": 312,
+        "CategoryName": "SOAP BARS"
+    },
+    {
+        "CategoryID": 461,
+        "CategoryName": "SODAS & SMOOTHIES"
+    },
+    {
+        "CategoryID": 609,
+        "CategoryName": "SORBET / GELATO"
+    },
+    {
+        "CategoryID": 263,
+        "CategoryName": "SOUP CUPS"
+    },
+    {
+        "CategoryID": 408,
+        "CategoryName": "SOY MILK"
+    },
+    {
+        "CategoryID": 666,
+        "CategoryName": "SPECIALTY"
+    },
+    {
+        "CategoryID": 515,
+        "CategoryName": "SPECIALTY BREADS"
+    },
+    {
+        "CategoryID": 676,
+        "CategoryName": "SPORTS NUTRITION"
+    },
+    {
+        "CategoryID": 388,
+        "CategoryName": "SPREADS"
+    },
+    {
+        "CategoryID": 366,
+        "CategoryName": "STORE SUPPLIES"
+    },
+    {
+        "CategoryID": 293,
+        "CategoryName": "SUPPLEMENTS"
+    },
+    {
+        "CategoryID": 195,
+        "CategoryName": "SUPPLIES"
+    },
+    {
+        "CategoryID": 261,
+        "CategoryName": "SWEETENERS"
+    },
+    {
+        "CategoryID": 569,
+        "CategoryName": "SWEETENERS"
+    },
+    {
+        "CategoryID": 616,
+        "CategoryName": "TAHINI / SOY / SEED"
+    },
+    {
+        "CategoryID": 411,
+        "CategoryName": "TEAS"
+    },
+    {
+        "CategoryID": 605,
+        "CategoryName": "TEEN"
+    },
+    {
+        "CategoryID": 370,
+        "CategoryName": "THAI"
+    },
+    {
+        "CategoryID": 586,
+        "CategoryName": "THANKSGIVING"
+    },
+    {
+        "CategoryID": 591,
+        "CategoryName": "THANKSGIVING"
+    },
+    {
+        "CategoryID": 611,
+        "CategoryName": "TINCTURES & EXTRACTS"
+    },
+    {
+        "CategoryID": 667,
+        "CategoryName": "TOFU"
+    },
+    {
+        "CategoryID": 639,
+        "CategoryName": "TOMATO PASTES"
+    },
+    {
+        "CategoryID": 373,
+        "CategoryName": "TOMATO SAUCE"
+    },
+    {
+        "CategoryID": 562,
+        "CategoryName": "TOPPINGS"
+    },
+    {
+        "CategoryID": 367,
+        "CategoryName": "TORTILLAS / PITAS / WRAPS"
+    },
+    {
+        "CategoryID": 396,
+        "CategoryName": "TRADITIONAL LONG / FLAT"
+    },
+    {
+        "CategoryID": 542,
+        "CategoryName": "TRADITIONAL SHORT / SHAPED"
+    },
+    {
+        "CategoryID": 319,
+        "CategoryName": "TRAIL MIXES"
+    },
+    {
+        "CategoryID": 453,
+        "CategoryName": "TREATS"
+    },
+    {
+        "CategoryID": 350,
+        "CategoryName": "TUNA"
+    },
+    {
+        "CategoryID": 344,
+        "CategoryName": "VEGETABLE"
+    },
+    {
+        "CategoryID": 581,
+        "CategoryName": "VEGETABLE"
+    },
+    {
+        "CategoryID": 568,
+        "CategoryName": "VEGETABLES"
+    },
+    {
+        "CategoryID": 635,
+        "CategoryName": "VEGETARIAN MIXES"
+    },
+    {
+        "CategoryID": 331,
+        "CategoryName": "VINEGARS"
+    },
+    {
+        "CategoryID": 580,
+        "CategoryName": "VISION"
+    },
+    {
+        "CategoryID": 628,
+        "CategoryName": "WAFFLE & PANCAKE MIXES"
+    },
+    {
+        "CategoryID": 296,
+        "CategoryName": "WAFFLES"
+    },
+    {
+        "CategoryID": 265,
+        "CategoryName": "WEIGHT MANAGEMENT"
+    },
+    {
+        "CategoryID": 637,
+        "CategoryName": "WHEAT /MULTIGRAIN /WHITE"
+    },
+    {
+        "CategoryID": 275,
+        "CategoryName": "WHEAT FREE"
+    },
+    {
+        "CategoryID": 629,
+        "CategoryName": "WHIP CREAM & HALF & HALF"
+    },
+    {
+        "CategoryID": 598,
+        "CategoryName": "WOMENS HEALTH"
+    },
+    {
+        "CategoryID": 417,
+        "CategoryName": "YEAST LEVEL MAINTENANCE"
+    },
+    {
+        "CategoryID": 513,
+        "CategoryName": "YOGURT DRINKABLE/KEFIR"
+    },
+    {
+        "CategoryID": 574,
+        "CategoryName": "YOGURT FAT FREE"
+    },
+    {
+        "CategoryID": 358,
+        "CategoryName": "YOGURT LOW FAT"
+    },
+    {
+        "CategoryID": 252,
+        "CategoryName": "YOGURT WHOLE MILK"
+    }
+]
