@@ -15,23 +15,27 @@ def response_to_json(response: Response) -> dict:
     status = None
     if not isinstance(response, Response):
         error = f"response value must be type %r got %r instead" % (Response, response)
-    else:
-        status = response.status_code
-        if not response.ok:
+    content_type = response.headers.get('content-type')
+    status = response.status_code
+    if not response.ok:
             data = None
             error = response.reason
-        else:
+                    
+    elif ('application/json' in content_type or 'text/json' in content_type or 'text/plain' in content_type):
             try:
                 data = response.json()
 
             except json.JSONDecodeError as exception:
-                error = ""
+                error = f"Invalid JSON Format {exception}"
+                data = ""
 
     result = {
         "error": error,
         "status": status,
         "data": data,
         "content": response.content,
+        "content_type": content_type,
+        "url": response.request.url,
         "text": response.text,
         "response": response
     }
