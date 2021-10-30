@@ -22,10 +22,19 @@ selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 4444)
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
+class UNFISession:
+    """
+    Class to login and create a session for UnfiAPI
+    """
+
+    def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):
+        pass
+
+
 class UnfiAPI(APICore):
 
     def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):
-        super().__init__()
+        # super().__init__(None)
         self.incapsula_retry_count = 0
         self.incapsula_retry_limit = incapsula_retry_limit
         self.incapsula_retry = incapsula_retry
@@ -224,7 +233,7 @@ class UnfiAPI(APICore):
     def _test_incapsula(self):
         """Test if the incapsula cookies are valid"""
         test = self.products.get_product_by_int_id("00001")
-        if test['error']:
+        if test.error:
             return False
         else:
             return True
