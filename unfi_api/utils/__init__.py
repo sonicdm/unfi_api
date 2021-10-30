@@ -1,73 +1,20 @@
 from __future__ import print_function
 
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterable, List, Union
 
-try:
-    from past.builtins import unicode
-except ImportError:
-    unicode = unicode
-import calendar
-import datetime
 import string
 from collections import Counter, OrderedDict
 
-from dateutil import parser
-
 
 # Date Utils
-def last_thursday(year, month):
-    c = calendar.Calendar(firstweekday=calendar.SUNDAY)
-    monthcal = c.monthdatescalendar(year, month)
-    last_fri = [day for week in monthcal for day in week if
-                day.weekday() == calendar.FRIDAY and
-                day.month == month][-1]
-    last_thurs = last_fri - datetime.timedelta(1)
-    return last_thurs
-
-
-def last_saturday(year, month):
-    c = calendar.Calendar(firstweekday=calendar.SUNDAY)
-    monthcal = c.monthdatescalendar(year, month)
-    last_sunday = [day for week in monthcal for day in week if
-                   day.weekday() == calendar.SUNDAY and
-                   day.month == month][-1]
-    last_sat = last_sunday - datetime.timedelta(1)
-    return last_sat
-
-
-def last_friday(year, month):
-    c = calendar.Calendar(firstweekday=calendar.SUNDAY)
-    monthcal = c.monthdatescalendar(year, month)
-    last_sat = [day for week in monthcal for day in week if
-                day.weekday() == calendar.SATURDAY and
-                day.month == month][-1]
-    last_fri = last_sat - datetime.timedelta(1)
-    return last_fri
-
-
-def fuzzy_date(datestr, verbose=False):
-    dateobj = None
-    for word in datestr.replace('_', ' ').replace('-', ' ').strip(' ').split(' '):
-        try:
-            dateobj = parser.parse(word)
-            fname = datestr.lower()
-            if dateobj.strftime('%B').lower() in fname \
-                    or dateobj.strftime('%b').lower() in fname:
-                if verbose:
-                    print('{word} matched to {month:%B}'.format(
-                        word=word, month=dateobj))
-                break
-        except ValueError:
-            pass
-    return dateobj
 
 
 # Text Utils
 
 
-def clean_size_field(text):
-    if not isinstance(text, (str, unicode)):
+def clean_size_field(text: str) -> str:
+    if not isinstance(text, str):
         return text
     size = text.split('/')
     if len(size) > 1:
@@ -143,13 +90,46 @@ def strings_to_numbers(l, fmt='float'):
 
     if not l:
         return l
-    if hasattr(l, "__iter__") and not isinstance(l, (str, unicode, int)):
+    if hasattr(l, "__iter__") and not isinstance(l, (str, int)):
         o = []
         for i in l:
             o.append(_convert(i))
         return o
     else:
         return _convert(l)
+
+
+def convert_strings_to_number(v: Union[str, Iterable]):
+    """
+    Convert a string to an int or float if possible.
+    """
+    if isinstance(v, str):
+        try:
+            return int(v)
+        except ValueError:
+            try:
+                return float(v)
+            except ValueError:
+                return v
+    elif isinstance(v, Iterable):
+        return [convert_strings_to_number(x) for x in v]
+    else:
+        return v
+
+
+def is_a_number(v: Any) -> bool:
+    """
+    check if value is a number. Remove commas and other number formatting.
+    """
+    v = str(v).replace(',', '')
+    if v.isdigit():
+        return True
+    else:
+        try:
+            float(v)
+            return True
+        except ValueError:
+            return False
 
 
 def isnumber(s, numtype=None):
@@ -173,26 +153,14 @@ def isnumber(s, numtype=None):
     :param numtype: specific type of number. 'float' or 'int'
     :return: bool
     """
-    flt = False
-    integer = False
-    if isinstance(s, (str, unicode, bytes)):
-        s = s.replace(',', '')
-    try:
-        if float(s).is_integer():
-            integer = True
-        if not float(s).is_integer():
-            flt = True
-    except (ValueError, TypeError):
-        return False
+    v = str(s).replace(',', '')
+    if v.isdigit():
+        return True
     else:
-        if numtype:
-            if numtype == 'float' and flt:
-                return True
-            elif numtype == 'int' and integer:
-                return True
-        elif flt or integer:
+        try:
+            float(v)
             return True
-        else:
+        except ValueError:
             return False
 
 
@@ -345,7 +313,7 @@ def index_header(ws, header_row=0, header_end=0, verbose=False):
 
 def rstrip_list(iterable, value):
     """
-    Remove all instances of given value from the end of a list. Works like unicode().rstrip()
+    Remove all instances of given value from the end of a list. Works like str().rstrip()
     :param iterable: iterable
     :param value: value to strip
     :return: list
@@ -365,7 +333,7 @@ def rstrip_list(iterable, value):
 
 def lstrip_list(iterable, value):
     """
-    Remove all instances of given value from the end of a list. Works like unicode().rstrip()
+    Remove all instances of given value from the end of a list. Works like str().rstrip()
     :param iterable: iterable
     :param value: value to strip
     :return: list

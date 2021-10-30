@@ -1,3 +1,5 @@
+beautiful_soup_parser = "html.parser"
+
 xdock_cust_num = "001016"
 xdock_warehouse = 2
 ridgefield_cust_num = "001014"

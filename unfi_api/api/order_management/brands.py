@@ -2,7 +2,7 @@ import requests
 import urllib.parse
 from unfi_api.utils.http import response_to_json
 from bs4 import BeautifulSoup
-
+from unfi_api import settings
 brands_base_url = 'https://ordermanagement.unfi.com/api/Brands/'
 
 
@@ -204,7 +204,7 @@ def get_product_details_from_service(session, token, product_code, account_numbe
 def parse_pricing_table(page):
     results = []
 
-    pricing_soup = BeautifulSoup(page, features="lxml")
+    pricing_soup = BeautifulSoup(page, features=settings.beautiful_soup_parser)
 
     table_soup = pricing_soup.find_all('table')[1]
     headers = {}

@@ -6,20 +6,19 @@ import requests
 # session = IncapSession()
 from bs4 import BeautifulSoup
 from selenium.webdriver import ChromeOptions
-from selenium.webdriver import Remote, Chrome, PhantomJS
+from selenium.webdriver import Remote, Chrome
 
 from .admin_backend import AdminBackend
 from .order_management import Brands
 from .order_management import OrderManagement
 from .products import Products
+from unfi_api import settings
 
 warnings.filterwarnings("ignore")
 
 selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 4444)
 
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
-
-
 
 
 class UnfiAPI(object):
@@ -50,7 +49,7 @@ class UnfiAPI(object):
 
         login_page_content = login_page_result.content.decode("utf-8")
 
-        login_page_soup = BeautifulSoup(login_page_content, features="lxml")
+        login_page_soup = BeautifulSoup(login_page_content, features="html.parser")
 
         viewstate = login_page_soup.select_one("#__VIEWSTATE")['value']
         viewstate_generator = login_page_soup.select_one("#__VIEWSTATEGENERATOR")['value']
@@ -92,7 +91,7 @@ class UnfiAPI(object):
                                          data=data
 
                                          )
-        login_soup = BeautifulSoup(login_result.content, features="lxml")
+        login_soup = BeautifulSoup(login_result.content, features=settings.beautiful_soup_parser)
         form_data = {}
         form_action = login_soup.form['action']
         for form_input in login_soup.find_all("input", type="hidden"):
@@ -114,7 +113,7 @@ class UnfiAPI(object):
         }
         home_url = 'https://customers.unfi.com/_trust/pages/home.aspx'
         home = self.session.post(home_url, data=form_data, headers=headers)
-        home_soup = BeautifulSoup(home.content, features="lxml")
+        home_soup = BeautifulSoup(home.content, features=settings.beautiful_soup_parser)
         validator_tag = home_soup.select_one("#hfTokValidator")
         if validator_tag:
             self.auth_token = validator_tag['value']
@@ -187,9 +186,6 @@ class UnfiAPI(object):
                 chrome_options.headless = True
             driver = Chrome(chrome_options=chrome_options)
 
-        elif driver_type == "phantomjs":
-            driver = PhantomJS()
-
         else:
             raise AttributeError("driver type must be remote, chrome or phantomjs")
 
@@ -239,7 +235,7 @@ class UnfiAPI(object):
     def refresh_metadata(self):
         home_url = 'https://customers.unfi.com/pages/Home.aspx'
         home = self.session.post(home_url)
-        home_soup = BeautifulSoup(home.content, features="lxml")
+        home_soup = BeautifulSoup(home.content, features="html.parser")
         validator_tag = home_soup.select_one("#hfTokValidator")
         if validator_tag:
             self.auth_token = validator_tag['value']

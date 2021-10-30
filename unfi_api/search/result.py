@@ -1,9 +1,9 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator, root_validator
 from typing import Any, Optional, List
 
 
 class TopProduct(BaseModel):
-    per_unit_price: float = Field(..., alias='PerUnitPrice')
+    per_unit_price: Optional[float] = Field(..., alias='PerUnitPrice')
     is_sponsored: bool = Field(..., alias='IsSponsored')
     brand_id: int = Field(..., alias='BrandID')
     brand_name: str = Field(..., alias='BrandName')
@@ -26,6 +26,11 @@ class TopProduct(BaseModel):
     search_rank: int = Field(..., alias='SearchRank')
     warehouse_message: Any = Field(..., alias='WarehouseMessage')
     is_new: bool = Field(..., alias='IsNew')
+
+    @root_validator(pre=True)
+    def root_validator(cls, values):
+        print(values)
+        return values
 
 
 class Result(BaseModel):
