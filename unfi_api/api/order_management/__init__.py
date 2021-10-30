@@ -2,6 +2,8 @@ import re
 from urllib import parse
 
 from bs4 import BeautifulSoup
+from unfi_api.api.api import Endpoint, APICore
+
 from unfi_api.api.response import APIResponse
 from unfi_api.utils import strings_to_numbers
 from unfi_api.utils.http import response_to_json
@@ -11,14 +13,14 @@ from unfi_api import settings
 order_history_base_url = 'https://ordermanagement.unfi.com/api/OrderHistory/'
 
 
-class OrderManagement(object):
+class OrderManagement(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         self.brands = Brands(api)
         self.categories = Categories(api)
         self.interactive_reports = InteractiveReports(api)
@@ -27,14 +29,13 @@ class OrderManagement(object):
         pass
 
 
-class Brands(object):
+class Brands(Endpoint):
     """
-
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         pass
 
     def get_products_by_full_text(self, query, limit=1000, organic_codes='', attribute_ids='', sales_filters='',
@@ -91,25 +92,25 @@ class Brands(object):
                                                        self.api.account)
 
 
-class Categories(object):
+class Categories(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         pass
 
 
-class InteractiveReports(object):
+class InteractiveReports(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         pass
 
     def get_products_by_top_sellers(self, start_date=None, end_date=None,
@@ -145,14 +146,13 @@ class InteractiveReports(object):
         return result
 
 
-class OrderHistory(object):
+class OrderHistory(Endpoint):
     """
 
-    :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         pass
 
     def get_invoice_list(self, order_no=None, po_no=None, req_by=None, invoice_no=None,
@@ -166,7 +166,10 @@ class OrderHistory(object):
                                            self.api.account_region, transaction_type=4)
 
     def get_invoice(self, invoice_number, command=''):
-        "https://ordermanagement.unfi.com/api/OrderHistory/GetCreditInvoiceDetailForWest?invoiceNumber={invoicenum}&customerNumber={custnum}&command="
+        """
+        "https://ordermanagement.unfi.com/api/OrderHistory/
+        GetCreditInvoiceDetailForWest?invoiceNumber={invoicenum}&customerNumber={custnum}&command="
+        """
 
         endpoint = "GetCreditInvoiceDetailForWest"
         url = order_history_base_url + endpoint
@@ -208,8 +211,8 @@ class ProductDetail(object):
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
         pass
 
     def get_product_detail_by_int_id(self, product_int_id):

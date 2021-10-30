@@ -1,38 +1,36 @@
 from .products import get_product_by_int_id, get_product_data, get_product_attributes_by_product_by_int_id
 import urllib.parse
-from unfi_api.utils.http import response_to_json
+from unfi_api.utils.http import response_to_api_response, response_to_api_response
 from unfi_api.products import Product, Pricing, Attribute, Ingredients, Marketing, NutritionFacts
+from unfi_api.api.base_classes import APICore, Endpoint
 import requests
 import random
 
 products_api_endpoint = r'https://products.unfi.com/api/Products/'
 
 
-class Products(object):
+class Products(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
-        self.api_endpoint = products_api_endpoint
+    def __init__(self, api: APICore):
+        self.api: APICore = api
+        self.api_endpoint: str = products_api_endpoint
         pass
 
-    def get_product_by_int_id(self, product_int_id):
+    def get_product_by_int_id(self, product_int_id: int):
         url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id))
-        # self.api.session.headers['origin'] = products_api_endpoint
         response = self.api.session.get(url)
-        # response = requests.get(url, cookies=self.api.cookiejar)
-        # cookies = self.api.session.get("http://localhost:8000")
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_product_attributes_by_product_by_int_id(self, product_int_id):
         endpoint = "attributes"
         product_url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id) + "/")
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_product_ingredients_by_product_by_int_id(self, product_int_id):
         endpoint = "ingredients"
@@ -40,7 +38,7 @@ class Products(object):
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
         # response = requests.get(url, cookies=self.api.session.cookies)
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_product_marketing_by_product_by_int_id(self, product_int_id):
         endpoint = "marketing"
@@ -48,7 +46,7 @@ class Products(object):
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
         # response = requests.get(url, cookies=self.api.session.cookies)
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_product_nutrition_by_product_by_int_id(self, product_int_id):
         endpoint = "nutrition"
@@ -56,7 +54,7 @@ class Products(object):
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
         # response = requests.get(url, cookies=self.api.session.cookies)
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_west_product_data(self, product_code):
         product_data_url = "https://products.unfi.com/api/Products/GetWestProductData"
@@ -70,7 +68,7 @@ class Products(object):
         # self.api.session.headers['origin'] = products_api_endpoint
         response = self.api.session.get(product_data_url, params=params, headers=header)
         # response = requests.get(product_data_url, headers=header, params=params)
-        return response_to_json(response)
+        return response_to_api_response(response)
 
     def get_product_image(self, product_int_id):
         url = f"https://products.unfi.com/api/Images/{product_int_id}"

@@ -1,6 +1,6 @@
 import requests
 import urllib.parse
-from unfi_api.utils.http import response_to_json
+from unfi_api.utils.http import response_to_json, response_to_api_response
 from bs4 import BeautifulSoup
 from unfi_api import settings
 brands_base_url = 'https://ordermanagement.unfi.com/api/Brands/'
@@ -180,25 +180,25 @@ def get_product_details_from_service(session, token, product_code, account_numbe
     )
 
     response = session.get(endpoint_url, headers=headers, params=params)
-    error = None
-    status = None
-    results = []
-    if not isinstance(response, requests.Response):
-        error = f"response value must be type %r got %r instead" % (requests.Response, response)
-    else:
-        status = response.status_code
-        if not response.status_code == 200:
-            results = None
-            error = response.reason
-        else:
-            results = parse_pricing_table(response.content)
-
-    result = {
-        "error": error,
-        "status": status,
-        "data": results
-    }
-    return result
+    # error = None
+    # status = None
+    # results = []
+    # if not isinstance(response, requests.Response):
+    #     error = f"response value must be type %r got %r instead" % (requests.Response, response)
+    # else:
+    #     status = response.status_code
+    #     if not response.status_code == 200:
+    #         results = None
+    #         error = response.reason
+    #     else:
+    #         results = parse_pricing_table(response.content)
+    #
+    # result = {
+    #     "error": error,
+    #     "status": status,
+    #     "data": results
+    # }
+    return response_to_api_response(response)
 
 
 def parse_pricing_table(page):

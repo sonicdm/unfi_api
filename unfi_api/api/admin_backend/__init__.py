@@ -1,26 +1,28 @@
 from . import reports, user
+from unfi_api.api.base_classes import Endpoint, APICore
 
 
-class AdminBackend(object):
+class AdminBackend(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
-    def __init__(self, api):
-        self.api = api
-        self.user = User(api)
-        self.reports = Reports(api)
+
+    def __init__(self, api: APICore):
+        self.api: APICore = api
+        self.user: Endpoint = User(api)
+        self.reports: Endpoint = Reports(api)
         pass
 
 
-class User(object):
+class User(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
 
     def insert_selected_account_as_default(self, account_number):
         token = self.api.auth_token
@@ -36,11 +38,12 @@ class User(object):
         user_id = self.api.user_id
         return user.get_users_data(token, user_id)
 
-class Reports(object):
+
+class Reports(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api):
-        self.api = api
+    def __init__(self, api: APICore):
+        self.api: APICore = api
