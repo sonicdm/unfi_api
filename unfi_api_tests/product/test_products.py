@@ -12,7 +12,7 @@ import unfi_api.product.pricing
 from dateutil.parser import parse as date_parse
 
 from unfi_api.api.order_management.brands import parse_pricing_table
-from unfi_api.product.pricing import Cost, Costs
+from unfi_api.product.pricing import Cost, Pricing
 from unfi_api.search.result import Result
 from unfi_api_tests.assets import ProductsFiles, OrderManagementFiles
 from unfi_api.product.attributes import Attributes, Attribute
@@ -283,7 +283,7 @@ class TestPricing(TestCase):
     def test_pricing(self):
         pricing_xml = self.ordermanagement_files.brands_GetProductDetailsFromService_xml
         parsed_pricing = parse_pricing_table(pricing_xml)
-        pricing = product.Costs(pricing_xml)
+        pricing = product.Pricing(pricing_xml)
 
     def test_cost(self):
         pricing_xml = self.ordermanagement_files.brands_GetProductDetailsFromService_xml
@@ -359,7 +359,7 @@ class TestProduct(TestCase):
 
     def test_product(self):
         """Test creating product object"""
-        from unfi_api.search.result import TopProduct
+        from unfi_api.search.result import ProductResult
         result = Result.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json)
         top_product = result.top_products[0]
 
@@ -372,7 +372,7 @@ class TestProduct(TestCase):
         # product_details = ProductDetail.parse_raw(self.product_details_json)
         attributes = Attributes.parse_obj(self.products_files.attributes_json)
         ingredients = Ingredients.parse_obj(self.products_files.ingredients_json)
-        costs = Costs(self.ordermanagement_files.brands_GetProductDetailsFromService_xml)
+        costs = Pricing(self.ordermanagement_files.brands_GetProductDetailsFromService_xml)
 
         prodct_data_dict = {
             # "product_listing": product_listing,
