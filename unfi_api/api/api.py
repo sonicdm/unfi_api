@@ -9,6 +9,7 @@ from selenium.webdriver import ChromeOptions
 from selenium.webdriver import Remote, Chrome
 
 from .admin_backend import AdminBackend
+from .base_classes import APICore, Endpoint
 from .order_management import Brands
 from .order_management import OrderManagement
 from .products import Products
@@ -21,9 +22,10 @@ selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 4444)
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
-class UnfiAPI(object):
+class UnfiAPI(APICore):
 
     def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):
+        super().__init__()
         self.incapsula_retry_count = 0
         self.incapsula_retry_limit = incapsula_retry_limit
         self.incapsula_retry = incapsula_retry
@@ -33,10 +35,10 @@ class UnfiAPI(object):
         self.auth_token = None
         self.logged_in = False
         self.usermeta = {}
-        self._admin_backend = AdminBackend(self)
-        self._products = Products(self)
-        self._brands = Brands(self)
-        self._order_management = OrderManagement(self)
+        self._admin_backend: Endpoint = AdminBackend(self)
+        self._products: Endpoint = Products(self)
+        self._brands: Endpoint = Brands(self)
+        self._order_management: Endpoint = OrderManagement(self)
         self.driver = None
         self.login(user, password)
         if self.incapsula:
