@@ -1,7 +1,8 @@
 from dateutil.parser import parse as date_parser
+from datetime import date, datetime
 
 
-def currency_string_to_float(currency:str)->float:
+def currency_string_to_float(currency: str) -> float:
     """
     Converts a string to a float.
     Removing all currency symbols and commas.
@@ -33,9 +34,16 @@ def currency_string_to_float(currency:str)->float:
     return float(currency)
 
 
-def string_to_date(date):
+def validate_date_input(date_val):
     """
     Converts a string to a date.
     """
-    date_ = date_parser(date)
-    return date_.date()
+
+    if not isinstance(date_val, (str, date, datetime)):
+        return None
+    if isinstance(date_val, str):
+        return date_parser(date_val)
+    if isinstance(date_val, date):
+        return date_val
+    elif isinstance(date_val, datetime):
+        return date_val.date()
