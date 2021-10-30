@@ -29,7 +29,7 @@ def fetch_attributes_from_api(product_id: int, header: dict, api: UnfiAPI) -> di
     :return: attributes of the product
     """
     attribute_url = product_attribute_url.format(product_id=product_id)
-    attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id)['data']
+    attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id).data
     # attribute_response = requests.get(attribute_url, header)
     # attribute_result = json.loads(attribute_response.content)
     return attribute_result
@@ -179,7 +179,7 @@ def get_product_info(product_id, product_code, token, xdock=False, callback=None
     custnum = ridgefield_cust_num
 
     # NEW API
-    data_result = api.products.get_west_product_data(product_code)['data']
+    data_result = api.products.get_west_product_data(product_code).data
     detail_result = api.order_management.product_detail.get_product_detail_by_int_id(product_id)['data'][0]
 
     attribute_result = get_attributes(product_id, header, api=api)

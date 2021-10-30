@@ -12,12 +12,14 @@ from requests import Response
 
 class APIResponse(BaseModel):
     status: int
-    data: Optional[dict]
+    data: Optional[Any]
     error: Optional[str]
     text: Optional[str]
+    url: Optional[str]
+    content_type: Optional[str]
     # reason:  str
     content: Optional[bytes]
-    response: Response
+    response: Optional[Response]
 
     class Config:
         arbitrary_types_allowed = True
@@ -37,5 +39,19 @@ class APIResponse(BaseModel):
         return v
 
 
+
+
+
 class NonJsonResultError(Exception):
-    super().__init__(Exception)
+    def __init__(self, response: APIResponse):
+        content_type = response.content_type
+        url = response.url
+        super().__init__(f'Non-JSON request error: {url} returned {content_type} instead')
+
+class MalformedJsonError(Exception):
+    def __init__(self, response: APIResponse):
+        content_type = response.content_type
+        url = response.url
+        super().__init__(f'Malformed JSON request error: {url} returned {content_type} instead')
+    
+

@@ -31,12 +31,12 @@ def run():
     pass
 
 
-def uncaught_exception_handler(type, value, tb):
-    print(type, value, tb)
+def uncaught_exception_handler(exc_type, value, tb):
+    print(exc_type, value, tb)
     input("PROCESS FAILED PRESS ENTER TO QUIT")
 
 
-sys.excepthook = uncaught_exception_handler
+# sys.excepthook = uncaught_exception_handler
 
 
 def pull_invoices(token, date, xdock=False, api=None):
