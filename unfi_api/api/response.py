@@ -36,3 +36,6 @@ class APIResponse(BaseModel):
             raise ValueError('Status must be between 200 and 599')
         return v
 
+
+class NonJsonResultError(Exception):
+    super().__init__(Exception)
