@@ -6,7 +6,7 @@ from typing import Any, Dict, List
 from .line_item import LineItem, LineItems
 
 from unfi_api.utils import table_to_dicts, remove_escaped_characters, normalize_dict
-from unfi_api.validators import currency_string_to_float, string_to_date
+from unfi_api.validators import currency_string_to_float, validate_date_input
 from unfi_api import settings
 
 
@@ -182,7 +182,7 @@ class Invoice(BaseModel):
     )(currency_string_to_float)
     _string_to_date = validator(
         "invoice_date", "delivery_date", "ordered_on", allow_reuse=True, pre=True
-    )(string_to_date)
+    )(validate_date_input)
 
     def normalize(self):
         """

@@ -7,7 +7,7 @@ from .attributes import Attributes
 from .marketing import Marketing
 from .ingredients import Ingredients
 from .nutrition import NutritionFacts
-from .pricing import Costs
+from .pricing import Pricing
 
 
 class ProductData(BaseModel):

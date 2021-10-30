@@ -1,8 +1,9 @@
 from pydantic import BaseModel, Field, validator, root_validator
 from typing import Any, Optional, List
+from unfi_api.utils import normalize_dict
 
 
-class TopProduct(BaseModel):
+class ProductResult(BaseModel):
     per_unit_price: Optional[float] = Field(..., alias='PerUnitPrice')
     is_sponsored: bool = Field(..., alias='IsSponsored')
     brand_id: int = Field(..., alias='BrandID')
@@ -38,4 +39,7 @@ class Result(BaseModel):
     top_product_ids: Optional[List[int]] = Field(None, alias='TopProductIds')
     category_ids: Optional[List[int]] = Field(None, alias='CategoryIds')
     brand_ids: Optional[List[int]] = Field(None, alias='BrandIds')
-    top_products: Optional[List[TopProduct]] = Field(None, alias='TopProducts')
+    products: Optional[List[ProductResult]] = Field(None, alias='TopProducts')
+
+    def normalize(self):
+        return normalize_dict(self.dict())
