@@ -1,58 +1,90 @@
 from datetime import date
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional, Union
 
 from bs4 import BeautifulSoup
 from pydantic import Field, validator
 from pydantic.main import BaseModel
 
-from unfi_api.utils import strings_to_numbers, isnumber
+from unfi_api.utils import (
+    strings_to_numbers,
+    isnumber,
+    remove_escaped_characters,
+    camel_to_snake_case,
+)
+from unfi_api.validators import currency_string_to_float, validate_date_input
+
+price_types = {
+    "A": "Customer Specific Ad Program",
+    "C": "Specialty Discount",
+    "E": "Every Day Low Price (EDLP)",
+    "F": "Circular Deal",
+    "H": "HABA Discount",
+    "M": "Super Saver Deals & New Additions",
+    "N": "Net Deal / Net Restricted",
+    "P": "Price Promotion",
+    "S": "Customer Specific Shelf Sale",
+    "Z": "Every Day Low Cost (EDLC)",
+    "R": "Retail",
+}
 
 
 def parse_pricing(response_content):
-    promo_soup = BeautifulSoup(response_content, 'html.parser')
+    response_content = remove_escaped_characters(response_content)
+    promo_soup = BeautifulSoup(response_content, "html.parser")
     # find table that contains the pricing.
-    promo_table = promo_soup.find_all('table')[1]
+    promo_table = promo_soup.find_all("table")[1]
     promo_rows = []
-    promo_headers = [header.text for header in promo_table.find_all('th')]
-    promo_rows.append(promo_headers)
+    promo_headers = [
+        header.text.replace(" ", "_").replace(".", "").lower()
+        for header in promo_table.find_all("th")
+    ]
+    # promo_rows.append(promo_headers)
     # grab table values and put into lists
-    for row in promo_table.find_all('tr'):
+    for row in promo_table.find_all("tr"):
         cur_row = []
-        for cell in row.find_all('td'):
-            cur_row.append(cell.get_text().replace('\\r', '').replace(
-                '\\t', '').replace('\\n', '').strip())
-        promo_rows.append(cur_row)
-    promo_rows.remove([])
+        for cell in row.find_all("td"):
+            cur_row.append(strings_to_numbers(cell.get_text().strip().replace("$", "")))
+        if len(cur_row) == len(promo_headers):
+            promo_rows.append(dict(zip(promo_headers, cur_row)))
 
     # create pricing data
-    pricing = {}
-
-    for row in promo_rows[1:]:
-        row = [strings_to_numbers(str(i).replace('$', '')) for i in row]
-        price_type = row[0]
+    pricing: Dict[str, Any] = {}
+    costs: Dict[str, dict] = {}
+    for row in promo_rows:
+        """
+        row = {'price_reason': '', 'min_qty': 1, 'discount_amount': '', 'discount_sign': '', 'net_flag': '',
+        'case_savings': '', 'each_savings': '', 'start_date': '00/00/0000', 'end_date': '00/00/0000',
+        'case_price': 27.24, 'unit_price': 4.54, 'retail_price': 6.99, 'margin': '35.05%'}
+        """
+        price_type = row["price_reason"]
+        cost = {}
         if not price_type:
-            pricing['retail_case_cost'] = row[-4]
-            pricing['retail_unit_cost'] = row[-3]
-            srp = row[-2]
-            if isnumber(srp):
-                pricing['retail_srp'] = row[-2]
-                # pricing['retail_srp'] = simple_round_retail(row[-2])
-            else:
-                pricing['retail_srp'] = 0
-            continue
-        else:
-            promo_price = row[-2]
-            promo_case_cost = row[9]
-            promo_unit_cost = row[10]
-            promo_from = row[7]
-            promo_to = row[8]
-            promo_key = price_type + "_"
-            pricing[promo_key + "srp"] = promo_price
-            pricing[promo_key + "case_cost"] = promo_case_cost
-            pricing[promo_key + "unit_cost"] = promo_unit_cost
-            pricing[promo_key + "from"] = promo_from
-            pricing[promo_key + "to"] = promo_to
+            price_type = "R"
+            pricing['case_price'] = currency_string_to_float(row["case_price"])
+            pricing['unit_price'] = currency_string_to_float(row["unit_price"])
+            pricing['retail_margin'] = float(row["margin"].replace("%", "")) / 100
+            pricing['retail_price'] = currency_string_to_float(row["retail_price"])
 
+        cost["price_type"] = price_type
+        cost["price_description"] = price_types[price_type]
+        cost["min_qty"] = row["min_qty"]
+        cost["discount_amount"] = currency_string_to_float(row["discount_amount"])
+        cost["discount_sign"] = row["discount_sign"]
+        cost["net_flag"] = row["net_flag"]
+        cost["case_savings"] = currency_string_to_float(row["case_savings"])
+        cost["each_savings"] = currency_string_to_float(row["each_savings"])
+        cost["start_date"] = (
+            row["start_date"] if row["start_date"] not in ["", "00/00/0000"] else None
+        )
+        cost["end_date"] = (
+            row["end_date"] if row["end_date"] not in ["", "00/00/0000"] else None
+        )
+        cost["case_price"] = currency_string_to_float(row["case_price"])
+        cost["unit_price"] = currency_string_to_float(row["unit_price"])
+        cost["retail_price"] = currency_string_to_float(row["retail_price"])
+        cost["margin"] = float(row["margin"].replace("%", "")) / 100
+        costs[price_type] = cost
+    pricing["costs"] = costs
     return pricing
 
 
@@ -60,80 +92,42 @@ class Cost(BaseModel):
     """
     Cost record of a product with detailed information
     """
-    price_reason = Field(str, alias="Price Reason")
-    price_type = Field(str, alias="Price Type")
-    min_qty = Field(int, alias="Min. Qty.")
-    discount_amount = Field(int, alias="Discount Amount")
-    discount_sign = Field(str, alias="Discount Sign")
-    net_flag = Field(str, alias="Net Flag")
-    case_savings = Field(int, alias="Case Savings")
-    each_savings = Field(int, alias="Each Savings")
-    start_date = Field(date, alias="Start Date")
-    end_date = Field(date, alias="End Date")
-    case_price = Field(int, alias="Case Price")
-    unit_price = Field(int, alias="Unit Price")
-    retail_price = Field(int, alias="Retail Price")
-    margin = Field(float, alias="Margin")
 
-    class Options:
-        arbitrary_types_allowed = True
+    price_type: str
+    price_description: str
+    min_qty: int
+    discount_amount: float
+    discount_sign: str
+    net_flag: str
+    case_savings: float
+    each_savings: float
+    start_date: Optional[date]
+    end_date: Optional[date]
+    case_price: float
+    unit_price: float
+    retail_price: float
+    margin: float
 
-    @validator("price_reason")
-    def validate_price_reason(cls, v):
-        """if no price reason, reason is R"""
-        if not v:
-            return "R"
-        return v
+    # class Options:
+    #     arbitrary_types_allowed = True
+    # validators
+    _validate_date = validator("start_date", "end_date", pre=True, allow_reuse=True)(
+        validate_date_input
+    )
 
-    @validator("case_price", "unit_price", "retail_price")
+    @validator("case_price", "unit_price", "retail_price", pre=True, allow_reuse=True)
     def validate_price(cls, v):
         """remove currency symbol from price and convert to float"""
-        return float(v.replace("$", ""))
+        if not isinstance(v, float):
+            return float(str.v.replace("$", ""))
+        return v
 
 
-class Costs:
-    """Collection for Cost objects contains dict of Cost Type: Cost Object"""
+class Pricing(BaseModel):
+    case_price: float
+    unit_price: float
+    retail_margin: float
+    retail_price: float
+    costs: Dict[str,Cost]
 
-    def __init__(self, pricing_xml: str):
-        self.costs: Dict[str, Cost] = {}
-        self.pricing_xml = pricing_xml
-        self.parsed_pricing: Dict[str, Any] = parse_pricing(pricing_xml)
-    
-    def get_cost(self, cost_type: str) -> Cost:
-        """
-        Returns a Cost object for a given cost type
-        """
-        return self.costs[cost_type]
 
-    def get_cost_types(self) -> list:
-        """
-        Returns a list of cost types
-        """
-        return list(self.costs.keys())
-
-    def costs_to_dict(self) -> Dict[str, Dict[str, Any]]:
-        """
-        Returns a dict of cost types to dict of cost attributes
-        """
-        return {cost_type: cost.dict() for cost_type, cost in self.costs.items()}
-        
-    
-    def __getitem__(self, key):
-        return self.costs[key]
-
-    def __setitem__(self, key, cost: Cost):
-        self.costs[key] = cost
-    
-    def __iter__(self):
-        return iter(self.costs)
-    
-    def __len__(self):
-        return len(self.costs)
-
-    def __repr__(self):
-        return f"Costs({self.costs})"
-
-    def __str__(self):
-        return f"Costs({self.costs})"
-    
-    
