@@ -20,6 +20,8 @@ selenium_server = "http://%s:%s/wd/hub" % ("192.168.1.161", 4444)
 login_page = r"https://customers.unfi.com/_login/LoginPage/Login.aspx"
 
 
+
+
 class UnfiAPI(object):
 
     def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):

@@ -2,7 +2,7 @@ import re
 from urllib import parse
 
 from bs4 import BeautifulSoup
-
+from unfi_api.api.response import APIResponse
 from unfi_api.utils import strings_to_numbers
 from unfi_api.utils.http import response_to_json
 from . import brands, categories, interactive_reports, order_history, product_detail

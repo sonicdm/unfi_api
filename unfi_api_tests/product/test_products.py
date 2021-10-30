@@ -365,8 +365,9 @@ class TestProduct(TestCase):
 
         # result = TopProduct.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json["TopProducts"][0])
         # product_listing = ProductListing.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json[0])
-        product_detail_int_id = ProductDetailIntId.parse_obj(self.ordermanagement_files.ProductDetail_GetProductDetailByProductIntId_json[0])
-        product_data =  ProductData.parse_obj(self.products_files.get_west_product_data_json)
+        product_detail_int_id = ProductDetailIntId.parse_obj(
+            self.ordermanagement_files.ProductDetail_GetProductDetailByProductIntId_json[0])
+        product_data = ProductData.parse_obj(self.products_files.get_west_product_data_json)
         nutrition_facts = NutritionFacts.parse_obj({"nutrients": self.products_files.nutrition_json})
         # product_details = ProductDetail.parse_raw(self.product_details_json)
         attributes = Attributes.parse_obj(self.products_files.attributes_json)
@@ -381,13 +382,13 @@ class TestProduct(TestCase):
             "ingredients": ingredients,
             "product_details": product_detail_int_id,
             "costs": costs
-        
+
         }
         combined_model_dicts = {}
         combined_model_dicts.update(product_data.dict())
         combined_model_dicts.update(product_detail_int_id.dict())
         # combined_model_dicts.update(nutrition_facts.dict())
-        combined_model_dicts.update({attr:"Y" for attr in attributes.get_attribute_names()})
+        combined_model_dicts.update({attr: "Y" for attr in attributes.get_attribute_names()})
         combined_model_dicts.update(ingredients.dict())
         combined_model_dicts.update(costs.costs_to_dict())
         # combined_model_dicts.update(product_listing.dict())
@@ -402,6 +403,6 @@ class TestProduct(TestCase):
             ws.append(row)
 
             wb.save("test.xlsx")
-        
+
         # product_obj = product.UNFIProduct.parse_obj(prodct_data_dict)
         print(rows)

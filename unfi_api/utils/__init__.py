@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 import re
+from typing import Any, Dict, List
 
 try:
     from past.builtins import unicode
@@ -498,3 +499,32 @@ def string_to_snake(string: str) -> str:
     Converts a string to lower case snake case.
     """
     return string.lower().replace(" ", "_")
+
+
+def table_to_dicts(table:List[Any], header_row:int=0, verbose:bool=False) -> List[Dict]:
+    """
+    Convert a table to a dict
+    :param table:
+    :return:
+    """
+    colindex = {val: idx for idx, val in enumerate(table[header_row])}
+    return [dict(zip(colindex.keys(), row)) for row in table[header_row + 1:]]
+
+
+def remove_escaped_characters(string: str) -> str:
+    """
+    Remove escaped characters from the string.
+    """
+    return re.sub(r"\\[\\n\\r\\t]", "", string)
+
+
+def normalize_dict(d: dict) -> str:  
+    new_data = dict()
+    for key, value in d.items():
+        if not isinstance(value, dict):
+            new_data[key] = value
+        else:
+            for k, v in value.items():
+                new_data[key + "_" + k] = v
+  
+    return new_data
