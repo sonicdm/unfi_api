@@ -6,6 +6,7 @@ from unfi_api.api.response import APIResponse
 from unfi_api.utils import strings_to_numbers
 from unfi_api.utils.http import response_to_json
 from . import brands, categories, interactive_reports, order_history, product_detail
+from unfi_api import settings
 
 order_history_base_url = 'https://ordermanagement.unfi.com/api/OrderHistory/'
 
@@ -232,7 +233,7 @@ class ProductDetail(object):
 def parse_invoice_html_to_json(page):
     no_lines = "<html><body>" + re.sub(r"(\r|\t|\n)+", " ", page) + "</body></html>"
     no_lines = re.sub(r"((\\r)+|(\\t)+|(\\n)+)", "", no_lines)
-    invoicesoup = BeautifulSoup(no_lines, features="lxml")
+    invoicesoup = BeautifulSoup(no_lines, features=settings.beautiful_soup_parser)
 
     # invoice metadata eg invoice number and such
     meta = {}

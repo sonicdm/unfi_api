@@ -5,7 +5,7 @@ import json
 
 from datetime import date, datetime, timedelta
 from unfi_api.utils.http import response_to_json
-from unfi_api.utils import fuzzy_date
+from unfi_api.utils.date import fuzzy_date
 
 """
 'https://ordermanagement.unfi.com/api/InteractiveReports/

@@ -7,13 +7,14 @@ from .line_item import LineItem, LineItems
 
 from unfi_api.utils import table_to_dicts, remove_escaped_characters, normalize_dict
 from unfi_api.validators import currency_string_to_float, string_to_date
+from unfi_api import settings
 
 
 def make_invoice_table_soup(html: str) -> BeautifulSoup:
     """
     Make a soup object from the html
     """
-    invoice_soup = BeautifulSoup(html, "lxml")
+    invoice_soup = BeautifulSoup(html, settings.beautiful_soup_parser)
     return invoice_soup.select("table")
 
 
@@ -24,7 +25,7 @@ def get_invoice_html_tables(invoice_xml: str) -> Dict[str, List[Dict[str, Any]]]
     """
 
     invoice_xml = invoice_xml.replace("\n", "").replace("\r", "").replace("\t", "")
-    xml_soup = BeautifulSoup(invoice_xml, "lxml")
+    xml_soup = BeautifulSoup(invoice_xml, settings.beautiful_soup_parser)
     invoice_data = {}
     invoice_tables = make_invoice_table_soup(invoice_xml)
 
