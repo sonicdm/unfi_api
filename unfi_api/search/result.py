@@ -30,7 +30,7 @@ class ProductResult(BaseModel):
 
     @root_validator(pre=True)
     def root_validator(cls, values):
-        print(values)
+        # print(values)
         return values
 
 
