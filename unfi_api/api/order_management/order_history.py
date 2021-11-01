@@ -1,5 +1,5 @@
 import requests
-from unfi_api.utils.http import response_to_json
+from unfi_api.utils.http import response_to_api_response, response_to_json
 
 order_history_base_url = 'https://ordermanagement.unfi.com/api/OrderHistory/'
 
@@ -64,7 +64,7 @@ def get_grid_item(session, token, account_num, user_id, region, transaction_type
     # echo_response = requests.get('http://localhost:8000/api/OrderHistory/GetGridItem', headers=headers, params=params)
     # echo_json = echo_response.json()
 
-    return response_to_json(response)
+    return response_to_api_response(response)
 
 
 def get_open_orders_item_for_west(session, token):
