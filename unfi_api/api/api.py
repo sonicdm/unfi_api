@@ -33,13 +33,13 @@ class UNFISession:
 
 class UnfiAPI(APICore):
 
-    def __init__(self, user, password, incapusla=True, incapsula_retry=False, incapsula_retry_limit=10):
+    def __init__(self, user, password, incapsula=True, incapsula_retry=False, incapsula_retry_limit=10):
         # super().__init__(None)
         self.incapsula_retry_count = 0
         self.incapsula_retry_limit = incapsula_retry_limit
         self.incapsula_retry = incapsula_retry
         self.session = requests.session()
-        self.incapsula = incapusla
+        self.incapsula = incapsula
         self.cookiejar = None
         self.auth_token = None
         self.logged_in = False
