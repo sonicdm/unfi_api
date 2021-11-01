@@ -42,11 +42,13 @@ def response_to_json(response: Response) -> dict:
     return result
 
 
-def response_to_api_response(response) -> APIResponse:
+def response_to_api_response(response, api_response: APIResponse=None) -> APIResponse:
     """
     :type response: `requests.models.Response`
     :param response:
     :return:
     """
+    if not api_response:
+        api_response = APIResponse
     result = response_to_json(response)
-    return APIResponse.parse_obj(result)
+    return api_response.parse_obj(result)
