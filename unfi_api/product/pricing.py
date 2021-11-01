@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from bs4 import BeautifulSoup
 from pydantic import Field, validator
+from pydantic.class_validators import root_validator
 from pydantic.main import BaseModel
 
 from unfi_api.utils import (
@@ -60,10 +61,10 @@ def parse_pricing(response_content):
         cost = {}
         if not price_type:
             price_type = "R"
-            pricing['case_price'] = currency_string_to_float(row["case_price"])
-            pricing['unit_price'] = currency_string_to_float(row["unit_price"])
-            pricing['retail_margin'] = float(row["margin"].replace("%", "")) / 100
-            pricing['retail_price'] = currency_string_to_float(row["retail_price"])
+            pricing["case_price"] = currency_string_to_float(row["case_price"])
+            pricing["unit_price"] = currency_string_to_float(row["unit_price"])
+            pricing["retail_margin"] = float(row["margin"].replace("%", "")) / 100
+            pricing["retail_price"] = currency_string_to_float(row["retail_price"])
 
         cost["price_type"] = price_type
         cost["price_description"] = price_types[price_type]
@@ -121,6 +122,8 @@ class Cost(BaseModel):
         if not isinstance(v, float):
             return float(str.v.replace("$", ""))
         return v
+    
+
 
 
 class Pricing(BaseModel):
@@ -128,6 +131,17 @@ class Pricing(BaseModel):
     unit_price: float
     retail_margin: float
     retail_price: float
-    costs: Dict[str,Cost]
+    costs: Dict[str, Cost]
 
-
+    def costs_to_dict(self) -> Dict[str, Any]:
+        """
+        Converts a list of costs to a dict of costs
+        """
+        costs = {}
+        for cost in self.costs.values():
+            for cost_field,cost_value in cost.dict(include={"case_price","unit_price","start_date","end_date"}).items():
+                if cost.price_type == "R":
+                    costs[cost_field] = cost_value
+                else:
+                    costs[f"{cost.price_type}_{cost_field}"] = cost_value
+        return costs

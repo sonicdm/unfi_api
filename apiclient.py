@@ -1,8 +1,9 @@
-from unfi_api import UnfiApiClient
-
-
+from unfi_api import UnfiApiClient, UnfiAPI
+import os
 
 if __name__ == '__main__':
-    api = UnfiApiClient("CapellaAPI", "CapellaAPI2489")
-    result = api.search("field day")
+    api = UnfiAPI(os.environ['UNFI_USER'], os.environ['UNFI_PASS'], False)
+    client = UnfiApiClient(api)
+    # result = client.search("field day")
+    invoice_list = client.get_invoice_list()
     pass
