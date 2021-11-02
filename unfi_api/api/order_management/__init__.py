@@ -22,6 +22,7 @@ class OrderManagement(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = 'order_management'
         self.api: APICore = api
         self.brands = Brands(api)
         self.categories = Categories(api)
@@ -37,7 +38,9 @@ class Brands(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = 'brands'
         self.api: APICore = api
+        self.api.register_endpoint(self)
         pass
 
     def get_products_by_full_text(self, query, limit=1000, organic_codes='', attribute_ids='', sales_filters='',
@@ -101,7 +104,9 @@ class Categories(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = 'categories'
         self.api: APICore = api
+        self.api.register_endpoint(self)
         pass
 
 
@@ -112,7 +117,9 @@ class InteractiveReports(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = 'interactive_reports'
         self.api: APICore = api
+        self.api.register_endpoint(self)
         pass
 
     def get_products_by_top_sellers(self, start_date=None, end_date=None,
@@ -162,7 +169,10 @@ class OrderHistory(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = 'order_history'
         self.api: APICore = api
+        self.api.register_endpoint(self)
+        self.endpoint = order_history_base_url
         pass
 
     def get_invoice_list(self, order_no=None, po_no=None, req_by=None, invoice_no=None,
@@ -215,14 +225,17 @@ class OrderHistory(Endpoint):
 product_detail_endpoint = 'https://ordermanagement.unfi.com/api/ProductDetail/'
 
 
-class ProductDetail(object):
+class ProductDetail(Endpoint):
     """
 
     :type api: `unfi_api.api.UnfiAPI`
     """
 
     def __init__(self, api: APICore):
+        self.name = 'product_detail'
         self.api: APICore = api
+        self.api.register_endpoint(self)
+        self.endpoint = product_detail_endpoint
         pass
 
     def get_product_detail_by_int_id(self, product_int_id):

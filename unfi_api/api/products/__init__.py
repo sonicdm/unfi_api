@@ -16,8 +16,11 @@ class Products(Endpoint):
     """
 
     def __init__(self, api: APICore):
+        self.name = "products"
         self.api: APICore = api
+        self.api.register_endpoint(self)
         self.api_endpoint: str = products_api_endpoint
+        self.endpoint = products_api_endpoint
         pass
 
     def get_product_by_int_id(self, product_int_id: int):

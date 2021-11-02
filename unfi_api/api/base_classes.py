@@ -5,12 +5,17 @@ import requests
 
 class Endpoint:
     """Base for API Endpoint"""
+    endpoint: str
 
 
 class APICore(ABC):
     """Base for API Object"""
 
     session: requests.Session
+
+    @abstractmethod
+    def register_endpoint(self, endpoint: Endpoint):
+        """Register an endpoint"""
 
     @abstractmethod
     def get(self, url: str, params: dict = None, **kwargs) -> requests.Response:

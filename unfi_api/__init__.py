@@ -34,6 +34,11 @@ class UnfiApiClient:
         self.order_management = OrderManagement(api)
         self.interactive_reports = InteractiveReports(api)
 
+
+    @property
+    def auth_token(self) -> str:
+        return self.api.auth_token
+
     def search(
         self,
         query,

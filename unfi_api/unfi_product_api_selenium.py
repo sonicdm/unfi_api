@@ -6,7 +6,7 @@ from tkinter import simpledialog
 
 from openpyxl import Workbook
 
-from unfi_api import UnfiAPI
+from unfi_api import UnfiAPI, UnfiApiClient
 from unfi_api.settings import image_output_path
 from unfi_api.unfi_web_queries import run_query, make_query_list
 
@@ -29,6 +29,7 @@ def main():
     if query:
         print("Loading UNFI Driver")
         api = UnfiAPI("CapellaAPI", "CapellaAPI2489", incapsula_retry=True)
+        api_client = UnfiApiClient(api)
         search = True
         products = {}
         fields = set()
@@ -39,7 +40,7 @@ def main():
             if not query:
                 query = ask_query()
             if query:
-                result = do_query(query, api)
+                result = do_query(query, api_client)
                 fields.update(result.get('fields'))
                 products.update(result.get('items'))
                 query = None
@@ -70,7 +71,7 @@ def download_product_image(api, product, output_path):
             with open(os.path.join(output_path, upc + ".jpg"), "wb") as img_file:
                 product_name = " ".join([product['brandname'], product['productname']])
                 print("Fetching Image for {}".format(product_name))
-                image_result = api.products.get_product_image(intid)
+                image_result = api.endpoints['products'].get_product_image(intid)
                 if not image_result.get('error'):
                     image_data = image_result.get('data')
                     if image_data:
