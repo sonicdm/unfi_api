@@ -74,33 +74,7 @@ def round_retails(price):
             price = "{}.{}{}".format(whole, tenth, hund)
 
     return float(price)
-    # if whole < 1 and tenth == 0 and hund < 5:
-    #     return 0.05
-    # elif whole < 1 and tenth == 0 and hund > 5:
-    #     return 0.09
-    # elif tenth == 0 and whole > 0:
-    #     if hund < 5:
-    #         whole -= 1
-    #         tenth = 9
-    #         hund = 9
-    #     else:
-    #         tenth = 1
-    #         hund = 5
-    # elif tenth == 1 and hund < 5:
-    #     hund = 5
-    # elif 2 < hund < 6:
-    #     hund = 5
-    # elif 2 >= hund:
-    #     tenth -= 1
-    #     hund = 9
-    # elif hund > 6:
-    #     hund = 9
-
-    # elif tenth == 1:
-    #     if hund < 5:
-    #         hund = 5
-
-    return float("{}.{}{}".format(whole, tenth, hund))
+ 
 
 
 # Collection Utils
@@ -153,6 +127,9 @@ def index_header(
 
 
 def explode_number(number):
+    """
+    breaks down number into whole, tenth, and hundreth
+    """
     s = u"%s" % round(float(number), 2) if isnumber(number) else None
     if not s:
         raise TypeError("a number value is required")
@@ -238,7 +215,7 @@ def yesno(text, default=True):
     :param default:
     :return: bool
     """
-    yesre = re.compile(r"^((?P<yes>Y(ES)?)|(?P<no>NO?))", re.IGNORECASE)
+    yesre = re.compile(r"^\s*?((?P<yes>Y(ES)?)|(?P<no>NO?))\s*?", re.IGNORECASE)
     yesnomatch = yesre.match(text)
     yes = default
     if yesnomatch or not text:
