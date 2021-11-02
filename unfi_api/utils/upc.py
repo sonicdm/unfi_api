@@ -1,13 +1,8 @@
-from __future__ import print_function, absolute_import
 
-try:
-    from past.builtins import unicode, long
-except ImportError:
-    pass
 import re
 import math
 
-from catalogboss.utils import strings_to_numbers, isnumber, lstrip_list
+from unfi_api.utils.string import isnumber
 
 
 def prep_upc_a(upc):
@@ -61,7 +56,7 @@ def add_check_digit(upc, text=True):
         else:
             return int(u)
 
-    if isinstance(upc, (str, unicode, bytes)):
+    if isinstance(upc, (str, bytes)):
         upc_str = re.sub(r'\D', '', upc)
     else:
         upc_str = str(upc)

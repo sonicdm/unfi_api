@@ -1,6 +1,6 @@
 import re
-from typing import Union, Iterable, Any
 from string import hexdigits
+from typing import Any, Iterable, Union
 
 
 def clean_size_field(text: str) -> str:
@@ -26,6 +26,9 @@ def is_hex(s: str) -> bool:
     >>> is_hex('44dFa5')
     True
     """
+    if not isinstance(s, str):
+        return False
+    s = s.replace('#', '')
     hex_digits = set(hexdigits)
     return all(c in hex_digits for c in s)
 
@@ -41,6 +44,7 @@ def is_hexcolor(s: str) -> bool:
     >>> is_hexcolor('FFEERR')
     False
     """
+    s = s.replace('#', '')
     if is_hex(s):
         if len(s) == 3 or len(s) == 6:
             return True
@@ -156,16 +160,30 @@ def camel_to_snake_case(s: str) -> str:
     regex = r"([a-z]+)([A-Z]+)"
     return re.sub(regex, r"\1_\2", s).lower()
 
+def pascal_case_to_snake_case(s: str) -> str:
+    """
+    Convert a string to lower case snake case.
+    convert TestString to test_string
+    """
+    if isinstance(s, str):
+        s = re.split(r'(?<!^)(?=[A-Z])', s)
+
+        return "_".join(s).lower()
+    else:
+        return s
 
 def string_to_snake(s: str) -> str:
     """
     Converts a string to lower case snake case.
     """
-    return s.lower().replace(" ", "_")
+    if isinstance(s, str):
+        return s.lower().replace(' ', '_')
+    else:
+        return s
 
 
 def remove_escaped_characters(s: str) -> str:
     """
-    Remove escaped characters from the string.
+    Remove newlines and tabs and returns from a string.
     """
-    return re.sub(r"\\[\\n\\r\\t]", "", s)
+    return re.sub(r'([\n\t\r]|[\\]+(n|t|r))', '', s)

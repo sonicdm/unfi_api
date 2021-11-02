@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import json
+
 from requests import Response, status_codes
 from unfi_api.api.response import APIResponse
 
