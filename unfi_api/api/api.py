@@ -33,6 +33,8 @@ class UNFISession:
 
 class UnfiAPI(APICore):
 
+
+
     def __init__(self, user, password, incapsula=True, incapsula_retry=False, incapsula_retry_limit=10):
         # super().__init__(None)
         self.incapsula_retry_count = 0
@@ -44,16 +46,50 @@ class UnfiAPI(APICore):
         self.auth_token = None
         self.logged_in = False
         self.usermeta = {}
-        self._admin_backend: Endpoint = AdminBackend(self)
-        self._products: Endpoint = Products(self)
-        self._brands: Endpoint = Brands(self)
-        self._order_management: Endpoint = OrderManagement(self)
         self.driver = None
         self.login(user, password)
         if self.incapsula:
             self._load_incapsula_cookies()
         # if not self._test_incapsula():
         #     self._load_incapsula_cookies()
+
+    def get(self, url: str, params: dict = None, **kwargs) -> requests.Response:
+        return self.session.get(url, params=params, **kwargs)
+
+    def post(self, url: str, data: dict = None, **kwargs) -> requests.Response:
+        return self.session.post(url, data=data, **kwargs)
+
+    def put(self, url: str, data: dict = None, **kwargs) -> requests.Response:
+        return self.session.put(url, data=data, **kwargs)
+
+    def logout(self) -> requests.Response:
+        pass
+
+    def is_logged_in(self) -> bool:
+        return self.logged_in
+
+    def set_session(self, session: requests.Session) -> None:
+        self.session = session
+
+    @property
+    def cookies(self) -> dict:
+        return dict(self.session.cookies)
+
+    @property
+    def headers(self) -> dict:
+        return dict(self.session.headers)
+
+    def get_session(self) -> requests.Session:
+        return self.session
+
+    def get_auth_token(self) -> str:
+        """
+        Get the auth token from the session
+        :return:
+        """
+        return self.auth_token
+
+
 
     def login(self, user, passwd):
         login_page_result = self.session.get(login_page)
@@ -259,9 +295,6 @@ class UnfiAPI(APICore):
         claims = json.loads(home_soup.select_one("#claims")['value'])
         self.usermeta = claims
 
-    def search(self, query, ):
-        pass
-
     @property
     def account(self):
         return self.usermeta['LastSelectedAccount']
@@ -285,25 +318,6 @@ class UnfiAPI(APICore):
     @property
     def customer_number(self):
         return self.usermeta["CustomerNumber"]
-
-    @property
-    def order_management(self):
-        return self._order_management
-
-    @property
-    def admin_backend(self):
-        return self._admin_backend
-
-    @property
-    def products(self):
-        return self._products
-
-    @property
-    def brands(self):
-        return self._brands
-
-    def get_product(self, product_code=None, product_id=None):
-        return self.products.product(product_code, product_id)
 
     def get_context_info(self):
         headers = {
