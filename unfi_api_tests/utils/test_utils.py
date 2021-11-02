@@ -1,5 +1,5 @@
 from unittest import TestCase
-from unfi_api.utils import index_header, round_retails
+from unfi_api.utils import index_header, round_retails, yesno, explode_number
 
 
 
@@ -157,3 +157,66 @@ class TestRoundRetails(TestCase):
         
         for idx,retail in enumerate(retails_to_round):
             self.assertEqual(round_retails(retail), expected[idx])
+
+class TestYesNo(TestCase):
+
+    def test_yes_no_yes_lowercase(self):
+        self.assertEqual(yesno("yes"), True)
+    
+    def test_yes_no_no_lowercase(self):
+        self.assertEqual(yesno("no"), False)
+    
+    def test_yes_no_default_false(self):
+        self.assertEqual(yesno("", False), False)
+
+    def test_yes_no_default_true(self):
+        self.assertEqual(yesno("", True), True)
+
+    def test_yes_no_yes_uppercase(self):
+        self.assertEqual(yesno("YES"), True)
+
+    def test_yes_no_no_uppercase(self):
+        self.assertEqual(yesno("NO"), False)
+
+    def test_yes_no_yes_mixed_case(self):
+        self.assertEqual(yesno("YeS"), True)
+
+    def test_yes_no_no_mixed_case(self):
+        self.assertEqual(yesno("nO"), False)
+
+    def test_yes_no_yes_with_spaces(self):
+        self.assertEqual(yesno(" yes "), True)
+
+    def test_yes_no_no_with_spaces(self):
+        self.assertEqual(yesno(" no "), False)
+
+    def test_yes_no_yes_with_spaces_uppercase(self):
+        self.assertEqual(yesno(" YES "), True)
+
+    def test_yes_no_no_with_spaces_uppercase(self):
+        self.assertEqual(yesno(" NO "), False)
+
+    def test_yes_no_yes_y(self):
+        self.assertEqual(yesno("y"), True)
+
+    def test_yes_no_no_n(self):
+        self.assertEqual(yesno("n"), False)
+
+class TestExplodeNumber(TestCase):
+
+    def test_explode_number_zero(self):
+        self.assertEqual(explode_number(0), (0,0,0))
+
+    def test_explode_number_one(self):
+        self.assertEqual(explode_number(1), (1,0,0))
+
+    def test_explode_number_45_23(self):
+        self.assertEqual(explode_number(45.23), (45,2,3))
+    
+    def test_explode_number_45_23231_with_decimal(self):
+        self.assertEqual(explode_number(45.23231), (45,2,3))
+
+    def test_explode_number_non_number_string(self):
+        with self.assertRaises(TypeError):
+            explode_number("abc")
+
