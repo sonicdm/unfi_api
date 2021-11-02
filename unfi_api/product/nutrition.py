@@ -6,7 +6,7 @@ from typing import Optional, List, Dict, Any
 import re
 from pydantic.main import BaseModel
 
-from unfi_api.utils import string_to_snake
+from unfi_api.utils.string import string_to_snake
 
 
 class Nutrient(BaseModel):

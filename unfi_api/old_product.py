@@ -7,7 +7,8 @@ from unfi_api import UnfiAPI
 from unfi_api.settings import xdock_cust_num, ridgefield_cust_num, product_data_url, product_detail_url, promo_url, \
     product_attribute_url, api_thread_limit
 from unfi_api.tools import combine_dicts, Threading
-from .utils import strings_to_numbers, isnumber
+from .utils import isnumber
+from .utils.string import strings_to_numbers
 from .utils.upc import stripcheckdigit
 
 

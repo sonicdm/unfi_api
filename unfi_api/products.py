@@ -6,7 +6,7 @@ from typing import Optional
 from dateutil.parser import parse as date_parse
 from pydantic import BaseModel, validator
 
-from unfi_api.utils import strings_to_numbers
+from unfi_api.utils.string import strings_to_numbers
 
 
 def camel_to_snake_case(s):

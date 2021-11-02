@@ -24,7 +24,7 @@ from unfi_api.settings import \
     invoice_xhr, \
     set_default_account_xhr, search_url
 from unfi_api.tools import Threading
-from unfi_api.utils import divide_chunks
+from unfi_api.utils.collections import divide_chunks
 
 
 def run():

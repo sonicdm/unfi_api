@@ -7,7 +7,8 @@ from typing import Any, Dict, List, Optional
 from pydantic.class_validators import root_validator
 from .line_item import LineItem, LineItems
 
-from unfi_api.utils import table_to_dicts, remove_escaped_characters, normalize_dict
+from ..utils.collections import table_to_dicts, normalize_dict
+from ..utils.string import remove_escaped_characters
 from unfi_api.validators import currency_string_to_float, validate_date_input
 from unfi_api import settings
 

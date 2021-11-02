@@ -7,7 +7,7 @@ from unfi_api.invoice import Invoice, get_invoice_html_tables, get_table_data
 from unfi_api.api.api import Endpoint, APICore
 
 from unfi_api.api.response import APIResponse
-from unfi_api.utils import strings_to_numbers
+from ...utils.string import strings_to_numbers
 from unfi_api.utils.http import response_to_api_response, response_to_json
 from . import brands, categories, interactive_reports, order_history, product_detail
 from unfi_api import settings
@@ -174,7 +174,7 @@ class OrderHistory(Endpoint):
 
     def get_credit_list(self, order_no=None, po_no=None, req_by=None, invoice_no=None,
                         page_size=1000, page_number=1, sort_expression=None, sort_direction=None):
-        return order_history.get_grid_item(self.api.session, self.api.auth_token, self.api.account, self.api.user_id,
+        return order_history.get_grid_item(self.api, self.api.auth_token, self.api.account, self.api.user_id,
                                            self.api.account_region, transaction_type=4)
 
     def get_invoice(self, invoice_number, command=''):
@@ -192,7 +192,7 @@ class OrderHistory(Endpoint):
             ('command', command),
         )
 
-        response = self.api.session.get(
+        response = self.api.get(
             'https://ordermanagement.unfi.com/api/OrderHistory/GetCreditInvoiceDetailForWest', params=params
         )
 
@@ -239,7 +239,7 @@ class ProductDetail(object):
             'userId': self.api.user_id
         }
 
-        result = self.api.session.get(url, headers=header, params=params)
+        result = self.api.get(url, headers=header, params=params)
         return response_to_json(result)
 
 

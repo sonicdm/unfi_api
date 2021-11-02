@@ -7,11 +7,9 @@ from pydantic.class_validators import root_validator
 from pydantic.main import BaseModel
 
 from unfi_api.utils import (
-    strings_to_numbers,
     isnumber,
-    remove_escaped_characters,
-    camel_to_snake_case,
 )
+from unfi_api.utils.string import strings_to_numbers, camel_to_snake_case, remove_escaped_characters
 from unfi_api.validators import currency_string_to_float, validate_date_input
 
 price_types = {
