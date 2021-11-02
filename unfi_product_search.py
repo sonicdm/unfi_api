@@ -8,7 +8,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import tqdm
 from openpyxl import Workbook
 
-from unfi_api.utils import strings_to_numbers, divide_chunks
+from unfi_api.utils.collections import divide_chunks
+from unfi_api.utils.string import strings_to_numbers
 from unfi_api.utils.upc import stripcheckdigit
 
 try:

@@ -1,369 +1,170 @@
 from __future__ import print_function
 
 import re
-from typing import Any, Dict, Iterable, List, Union
+from typing import Dict, List, Union
 
-import string
-from collections import Counter, OrderedDict
-
-
-# Date Utils
-
-
-# Text Utils
-
-
-def clean_size_field(text: str) -> str:
-    if not isinstance(text, str):
-        return text
-    size = text.split('/')
-    if len(size) > 1:
-        output = "/".join(size[1:])
-        return output.strip()
-    else:
-        return size.pop().strip()
-
-
-def is_hex(s):
-    # type: (str) -> bool
-    """
-    Check if a string is hexadecimal
-    :param s: string
-    :type s: str
-    :return: bool
-    :rtype: bool
-    >>> is_hex('aavv22')
-    False
-    >>> is_hex('44dFa5')
-    True
-    """
-    hex_digits = set(string.hexdigits)
-    return all(c in hex_digits for c in s)
-
-
-def is_hexcolor(s):
-    """
-    >>> is_hexcolor('ff55ee')
-    True
-    >>> is_hexcolor('123')
-    True
-    >>> is_hexcolor('abab')
-    False
-    >>> is_hexcolor('FFEERR')
-    False
-    """
-    if is_hex(s):
-        if len(s) == 3 or len(s) == 6:
-            return True
-        else:
-            return False
-    else:
-        return False
-
-
-# Number Utils
-def strings_to_numbers(l, fmt='float'):
-    """
-    Turn number string into the specified format from a list of values or a single string
-
-    >>> strings_to_numbers(['1', 'a', '2.34', 3])
-    [1, 'a', 2.34, 3]
-    >>> strings_to_numbers('2.34')
-    2.34
-    >>> strings_to_numbers('Hi There')
-    'Hi There'
-    >>> strings_to_numbers('   123456')
-    123456
-    >>> strings_to_numbers(None)
-    """
-
-    def _convert(s):
-        if not s:
-            return s
-        try:
-            if float(s).is_integer():
-                return int(float(s))
-            else:
-                return float(s)
-        except (ValueError, TypeError):
-            return s
-
-    if not l:
-        return l
-    if hasattr(l, "__iter__") and not isinstance(l, (str, int)):
-        o = []
-        for i in l:
-            o.append(_convert(i))
-        return o
-    else:
-        return _convert(l)
-
-
-def convert_strings_to_number(v: Union[str, Iterable]):
-    """
-    Convert a string to an int or float if possible.
-    """
-    if isinstance(v, str):
-        try:
-            return int(v)
-        except ValueError:
-            try:
-                return float(v)
-            except ValueError:
-                return v
-    elif isinstance(v, Iterable):
-        return [convert_strings_to_number(x) for x in v]
-    else:
-        return v
-
-
-def is_a_number(v: Any) -> bool:
-    """
-    check if value is a number. Remove commas and other number formatting.
-    """
-    v = str(v).replace(',', '')
-    if v.isdigit():
-        return True
-    else:
-        try:
-            float(v)
-            return True
-        except ValueError:
-            return False
-
-
-def isnumber(s, numtype=None):
-    """
-    >>> isnumber('1.23')
-    True
-    >>> isnumber('String')
-    False
-    >>> isnumber(1.23)
-    True
-    >>> isnumber(1)
-    True
-    >>> isnumber('1')
-    True
-    >>> isnumber('123,456')
-    True
-    >>> isnumber(None)
-    False
-
-    :param s:
-    :param numtype: specific type of number. 'float' or 'int'
-    :return: bool
-    """
-    v = str(s).replace(',', '')
-    if v.isdigit():
-        return True
-    else:
-        try:
-            float(v)
-            return True
-        except ValueError:
-            return False
-
-
-def find_most_common_member(l):
-    counts = Counter(l).most_common(1)
-    if len(counts) > 0:
-        return counts[0][0]
+from unfi_api.utils.string import convert_strings_to_number, isnumber
 
 
 def round_retails(price):
     """
-    round a number to the nearest x9 or x5
-    for 0x numbers:
-    <= .04 numbers. Round down to .99
-    >= .05 numbers. Round up to .15
-
-    >>> round_retails('1.23')
-    1.25
-    >>> round_retails(1)
-    0.99
-    >>> round_retails(1.76)
-    1.75
-    >>> round_retails(1.77)
-    1.79
-    >>> round_retails(2.03)
-    1.99
-    >>> round_retails(2.07)
-    2.15
-    >>> round_retails(1.9)
-    1.89
-    >>> round_retails(1.1)
-    0.99
-    >>> round_retails(0.7)
-    0.69
-    >>> round_retails(3.09)
-    3.15
-    >>> round_retails(1.62)
-    1.59
-
-
-    :param price: float value to round
-    :return:
+    if tenth is 0, hundreth is  < 5, and whole is > 0, round down to whole-1 .99.
+    if tenth is 0, whole is 0 and hund is < 5, round to 0.05
     """
-    s = u"%s" % round(float(price), 2) if isnumber(price) else None
-    if not s:
-        raise TypeError('a number value is required')
-    hund = None
-    tenth = None
-    whole = None
-    if isnumber(price, 'float'):
-        whl, dec = s.split('.')
-        hund = int(dec[-1]) if len(dec) == 2 else 0
-        tenth = int(s[-2]) if len(dec) == 2 else int(s[-1])
-        whole = int(whl)
-    elif isnumber(price, 'int'):
-        hund = 0
-        tenth = 0
-        whole = int(price)
+    price = str(price)
+    # find currency symbols and remove them
+    currency_symbol = ""
+    float_symbols = ["$", "€", "£"]
+    cent_symbols = ["¢", "c", "p"]
+    currency_symbol = ""
+    for symbol in float_symbols:
+        if symbol in price:
+            currency_symbol = symbol
+            price = price.replace(symbol, "")
+            break
+    for symbol in cent_symbols:
+        if symbol in price:
+            currency_symbol = symbol
+            price = price.replace(symbol, "")
+            break
 
-    if hund == 0:
-        if tenth <= 1:
-            if whole > 0:
-                whole -= 1
-            tenth = 9
-            hund = 9
-        else:
-            tenth -= 1
-            hund = 9
-
-        return float("{}.{}{}".format(whole, tenth, hund))
-
-    if hund not in [5, 9] or tenth == 0:
-
+    # make sure price is a number and float
+    if not isnumber(price):
+        raise TypeError("a number value is required")
+    price = float(price)
+    # if curenncy symbol is a cent symbol, convert to float and divide by 100
+    if currency_symbol in cent_symbols:
+        price = price / 100
+    # break price into whole number tenths and hudredths
+    whole, tenth, hund = explode_number(price)
+    round_to_lower_99_tails = ["00", "01", "02", "03", "04", "05"]
+    round_to_15_tails = ["06", "07", "08", "09", "10", "11", "12", "13", "14"]
+    round_to_15_xtails = ["09", "10", "11", "12", "13", "14"]
+    round_to_lower_x9_tails = ["x0", "x1", "x2", "x3"]
+    round_to_x5_tails = ["x4", "x5", "x6"]
+    round_to_x9_tails = ["x7", "x8"]
+    tail = str(tenth) + str(hund)
+    xtail = "x" + tail[1]
+    if whole == 0 and tail in round_to_lower_99_tails:
         if tenth == 0:
-            if 4 < hund < 10:
-                tenth = 1
-                hund = 5
-            if 0 < hund < 5:
-                if 0 < whole < 5:
-                    whole -= 1
-                else:
-                    whole = 0
-                tenth = 9
-                hund = 9
-
-        if tenth > 4 and hund < 1:
-            tenth = 9
-            hund = 9
-
-        if 2 < hund < 7:
-            hund = 5
-
-        if 0 < hund < 3:
-            hund = 9
-            if tenth <= 1:
-                if whole > 0:
-                    whole -= 1
-                    tenth = 9
+            if hund < 5:
+                price = 0.05
             else:
-                tenth -= 1
+                price = 0.09
+    elif whole == 0 and tail in round_to_15_tails:
+        price = 0.15
 
-        if 6 < hund < 10:
-            hund = 9
-
-        if 0 < hund < 3:
-            whole -= 1
-            hund = 9
-            tenth = 9
-        if hund == 0:
-            whole -= 1
-            tenth = 9
-            hund = 9
-        return float("{}.{}{}".format(whole, tenth, hund))
+    elif tenth == 0:
+        if tail in round_to_lower_99_tails:
+            price = "{}.{}".format(whole - 1, "99")
+        elif tail in round_to_15_tails:
+            price = "{}.{}".format(whole, "15")
     else:
-        return float(price)
+        if xtail in round_to_x5_tails:
+            price = "{}.{}{}".format(whole, tenth, 5)
+        elif xtail in round_to_x5_tails:
+            price = "{}.{}{}".format(whole, tenth, 5)
+        elif xtail in round_to_x9_tails:
+            price = "{}.{}{}".format(whole, tenth, 9)
+        elif xtail in round_to_15_xtails:
+            price = "{}.{}".format(whole, "15")
+        elif xtail in round_to_lower_x9_tails:
+            price = "{}.{}{}".format(whole, tenth-1, "9")
+        else:
+            price = "{}.{}{}".format(whole, tenth, hund)
+
+    return float(price)
+    # if whole < 1 and tenth == 0 and hund < 5:
+    #     return 0.05
+    # elif whole < 1 and tenth == 0 and hund > 5:
+    #     return 0.09
+    # elif tenth == 0 and whole > 0:
+    #     if hund < 5:
+    #         whole -= 1
+    #         tenth = 9
+    #         hund = 9
+    #     else:
+    #         tenth = 1
+    #         hund = 5
+    # elif tenth == 1 and hund < 5:
+    #     hund = 5
+    # elif 2 < hund < 6:
+    #     hund = 5
+    # elif 2 >= hund:
+    #     tenth -= 1
+    #     hund = 9
+    # elif hund > 6:
+    #     hund = 9
+
+    # elif tenth == 1:
+    #     if hund < 5:
+    #         hund = 5
+
+    return float("{}.{}{}".format(whole, tenth, hund))
 
 
 # Collection Utils
-def sort_dict(d):
-    od = OrderedDict((k, v) for k, v in sorted(d.items()))
-    return od
 
 
-def is_cur_col(key, cur_cols):
-    cur_cols = set(["%s".lower() % x for x in cur_cols])
-    key = u"%s" % key
-    return len(set(key.lower().split(' ')).intersection(cur_cols)) > 0
-
-
-def index_header(ws, header_row=0, header_end=0, verbose=False):
+def index_header(
+    header: Union[List[List], List], header_end: int = None, verbose=False
+) -> Dict[int, str]:
     """
-    :param header_end:
-    :param ws: REQUIRED worksheet data
+    :param header_end: last index of the header to include in the colindex
+    :param header: list of header rows to index
     :type ws: iterable
     :param header_row: starting row of data default 1
     :type header_row: int
     :return: dict
     :rtype dict: `outcolindex`
     """
-    header_end = header_end if header_end >= header_row else header_row
-    colindex = {u"{}".format(k).lower(): [] for k in ws[header_row]}
-    for idx, val in enumerate(ws[header_row]):
-        colindex[u"{}".format(val).lower()].append(idx)
+    # check if header is a list or a list of lists
+    if isinstance(header, list):
+        if isinstance(header[0], list):
+            header = header
+        else:
+            header = [header]
+    else:
+        raise TypeError("header must be a list or a list of lists")
 
-    if verbose:
-        print(colindex)
+    # for each index in the headers list create a dict of the header name from all headers combined with the column index
+    outcolindex = {}  # type: Dict[int: str]
+    for i, h in enumerate(header):
+        for ii, hh in enumerate(h[:header_end]):
+            if hh:
+                current_index = outcolindex.setdefault(ii, None)
+                if current_index:
+                    if verbose:
+                        print("{} {} {}".format(i, ii, hh))
+                    outcolindex[ii] = "{} {}".format(current_index, hh)
+                else:
+                    outcolindex[ii] = hh
+    return outcolindex
+
+    # header_end = header_end if header_end >= header_row else header_row
+    # colindex = {u"{}".format(k).lower(): [] for k in ws[header_row]}
+    # for idx, val in enumerate(ws[header_row]):
+    #     colindex[u"{}".format(val).lower()].append(idx)
+
+    # if verbose:
+    #     print(colindex)
 
     return colindex
-
-
-def rstrip_list(iterable, value):
-    """
-    Remove all instances of given value from the end of a list. Works like str().rstrip()
-    :param iterable: iterable
-    :param value: value to strip
-    :return: list
-
-    >>> rstrip_list([1,2,3,4,None,6,None,None,None], None)
-    [1, 2, 3, 4, None, 6]
-    >>> rstrip_list([1,2,3,4,5,5,5,5,5], 5)
-    [1, 2, 3, 4]
-    """
-    i = iterable[::-1]
-    if len(i) > 1:
-        for idx, x in enumerate(i):
-            while i[0] == value:
-                i.remove(value)
-    return i[::-1]
-
-
-def lstrip_list(iterable, value):
-    """
-    Remove all instances of given value from the end of a list. Works like str().rstrip()
-    :param iterable: iterable
-    :param value: value to strip
-    :return: list
-
-    >>> lstrip_list([1,2,3,4,None,6,None,None,None], None)
-    [1, 2, 3, 4, None, 6]
-    >>> lstrip_list([1,2,3,4,5,5,5,5,5], 1)
-    [1, 2, 3, 4]
-    """
-    i = iterable
-    if len(i) > 1:
-        for idx, x in enumerate(i):
-            while i[0] == value:
-                i.remove(value)
-    return i
 
 
 def explode_number(number):
     s = u"%s" % round(float(number), 2) if isnumber(number) else None
     if not s:
-        raise TypeError('a number value is required')
+        raise TypeError("a number value is required")
     hund = None
     tenth = None
     whole = None
-    if isnumber(number, 'float'):
-        whl, dec = s.split('.')
+    if isnumber(number, "float"):
+        whl, dec = s.split(".")
         hund = int(dec[-1]) if len(dec) == 2 else 0
         tenth = int(s[-2]) if len(dec) == 2 else int(s[-1])
         whole = int(whl)
-    elif isnumber(number, 'int'):
+    elif isnumber(number, "int"):
         hund = 0
         tenth = 0
         whole = int(number)
@@ -437,62 +238,15 @@ def yesno(text, default=True):
     :param default:
     :return: bool
     """
-    yesre = re.compile(r'^((?P<yes>Y(ES)?)|(?P<no>NO?))', re.IGNORECASE)
+    yesre = re.compile(r"^((?P<yes>Y(ES)?)|(?P<no>NO?))", re.IGNORECASE)
     yesnomatch = yesre.match(text)
     yes = default
     if yesnomatch or not text:
         yes = default
         if yesnomatch:
-            yes = True if yesnomatch.group('yes') else False
+            yes = True if yesnomatch.group("yes") else False
             return yes
         if yes:
             return yes
 
     return yes
-
-
-def divide_chunks(l, n):
-    # looping till length l
-    for i in range(0, len(l), n):
-        yield l[i:i + n]
-
-
-def camel_to_snake_case(s):
-    regex = r"([a-z]+)([A-Z]+)"
-    return re.sub(regex, r"\1_\2", s).lower()
-
-
-def string_to_snake(string: str) -> str:
-    """
-    Converts a string to lower case snake case.
-    """
-    return string.lower().replace(" ", "_")
-
-
-def table_to_dicts(table:List[Any], header_row:int=0, verbose:bool=False) -> List[Dict]:
-    """
-    Convert a table to a dict
-    :param table:
-    :return:
-    """
-    colindex = {val: idx for idx, val in enumerate(table[header_row])}
-    return [dict(zip(colindex.keys(), row)) for row in table[header_row + 1:]]
-
-
-def remove_escaped_characters(string: str) -> str:
-    """
-    Remove escaped characters from the string.
-    """
-    return re.sub(r"\\[\\n\\r\\t]", "", string)
-
-
-def normalize_dict(d: dict) -> str:  
-    new_data = dict()
-    for key, value in d.items():
-        if not isinstance(value, dict):
-            new_data[key] = value
-        else:
-            for k, v in value.items():
-                new_data[key + "_" + k] = v
-  
-    return new_data

@@ -2,12 +2,24 @@ from bs4 import BeautifulSoup
 from bs4.element import ResultSet
 from pydantic import BaseModel, validator, Field
 from datetime import date
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
+
+from pydantic.class_validators import root_validator
 from .line_item import LineItem, LineItems
 
-from unfi_api.utils import table_to_dicts, remove_escaped_characters, normalize_dict
+from ..utils.collections import table_to_dicts, normalize_dict
+from ..utils.string import remove_escaped_characters
 from unfi_api.validators import currency_string_to_float, validate_date_input
 from unfi_api import settings
+
+"""
+    1: Invoices
+    2: Web Orders
+    4: Credits
+    """
+INVOICE = 1
+WEB_ORDER = 2
+CREDIT = 4
 
 
 def make_invoice_table_soup(html: str) -> BeautifulSoup:
@@ -25,7 +37,6 @@ def get_invoice_html_tables(invoice_xml: str) -> Dict[str, List[Dict[str, Any]]]
     """
 
     invoice_xml = invoice_xml.replace("\n", "").replace("\r", "").replace("\t", "")
-    xml_soup = BeautifulSoup(invoice_xml, settings.beautiful_soup_parser)
     invoice_data = {}
     invoice_tables = make_invoice_table_soup(invoice_xml)
 
@@ -93,7 +104,7 @@ def parse_table_with_labels_on_left(table_data: List[List[str]]) -> Dict[str, An
     # invoice_data['tableName'] = table_data[0][0]
     for row in table_data:
         if len(row) == 2:
-            if not row[0].strip() and row[1].strip() and label is not "":
+            if not row[0].strip() and row[1].strip() and label != "":
                 invoice_data[label] += "\n" + row[1]
             else:
                 label = row[0].strip()
@@ -119,25 +130,25 @@ def index_line_item_table(line_items: List[List[str]]) -> Dict[int, Dict[str, st
 
 
 class ShippingDetail(BaseModel):
-    to_: str = Field(..., alias="To:")
-    address_: str = Field(..., alias="Address:")
-    city_: str = Field(..., alias="City:")
-    state_: str = Field(..., alias="State:")
-    zip__code_: str = Field(..., alias="Zip Code:")
+    to: str = Field(..., alias="To:")
+    address: str = Field(..., alias="Address:")
+    city: str = Field(..., alias="City:")
+    state: str = Field(..., alias="State:")
+    zip_code_: str = Field(..., alias="Zip Code:")
 
 
 class BillingDetail(BaseModel):
-    to_: str = Field(..., alias="To:")
-    address_: str = Field(..., alias="Address:")
-    city_: str = Field(..., alias="City:")
-    state_: str = Field(..., alias="State:")
-    zip__code_: str = Field(..., alias="Zip Code:")
+    to: str = Field(..., alias="To:")
+    address: str = Field(..., alias="Address:")
+    city: str = Field(..., alias="City:")
+    state: str = Field(..., alias="State:")
+    zip_code: str = Field(..., alias="Zip Code:")
 
 
 class FreightDetails(BaseModel):
-    weight_: str = Field(..., alias="Weight:")
-    cubes_: str = Field(..., alias="Cubes:")
-    cases_: str = Field(..., alias="Cases:")
+    weight: str = Field(..., alias="Weight:")
+    cubes: str = Field(..., alias="Cubes:")
+    cases: str = Field(..., alias="Cases:")
 
 
 class Invoice(BaseModel):
@@ -189,3 +200,56 @@ class Invoice(BaseModel):
         Normalize the invoice data.
         """
         return normalize_dict(self.dict())
+
+
+class OrderListing(BaseModel):
+    # total_rows: int = Field(..., alias='Total_Rows')
+    # row_number: int = Field(..., alias='Row_Number')
+    invoice_number: str = Field(..., alias='InvoiceNumber')
+    invoice_date: date = Field(..., alias='InvoiceDate')
+    order_number: str = Field(..., alias='OrderNumber')
+    requested_date: date = Field(..., alias='RequestedDate')
+    requested_by: str = Field(..., alias='RequestedBy')
+    status: Optional[str] = Field(..., alias='Status')
+    po_number: str = Field(..., alias='PONumber')
+    pk_key: str = Field(..., alias='PKKey')
+    dollar_total: float = Field(..., alias='DollarTotal')
+    cases_shipped: float = Field(..., alias='CasesShipped')
+    weight_shipped: float = Field(..., alias='WeightShipped')
+
+    _date_validator = validator(
+        "invoice_date", "requested_date", allow_reuse=True, pre=True
+    )(validate_date_input)
+
+
+class OrderList(BaseModel):
+    __root__: Dict[str, OrderListing]
+
+    @root_validator(pre=True)
+    def listing_to_dict(cls, values):
+        """
+        Convert the order listing to a dict.
+        """
+        listings = values.get("__root__")
+        new_dict = {}
+        for listing in listings:
+            invoice_number = listing.get("InvoiceNumber")
+            if not invoice_number:
+                continue
+            new_dict[invoice_number] = listing
+        values["__root__"] = new_dict
+        return values
+
+    @property
+    def orders(self):
+        return self.__root__
+
+    def filter_by_date(self, start_date: date, end_date: date) -> List[OrderListing]:
+        """
+        Filter the order list by date.
+        """
+        return {
+            number: order
+            for number, order in self.orders.items()
+            if start_date <= order.invoice_date <= end_date
+        }

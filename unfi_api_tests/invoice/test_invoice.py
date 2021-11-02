@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List
 from unittest import TestCase
 
@@ -10,6 +11,8 @@ from unfi_api.invoice import (
     make_invoice_table_soup,
     get_table_data,
     Invoice,
+    OrderList,
+    OrderListing,
 )
 from unfi_api.invoice.line_item import LineItem, LineItems
 from devtools import debug
@@ -1435,6 +1438,159 @@ line_items_dict = {
 
 line_items_list = [x for x in line_items_dict.values()]
 
+order_listings = [
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429782-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "599-064-028",
+        "PKKey": "068429782",
+        "DollarTotal": 71.14,
+        "CasesShipped": 2.0,
+        "WeightShipped": 13.4,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429776-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "603-914-648",
+        "PKKey": "068429776",
+        "DollarTotal": 317.46,
+        "CasesShipped": 14.0,
+        "WeightShipped": 33.2,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429752-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "308-061-728",
+        "PKKey": "068429752",
+        "DollarTotal": 1215.8,
+        "CasesShipped": 39.0,
+        "WeightShipped": 296.55,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429724-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "249-022-895",
+        "PKKey": "068429724",
+        "DollarTotal": 5945.38,
+        "CasesShipped": 231.0,
+        "WeightShipped": 1846.48,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429687-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "CapellaGrocery",
+        "Status": None,
+        "PONumber": "0077846248",
+        "PKKey": "068429687",
+        "DollarTotal": 27.89,
+        "CasesShipped": 1.0,
+        "WeightShipped": 6.51,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429686-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "CapellaGrocery",
+        "Status": None,
+        "PONumber": "0065348030",
+        "PKKey": "068429686",
+        "DollarTotal": 42.48,
+        "CasesShipped": 2.0,
+        "WeightShipped": 24.0,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429666-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "CapellaGrocery",
+        "Status": None,
+        "PONumber": "0073405653",
+        "PKKey": "068429666",
+        "DollarTotal": 55.52,
+        "CasesShipped": 2.0,
+        "WeightShipped": 55.82,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429566-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "CapellaGrocery",
+        "Status": None,
+        "PONumber": "0068756424",
+        "PKKey": "068429566",
+        "DollarTotal": 55.52,
+        "CasesShipped": 2.0,
+        "WeightShipped": 55.0,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429406-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "393-328-715",
+        "PKKey": "068429406",
+        "DollarTotal": 46.2,
+        "CasesShipped": 2.0,
+        "WeightShipped": 44.2,
+    },
+    {
+        "Total_Rows": 2890,
+        "Row_Number": 1,
+        "InvoiceNumber": "068429195-003",
+        "InvoiceDate": "10/28/2021",
+        "OrderNumber": "",
+        "RequestedDate": "10/28/2021",
+        "RequestedBy": "",
+        "Status": None,
+        "PONumber": "719-397-209",
+        "PKKey": "068429195",
+        "DollarTotal": 288.22,
+        "CasesShipped": 17.0,
+        "WeightShipped": 132.55,
+    },
+]
+
 
 class TestInvoiceScraper(TestCase):
     def setUp(self) -> None:
@@ -1477,11 +1633,11 @@ class TestInvoiceScraper(TestCase):
         invoice_tables = make_invoice_table_soup(self.invoice_html)
         line_item_table = get_table_data(invoice_tables[6])
         returned_table = index_line_item_table(line_item_table)
-        for k,v in returned_table.items():
+        for k, v in returned_table.items():
             v_actual = line_items_dict[k]
             self.assertEqual(v_actual, v)
         pass
-    
+
     def test_make_invoice_table_soup(self):
         """
         Test that the make_invoice_table_soup function returns a proper soup
@@ -1500,6 +1656,7 @@ class TestInvoiceScraper(TestCase):
         self.assertIsInstance(table_data, list)
         for row in table_data:
             self.assertIsInstance(row, list)
+
 
 class TestLineItem(TestCase):
     def test_LineItem(self):
@@ -1636,7 +1793,6 @@ class TestLineItems(TestCase):
 
 
 class TestInvoice(TestCase):
-
     def setUp(self):
         from unfi_api_tests.assets import OrderManagementFiles
 
@@ -1648,4 +1804,68 @@ class TestInvoice(TestCase):
     def test_invoice(self):
         invoice_tables = get_invoice_html_tables(self.invoice_html)
         invoice = Invoice.parse_obj(invoice_tables)
+        pass
+
+
+class TestOrderListing(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.order_listings = order_listings
+
+    def test_create_order_listing(self):
+        order_listing_dict = {
+            "Total_Rows": 2890,
+            "Row_Number": 1,
+            "InvoiceNumber": "068429782-003",
+            "InvoiceDate": "10/28/2021",
+            "OrderNumber": "",
+            "RequestedDate": "10/28/2021",
+            "RequestedBy": "",
+            "Status": None,
+            "PONumber": "599-064-028",
+            "PKKey": "068429782",
+            "DollarTotal": 71.14,
+            "CasesShipped": 2.0,
+            "WeightShipped": 13.4,
+        }
+        order_listing = OrderListing(**order_listing_dict)
+        self.assertEqual(order_listing.invoice_number, "068429782-003")
+        self.assertEqual(order_listing.invoice_date, date(2021, 10, 28))
+        self.assertEqual(order_listing.order_number, "")
+        self.assertEqual(order_listing.requested_date, date(2021, 10, 28))
+        self.assertEqual(order_listing.requested_by, "")
+        self.assertEqual(order_listing.status, None)
+        self.assertEqual(order_listing.po_number, "599-064-028")
+        self.assertEqual(order_listing.pk_key, "068429782")
+        self.assertEqual(order_listing.dollar_total, 71.14)
+        self.assertEqual(order_listing.cases_shipped, 2.0)
+        self.assertEqual(order_listing.weight_shipped, 13.4)
+
+    def test_fail_create_order_listing(self):
+        from pydantic import ValidationError
+        order_listing_dict = {
+            "Total_Rows": 2890,
+            "Row_Number": 1,
+            "InvoiceNumber": "068429782-003",
+            "InvoiceDate": "10/28/2021",
+            "OrderNumber": "",
+            "RequestedDate": "10/28/2021sf",
+            "RequestedBy": "",
+            "Status": None,
+            "PONumber": "599-064-028",
+            "PKKey": "068429782",
+            "DollarTotal": 71.14,
+            "CasesShipped": 2.0,
+            "WeightShipped": 13.4,
+        }
+
+        with self.assertRaises(ValidationError):
+            OrderListing(**order_listing_dict)
+
+
+class TestOrderList(TestCase):
+
+    def test_order_list(self):
+        orders = OrderList.parse_obj(order_listings)
+        print(orders)
         pass

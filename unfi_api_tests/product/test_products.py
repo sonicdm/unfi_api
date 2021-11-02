@@ -1,9 +1,11 @@
 import codecs
+from datetime import date
 import json
 import pathlib
 from os import path
 from unittest import TestCase
-from devtools import debug
+
+# from devtools import debug
 from unfi_api import product
 from typing import List, Dict, Any
 import unfi_api.product.ingredients
@@ -11,8 +13,8 @@ import unfi_api.product.nutrition
 import unfi_api.product.pricing
 from dateutil.parser import parse as date_parse
 
-from unfi_api.api.order_management.brands import parse_pricing_table
-from unfi_api.product.pricing import Cost, Pricing
+# from unfi_api.api.order_management.brands import parse_pricing_table
+from unfi_api.product.pricing import Cost, Pricing, parse_pricing
 from unfi_api.search.result import Result
 from unfi_api_tests.assets import ProductsFiles, OrderManagementFiles
 from unfi_api.product.attributes import Attributes, Attribute
@@ -25,17 +27,14 @@ from unfi_api.product import ProductListing
 
 
 class TestProductData(TestCase):
-
     @classmethod
     def setUpClass(cls):
-        """ Set up class for testing
-        """
+        """Set up class for testing"""
         # read in json files
         cls.product_files = ProductsFiles()
 
     def test_product_data(self):
-        """ Test product data object and make sure it matches the input json with the object property alias
-        """
+        """Test product data object and make sure it matches the input json with the object property alias"""
         input_json = {
             "productID": "08345",
             "effectiveDate": "05/25/2020",
@@ -49,7 +48,7 @@ class TestProductData(TestCase):
             "allow": "Y",
             "refersTo": "TestRefersTo",
             "buyerNotes": "TestBuyerNotes",
-            "buyerCode": "T2"
+            "buyerCode": "T2",
         }
 
         product_data = ProductData.parse_obj(input_json)
@@ -57,19 +56,16 @@ class TestProductData(TestCase):
         # check that each value matches the input json if it exists in the json
         self.assertEqual(input_json["productID"], object_values["productID"])
         self.assertEqual(
-            input_json["effectiveDate"], object_values["effectiveDate"].strftime("%m/%d/%Y"))
+            input_json["effectiveDate"],
+            object_values["effectiveDate"].strftime("%m/%d/%Y"),
+        )
         self.assertEqual(input_json["status"], object_values["status"])
-        self.assertEqual(
-            float(input_json["netPrice"]), object_values["netPrice"])
-        self.assertEqual(
-            float(input_json["retailPrice"]), object_values["retailPrice"])
-        self.assertEqual(input_json["priceReason"],
-                         object_values["priceReason"])
-        self.assertEqual(
-            float(input_json["margin"]) / 100, object_values["margin"])
+        self.assertEqual(float(input_json["netPrice"]), object_values["netPrice"])
+        self.assertEqual(float(input_json["retailPrice"]), object_values["retailPrice"])
+        self.assertEqual(input_json["priceReason"], object_values["priceReason"])
+        self.assertEqual(float(input_json["margin"]) / 100, object_values["margin"])
         self.assertEqual(int(input_json["stockOh"]), object_values["stockOh"])
-        self.assertEqual(
-            int(input_json["stockAvail"]), object_values["stockAvail"])
+        self.assertEqual(int(input_json["stockAvail"]), object_values["stockAvail"])
         self.assertEqual(input_json["allow"], object_values["allow"])
         self.assertEqual(input_json["refersTo"], object_values["refersTo"])
         self.assertEqual(input_json["buyerNotes"], object_values["buyerNotes"])
@@ -77,10 +73,8 @@ class TestProductData(TestCase):
 
 
 class TestProductDetail(TestCase):
-
     def test_product_detail(self):
-        """ Test product detail object and make sure it matches the input json with the object property alias
-        """
+        """Test product detail object and make sure it matches the input json with the object property alias"""
         raw_input_json = """{
         "StockAvail": 70,
         "StockOH": 70,
@@ -116,52 +110,54 @@ class TestProductDetail(TestCase):
         input_json = json.loads(raw_input_json)
         # check that each value matches the input json if it exists in the json
         object_dict = product_detail.dict(by_alias=True)
-        self.assertEqual(
-            int(input_json["StockAvail"]), object_dict["StockAvail"])
+        self.assertEqual(int(input_json["StockAvail"]), object_dict["StockAvail"])
         self.assertEqual(int(input_json["StockOH"]), object_dict["StockOH"])
-        self.assertEqual(
-            float(input_json["PerUnitPrice"]), object_dict["PerUnitPrice"])
+        self.assertEqual(float(input_json["PerUnitPrice"]), object_dict["PerUnitPrice"])
         self.assertEqual(int(input_json["BrandId"]), object_dict["BrandId"])
         self.assertEqual(input_json["BrandName"], object_dict["BrandName"])
-        self.assertEqual(
-            int(input_json["ProductIntID"]), object_dict["ProductIntID"])
+        self.assertEqual(int(input_json["ProductIntID"]), object_dict["ProductIntID"])
         self.assertEqual(input_json["ProductCode"], object_dict["ProductCode"])
         self.assertEqual(input_json["ProductName"], object_dict["ProductName"])
         self.assertEqual(input_json["Discount"], object_dict["Discount"])
-        self.assertEqual(
-            int(input_json["UPC"].replace("-", "")), object_dict["UPC"])
+        self.assertEqual(int(input_json["UPC"].replace("-", "")), object_dict["UPC"])
         self.assertEqual(input_json["PackSize"], object_dict["PackSize"])
         self.assertEqual(float(input_json["Price"]), object_dict["Price"])
         self.assertEqual(
-            int(input_json["UnitsInFullCase"]), object_dict["UnitsInFullCase"])
+            int(input_json["UnitsInFullCase"]), object_dict["UnitsInFullCase"]
+        )
         self.assertEqual(int(input_json["MINQTY"]), object_dict["MINQTY"])
-        self.assertEqual(int(input_json["InnerCaseUPC"].replace(
-            "-", "")), object_dict["InnerCaseUPC"])
-        self.assertEqual(int(input_json["MasterCaseUPC"].replace(
-            "-", "")), object_dict["MasterCaseUPC"])
+        self.assertEqual(
+            int(input_json["InnerCaseUPC"].replace("-", "")),
+            object_dict["InnerCaseUPC"],
+        )
+        self.assertEqual(
+            int(input_json["MasterCaseUPC"].replace("-", "")),
+            object_dict["MasterCaseUPC"],
+        )
         self.assertEqual(input_json["PLU"], object_dict["PLU"])
         self.assertEqual(input_json["PVLabelCode"], object_dict["PVLabelCode"])
         self.assertEqual(
-            float(input_json["MemberApplicableFee"]), object_dict["MemberApplicableFee"])
+            float(input_json["MemberApplicableFee"]), object_dict["MemberApplicableFee"]
+        )
         self.assertEqual(input_json["OrganicCode"], object_dict["OrganicCode"])
         self.assertEqual(input_json["SubHeader"], object_dict["SubHeader"])
+        self.assertEqual(int(input_json["CategoryID"]), object_dict["CategoryID"])
+        self.assertEqual(input_json["CategoryName"], object_dict["CategoryName"])
         self.assertEqual(
-            int(input_json["CategoryID"]), object_dict["CategoryID"])
-        self.assertEqual(input_json["CategoryName"],
-                         object_dict["CategoryName"])
+            int(input_json["CountryOfOriginID"]), object_dict["CountryOfOriginID"]
+        )
         self.assertEqual(
-            int(input_json["CountryOfOriginID"]), object_dict["CountryOfOriginID"])
-        self.assertEqual(input_json["CountryOfOriginName"],
-                         object_dict["CountryOfOriginName"])
-        self.assertEqual(input_json["WarehouseMessage"],
-                         object_dict["WarehouseMessage"])
+            input_json["CountryOfOriginName"], object_dict["CountryOfOriginName"]
+        )
+        self.assertEqual(
+            input_json["WarehouseMessage"], object_dict["WarehouseMessage"]
+        )
         self.assertEqual(input_json["IsNew"], object_dict["IsNew"])
 
 
 class TestProductListing(TestCase):
     def test_create_product_listing(self):
-        """ Test product listing object and make sure it matches the input json with the object property alias
-        """
+        """Test product listing object and make sure it matches the input json with the object property alias"""
         raw_json = r"""{
     "ProductIntID": 412029,
     "DivisionCode": "WEST",
@@ -207,93 +203,154 @@ class TestProductListing(TestCase):
         object_values = product_listing.dict(by_alias=True)
         # check that each value matches the input json if it exists in the json
         object_dict = product_listing.dict(by_alias=True)
-        self.assertEqual(
-            int(input_json["ProductIntID"]), object_dict["ProductIntID"])
-        self.assertEqual(input_json["DivisionCode"],
-                         object_dict["DivisionCode"])
-        self.assertEqual(input_json["ProductNumber"],
-                         object_dict["ProductNumber"])
+        self.assertEqual(int(input_json["ProductIntID"]), object_dict["ProductIntID"])
+        self.assertEqual(input_json["DivisionCode"], object_dict["DivisionCode"])
+        self.assertEqual(input_json["ProductNumber"], object_dict["ProductNumber"])
         self.assertEqual(input_json["ProductName"], object_dict["ProductName"])
-        self.assertEqual(
-            int(input_json["CategoryID"]), object_dict["CategoryID"])
+        self.assertEqual(int(input_json["CategoryID"]), object_dict["CategoryID"])
         self.assertEqual(int(input_json["BrandID"]), object_dict["BrandID"])
+        self.assertEqual(int(input_json["SubHeaderID"]), object_dict["SubHeaderID"])
+        self.assertEqual(int(input_json["DepartmentID"]), object_dict["DepartmentID"])
+        self.assertEqual(int(input_json["UPC"].replace("-", "")), object_dict["UPC"])
         self.assertEqual(
-            int(input_json["SubHeaderID"]), object_dict["SubHeaderID"])
+            int(input_json["InnerCaseUPC"].replace("-", "")),
+            object_dict["InnerCaseUPC"],
+        )
         self.assertEqual(
-            int(input_json["DepartmentID"]), object_dict["DepartmentID"])
-        self.assertEqual(
-            int(input_json["UPC"].replace("-", "")), object_dict["UPC"])
-        self.assertEqual(int(input_json["InnerCaseUPC"].replace(
-            "-", "")), object_dict["InnerCaseUPC"])
-        self.assertEqual(int(input_json["MasterCaseUPC"].replace(
-            "-", "")), object_dict["MasterCaseUPC"])
+            int(input_json["MasterCaseUPC"].replace("-", "")),
+            object_dict["MasterCaseUPC"],
+        )
         self.assertEqual(input_json["PLU"], object_dict["PLU"])
         self.assertEqual(input_json["OrganicCode"], object_dict["OrganicCode"])
-        self.assertEqual(input_json["SpecialityFlag"],
-                         object_dict["SpecialityFlag"])
+        self.assertEqual(input_json["SpecialityFlag"], object_dict["SpecialityFlag"])
         self.assertEqual(
-            int(input_json["CountryOfOriginID"]), object_dict["CountryOfOriginID"])
-        self.assertEqual(input_json["IsPrivateLabel"],
-                         object_dict["IsPrivateLabel"])
-        self.assertEqual(input_json["ProductOwner"],
-                         object_dict["ProductOwner"])
+            int(input_json["CountryOfOriginID"]), object_dict["CountryOfOriginID"]
+        )
+        self.assertEqual(input_json["IsPrivateLabel"], object_dict["IsPrivateLabel"])
+        self.assertEqual(input_json["ProductOwner"], object_dict["ProductOwner"])
         self.assertEqual(input_json["Ingredients"], object_dict["Ingredients"])
         self.assertEqual(input_json["ImgFileName"], object_dict["ImgFileName"])
         self.assertEqual(input_json["ImgUrl"], object_dict["ImgUrl"])
-        self.assertEqual(input_json["IsImageAvailable"],
-                         object_dict["IsImageAvailable"])
         self.assertEqual(
-            int(input_json["MinimumOrderQuantity"]), object_dict["MinimumOrderQuantity"])
-        self.assertEqual(input_json["SubstituteNumber"],
-                         object_dict["SubstituteNumber"])
-        self.assertEqual(input_json["ShortDescription"],
-                         object_dict["ShortDescription"])
-        self.assertEqual(input_json["LongDescription"],
-                         object_dict["LongDescription"])
-        self.assertEqual(input_json["SearchKeywords"],
-                         object_dict["SearchKeywords"])
+            input_json["IsImageAvailable"], object_dict["IsImageAvailable"]
+        )
+        self.assertEqual(
+            int(input_json["MinimumOrderQuantity"]), object_dict["MinimumOrderQuantity"]
+        )
+        self.assertEqual(
+            input_json["SubstituteNumber"], object_dict["SubstituteNumber"]
+        )
+        self.assertEqual(
+            input_json["ShortDescription"], object_dict["ShortDescription"]
+        )
+        self.assertEqual(input_json["LongDescription"], object_dict["LongDescription"])
+        self.assertEqual(input_json["SearchKeywords"], object_dict["SearchKeywords"])
         self.assertEqual(input_json["PackSize"], object_dict["PackSize"])
         self.assertEqual(
-            int(input_json["UnitsInFullCase"]), object_dict["UnitsInFullCase"])
+            int(input_json["UnitsInFullCase"]), object_dict["UnitsInFullCase"]
+        )
         self.assertEqual(input_json["UnitType"], object_dict["UnitType"])
         self.assertEqual(input_json["Size"], object_dict["Size"])
+        self.assertEqual(int(input_json["CreatedBy"]), object_dict["CreatedBy"])
         self.assertEqual(
-            int(input_json["CreatedBy"]), object_dict["CreatedBy"])
-        self.assertEqual(date_parse(
-            input_json["CreatedDate"]), object_dict["CreatedDate"])
+            date_parse(input_json["CreatedDate"]), object_dict["CreatedDate"]
+        )
+        self.assertEqual(int(input_json["ModifiedBy"]), object_dict["ModifiedBy"])
         self.assertEqual(
-            int(input_json["ModifiedBy"]), object_dict["ModifiedBy"])
-        self.assertEqual(date_parse(
-            input_json["ModifiedDate"]), object_dict["ModifiedDate"])
+            date_parse(input_json["ModifiedDate"]), object_dict["ModifiedDate"]
+        )
         self.assertEqual(input_json["IsActive"], object_dict["IsActive"])
         self.assertEqual(input_json["IsDeleted"], object_dict["IsDeleted"])
         self.assertEqual(
-            int(input_json["PrivateLblDept"]), object_dict["PrivateLblDept"])
-        self.assertEqual(input_json["RequiresCustomerAuthorization"],
-                         object_dict["RequiresCustomerAuthorization"])
+            int(input_json["PrivateLblDept"]), object_dict["PrivateLblDept"]
+        )
+        self.assertEqual(
+            input_json["RequiresCustomerAuthorization"],
+            object_dict["RequiresCustomerAuthorization"],
+        )
 
 
 class TestPricing(TestCase):
-
     @classmethod
     def setUp(cls) -> None:
         # pricing table
         cls.ordermanagement_files = OrderManagementFiles()
 
-    def test_pricing(self):
+    def test_pricing_from_dict(self):
         pricing_xml = self.ordermanagement_files.brands_GetProductDetailsFromService_xml
-        parsed_pricing = parse_pricing_table(pricing_xml)
-        pricing = product.Pricing(pricing_xml)
+        parsed_pricing = parse_pricing(pricing_xml)
+        pricing = Pricing.parse_obj(parsed_pricing)
 
-    def test_cost(self):
-        pricing_xml = self.ordermanagement_files.brands_GetProductDetailsFromService_xml
-        parsed_pricing = parse_pricing_table(pricing_xml)
-        cost = unfi_api.product.pricing.Cost(**parsed_pricing[0])
+    def test_retail_cost(self):
+        cost_dict = {
+            "price_type": "R",
+            "price_description": "Retail",
+            "min_qty": 1,
+            "discount_amount": 0.0,
+            "discount_sign": "",
+            "net_flag": "",
+            "case_savings": 0.0,
+            "each_savings": 0.0,
+            "start_date": None,
+            "end_date": None,
+            "case_price": 27.24,
+            "unit_price": 4.54,
+            "retail_price": 6.99,
+            "margin": 0.3505,
+        }
+        cost = Cost.parse_obj(cost_dict)
         print("Cost: " + str(cost))
+        self.assertEqual(cost.price_type, "R")
+        self.assertEqual(cost.price_description, "Retail")
+        self.assertEqual(cost.min_qty, 1)
+        self.assertEqual(cost.discount_amount, 0.0)
+        self.assertEqual(cost.discount_sign, "")
+        self.assertEqual(cost.net_flag, "")
+        self.assertEqual(cost.case_savings, 0.0)
+        self.assertEqual(cost.each_savings, 0.0)
+        self.assertEqual(cost.start_date, None)
+        self.assertEqual(cost.end_date, None)
+        self.assertEqual(cost.case_price, 27.24)
+        self.assertEqual(cost.unit_price, 4.54)
+        self.assertEqual(cost.retail_price, 6.99)
+        self.assertEqual(cost.margin, 0.3505)
+
+    def test_sale_cost(self):
+        sale_cost_dict = {
+            "price_type": "S",
+            "price_description": "Customer Specific Shelf Sale",
+            "min_qty": 1,
+            "discount_amount": 21.79,
+            "discount_sign": "",
+            "net_flag": "",
+            "case_savings": 5.45,
+            "each_savings": 0.91,
+            "start_date": "09/25/2021",
+            "end_date": "10/29/2021",
+            "case_price": 21.79,
+            "unit_price": 3.63,
+            "retail_price": 6.99,
+            "margin": 0.4804,
+        }
+        cost = Cost.parse_obj(sale_cost_dict)
+        print("Cost: " + str(cost))
+        self.assertEqual(cost.price_type, "S")
+        self.assertEqual(cost.price_description, "Customer Specific Shelf Sale")
+        self.assertEqual(cost.min_qty, 1)
+        self.assertEqual(cost.discount_amount, 21.79)
+        self.assertEqual(cost.discount_sign, "")
+        self.assertEqual(cost.net_flag, "")
+        self.assertEqual(cost.case_savings, 5.45)
+        self.assertEqual(cost.each_savings, 0.91)
+        self.assertEqual(cost.start_date, date_parse("09/25/2021").date())
+        self.assertEqual(cost.end_date, date_parse("10/29/2021").date())
+        self.assertEqual(cost.case_price, 21.79)
+        self.assertEqual(cost.unit_price, 3.63)
+        self.assertEqual(cost.retail_price, 6.99)
+        self.assertEqual(cost.margin, 0.4804)
 
 
 class TestOtherAttributes(TestCase):
-
     @classmethod
     def setUp(cls) -> None:
         cls.products_files = ProductsFiles()
@@ -320,19 +377,16 @@ class TestNutritionFacts(TestCase):
 
     def test_nutrition_facts(self):
         nutrition_json: List[dict] = self.products_files.nutrition_json
-        nutrition_facts = NutritionFacts.parse_obj(
-            {"nutrients": nutrition_json})
+        nutrition_facts = NutritionFacts.parse_obj({"nutrients": nutrition_json})
 
     def test_nutrition_facts_property(self):
         nutrition_json: List[dict] = self.products_files.nutrition_json
-        nutrition_facts = NutritionFacts.parse_obj(
-            {"nutrients": nutrition_json})
+        nutrition_facts = NutritionFacts.parse_obj({"nutrients": nutrition_json})
         print(nutrition_facts.nutrition_facts)
 
     def test_print_nutrition_facts_as_table(self):
         nutrition_json: List[dict] = self.products_files.nutrition_json
-        nutrition_facts = NutritionFacts.parse_obj(
-            {"nutrients": nutrition_json})
+        nutrition_facts = NutritionFacts.parse_obj({"nutrients": nutrition_json})
         print(nutrition_facts.as_table())
 
 
@@ -349,7 +403,6 @@ class TestIngredients(TestCase):
 
 
 class TestProduct(TestCase):
-
     @classmethod
     def setUpClass(cls):
         # product data assets
@@ -360,19 +413,31 @@ class TestProduct(TestCase):
     def test_product(self):
         """Test creating product object"""
         from unfi_api.search.result import ProductResult
-        result = Result.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json)
-        top_product = result.top_products[0]
+
+        result = Result.parse_obj(
+            self.ordermanagement_files.brands_path_GetProductsByFullText_json
+        )
+        top_product = result.products[0]
 
         # result = TopProduct.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json["TopProducts"][0])
         # product_listing = ProductListing.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json[0])
         product_detail_int_id = ProductDetailIntId.parse_obj(
-            self.ordermanagement_files.ProductDetail_GetProductDetailByProductIntId_json[0])
-        product_data = ProductData.parse_obj(self.products_files.get_west_product_data_json)
-        nutrition_facts = NutritionFacts.parse_obj({"nutrients": self.products_files.nutrition_json})
+            self.ordermanagement_files.ProductDetail_GetProductDetailByProductIntId_json[
+                0
+            ]
+        )
+        product_data = ProductData.parse_obj(
+            self.products_files.get_west_product_data_json
+        )
+        nutrition_facts = NutritionFacts.parse_obj(
+            {"nutrients": self.products_files.nutrition_json}
+        )
         # product_details = ProductDetail.parse_raw(self.product_details_json)
         attributes = Attributes.parse_obj(self.products_files.attributes_json)
         ingredients = Ingredients.parse_obj(self.products_files.ingredients_json)
-        costs = Pricing(self.ordermanagement_files.brands_GetProductDetailsFromService_xml)
+        costs = Pricing(
+            **parse_pricing(self.ordermanagement_files.brands_GetProductDetailsFromService_xml)
+        )
 
         prodct_data_dict = {
             # "product_listing": product_listing,
@@ -381,22 +446,31 @@ class TestProduct(TestCase):
             "attributes": attributes,
             "ingredients": ingredients,
             "product_details": product_detail_int_id,
-            "costs": costs
-
+            "costs": costs,
         }
         combined_model_dicts = {}
         combined_model_dicts.update(product_data.dict())
         combined_model_dicts.update(product_detail_int_id.dict())
         # combined_model_dicts.update(nutrition_facts.dict())
-        combined_model_dicts.update({attr: "Y" for attr in attributes.get_attribute_names()})
+        combined_model_dicts.update(
+            {attr: "Y" for attr in attributes.get_attribute_names()}
+        )
         combined_model_dicts.update(ingredients.dict())
         combined_model_dicts.update(costs.costs_to_dict())
-        # combined_model_dicts.update(product_listing.dict())
-        # print(combined_model_dicts)
-        rows = [list(combined_model_dicts.keys())]
-        rows.append([val for val in combined_model_dicts.values()])
+        combined_model_dicts = {k.lower(): v for k, v in combined_model_dicts.items()}
+        header = [x for x in sorted(list(combined_model_dicts.keys()))]
+        rows = []
+        rows = [header]
+        rows.append(
+            [
+                combined_model_dicts.get(key, "")
+                for key in header
+            ]
+        )
+
 
         from openpyxl import Workbook
+
         wb = Workbook()
         ws = wb.active
         for row in rows:

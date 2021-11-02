@@ -1,4 +1,5 @@
-from .utils import index_header, find_most_common_member
+from .utils import index_header
+from .utils.collections import find_most_common_member
 
 
 class Invoice(object):
