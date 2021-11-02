@@ -110,11 +110,12 @@ class ProductResult(BaseModel):
     @root_validator(pre=True)
     def root_validator(cls, values):
         # print(values)
-        upc = values.get("upc")
+        upc = values.get("UPC")
         if upc is None:
             raise ValueError("upc is required")
         upc_no_check = stripcheckdigit(upc)
         values["upc_no_check"] = upc_no_check
+        values['UPC'] = int(str(upc).replace("-", "").replace(" ", ""))
         return values
 
 
