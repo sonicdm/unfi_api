@@ -1,18 +1,20 @@
 from __future__ import print_function
-
+from datetime import date, datetime, timedelta
 import datetime
 import json
 import sys
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from html import escape
+from typing import List
 
 import requests
 from bs4 import BeautifulSoup
 from catalogboss.formatter import size_cols
 from catalogboss.utils import strings_to_numbers
 from openpyxl import Workbook
-
+from unfi_api import UnfiAPI, UnfiApiClient
 import unfi_api
+from unfi_api.invoice import OrderListing, OrderList
 from unfi_api.old_product import product_info
 from unfi_api.settings import \
     xdock_cust_num, \
@@ -39,21 +41,16 @@ def uncaught_exception_handler(exc_type, value, tb):
 # sys.excepthook = uncaught_exception_handler
 
 
-def pull_invoices(token, date, xdock=False, api=None):
+def pull_invoices(token, day: date, client: UnfiApiClient = None, num_days=1):
     invoice_dict = {}
     threading = Threading()
-    if xdock:
-        num_days = 2
-        dock = "Auburn X-Dock"
-    else:
-        num_days = 1
-        dock = "Ridgefield"
+    dock = "Ridgefield"
 
-    invoices = get_invoice_list(token, date, num_days=num_days, xdock=xdock, api=api)
+    invoices = get_invoice_list(day, num_days=num_days, client=client)
     print("Downloading {COUNT} {DOCK} invoices...".format(DOCK=dock, COUNT=len(invoices)))
 
     def _add_invoice_to_dict(i):
-        invoice_dict[i] = get_invoice(i, token, xdock, api=api)
+        invoice_dict[i] = get_invoice(i, token, api=client.api)
 
     threading.thread_with_progressbar(_add_invoice_to_dict, invoices)
     # for invoice in invoices:
@@ -75,43 +72,18 @@ def pull_invoices(token, date, xdock=False, api=None):
     return invoice_dict
 
 
-def get_invoice_list(token, dateobj, num_days=1, xdock=False, api=None):
+def get_invoice_list(dateobj: date, num_days=1, client: UnfiApiClient = None):
     """
-
-    :type api: 'unfi_api.api.api.UnfiAPI'
+    get invoice list from UNFI API
     """
-    header = {
-        'authorization': '{token}'.format(token=api.auth_token, )
-    }
-
-    if xdock:
-        invoice_list_url = unfi_invoice_list_xhr.format(
-            userid=user_id,
-            custnum=xdock_cust_num,
-        )
-    else:
-        invoice_list_url = unfi_invoice_list_xhr.format(
-            userid=user_id,
-            custnum=ridgefield_cust_num
-        )
-    invoice_date = dateobj - datetime.timedelta(days=0)
-    invoice_date_string = invoice_date.strftime('%m/%d/%Y')
-    invoices = api.order_management.order_history.get_invoice_list()
-    response = api.session.get(invoice_list_url)
-    # invoice_search_result = json.loads(response.content)
-    invoice_search_result = invoices['data']
-    invoice_dict = {}
-    for invoice in invoice_search_result:
-        invoice_date = datetime.datetime.strptime(invoice['InvoiceDate'], '%m/%d/%Y')
-        invoice_day = invoice_dict.get(invoice_date, [])
-        invoice_day.append(invoice['InvoiceNumber'])
-        invoice_dict[invoice_date] = invoice_day
-
-    invoice_nums = invoice_dict[get_most_recent_date(invoice_dict.keys(), dateobj)]
+    invoice_list: OrderList = client.get_invoice_list()
+    invoice_dict = invoice_list.orders_by_date()
+    invoice_listings: List[OrderListing] = invoice_dict[get_most_recent_date(invoice_dict.keys(), dateobj)]
+    invoice_nums: List[str] = [listing.invoice_number for listing in invoice_listings]
     return invoice_nums
 
 
-def get_most_recent_date(items, dateobj):
+def get_most_recent_date(items, dateobj: date):
     found_date = None
     for day in items:
         if (dateobj - day).days < 0:
@@ -129,7 +101,7 @@ def get_invoice(invoice_number, token, xdock=False, callback=None, api: unfi_api
     header = {
         'authorization': '{token}'.format(token=token)
     }
-    invoice = api.session.get(invoice_url)
+    invoice = api.get(invoice_url)
     # invoice = api.order_management.order_history.get_invoice(invoice_number)
     # invoicesoup = BeautifulSoup(invoice['data'], "html.parser")
     invoicesoup = BeautifulSoup(invoice.text, 'html.parser')

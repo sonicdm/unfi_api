@@ -22,7 +22,7 @@ from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
 
 class UnfiApiClient:
     def __init__(self, api: APICore):
-        self.api = api
+        self.api: UnfiAPI = api
         self.user = User(api)
         self.brands = Brands(api)
         self.reports = Reports(api)
@@ -88,7 +88,7 @@ class UnfiApiClient:
             )
         return Invoice.parse_obj(response.data)
 
-    def get_invoice_list(self) -> OrderList:
+    def get_invoice_list(self, limit=1000) -> OrderList:
         """
         invoice_id: invoice id
         """
@@ -97,7 +97,7 @@ class UnfiApiClient:
             po_no=None,
             req_by=None,
             invoice_no=None,
-            page_size=1000,
+            page_size=limit,
             page_number=1,
             sort_expression=None,
             sort_direction=None,

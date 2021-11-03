@@ -244,6 +244,18 @@ class OrderList(BaseModel):
     def orders(self):
         return self.__root__
 
+    def orders_by_date(self):
+        """
+        Return a dict indexed by invoice date
+        """
+        invoices: Dict[date, List[OrderListing]] = {}
+        for invoice_number, listing in self.orders.items():
+            invoice_date = listing.invoice_date
+            if invoice_date not in invoices:
+                invoices[invoice_date] = []
+            invoices[invoice_date].append(listing)
+        return invoices
+
     def filter_by_date(self, start_date: date, end_date: date) -> List[OrderListing]:
         """
         Filter the order list by date.

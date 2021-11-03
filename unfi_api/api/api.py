@@ -61,12 +61,12 @@ class UnfiAPI(APICore):
         self.usermeta = {}
         self.driver = None
         self.login(user, password)
+        self.endpoints: Dict[str, Endpoint] = {}
         if self.incapsula:
             self._load_incapsula_cookies()
         # if not self._test_incapsula():
         #     self._load_incapsula_cookies()
 
-        self.endpoints: Dict[str, Endpoint] = {}
 
     def register_endpoint(self, endpoint: Endpoint):
         self.endpoints[endpoint.name] = endpoint
