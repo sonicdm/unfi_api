@@ -30,7 +30,7 @@ def fetch_attributes_from_api(product_id: int, header: dict, api: UnfiAPI) -> di
     :return: attributes of the product
     """
     attribute_url = product_attribute_url.format(product_id=product_id)
-    attribute_result = api.products.get_product_attributes_by_product_by_int_id(product_id).data
+    attribute_result = api.products.get_product_attributes_by_int_id(product_id).data
     # attribute_response = requests.get(attribute_url, header)
     # attribute_result = json.loads(attribute_response.content)
     return attribute_result

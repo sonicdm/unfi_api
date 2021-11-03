@@ -87,25 +87,6 @@ class NutritionFacts(BaseModel):
     serving_size: Optional[str]
     servings_container: Optional[str]
 
-    # # nutrients: Optional[List[Nutrient]] = []
-    # nutrition_facts: Optional[List[Nutrient]] = []
-    # calories: Optional[int]
-    # from_fat: Optional[int]
-    # serving_size: Optional[str]
-    # servings_container: Optional[str]
-
-    # def add_nutrition_fact(self, nutrition_fact: Dict[str, Any]) -> None:
-    #     name = string_to_snake(nutrition_fact["nutrientName"])
-    #     # if nutrients name converted to snake case is in member variables set them otherwise create nutrition fact
-    #     if name in self.__dict__:
-    #         if name == "from_fat":
-    #             self.calories_from_fat = nutrition_fact["amount"]
-    #         else:
-    #             setattr(self, name, nutrition_fact["amount"])
-    #     else:
-    #         self.nutrients.append(Nutrient(**nutrition_fact))
-
-    # get nutrition fact values as a dictionary including calories, calories from fat serving information
     @root_validator(pre=True)
     def get_nutrition_facts(cls, values):
         nutrition_facts: List[Nutrient] = []

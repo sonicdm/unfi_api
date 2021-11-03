@@ -1,7 +1,7 @@
 import inspect
 import re
 from datetime import date
-from typing import Optional
+from typing import List, Optional
 
 from dateutil.parser import parse as date_parse
 from pydantic import BaseModel, validator
@@ -338,11 +338,6 @@ class Attribute(UnfiObject):
         items = ("%s = %r" % (k, v) for k, v in self.__dict__.items())
         return "<%s: {%s}>" % (self.__class__.__name__, ', '.join(items))
 
-
-class Attributes:
-
-    def __init__(self, **kwargs):
-        pass
 
 
 class Marketing(object):

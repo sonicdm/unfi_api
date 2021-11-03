@@ -1,23 +1,19 @@
 import os
 from typing import Union
+
 from unfi_api import invoice
+from unfi_api.api.admin_backend import AdminBackend, Reports, User
 from unfi_api.api.api import UnfiAPI
-from unfi_api.api.order_management import (
-    Brands,
-    OrderManagement,
-    OrderHistory,
-    InteractiveReports,
-    Categories,
-    ProductDetail,
-)
-from unfi_api.api.products import Products
-from unfi_api.product.pricing import Pricing
 from unfi_api.api.base_classes import APICore
-from unfi_api.product import ProductDetailIntId
-from unfi_api.search.result import Result, ProductResult
+from unfi_api.api.order_management import (Brands, Categories,
+                                           InteractiveReports, OrderHistory,
+                                           OrderManagement, ProductDetail)
+from unfi_api.api.products import Products
 from unfi_api.api.response import APIResponse, NonJsonResultError
-from unfi_api.api.admin_backend import AdminBackend, User, Reports
 from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
+from unfi_api.product import (Attributes, Ingredients, Marketing,
+                              NutritionFacts, ProductData, ProductDetailIntId, Pricing, UNFIProduct)
+from unfi_api.search.result import ProductResult, Result
 
 
 class UnfiApiClient:
@@ -33,7 +29,6 @@ class UnfiApiClient:
         self.product_detail = ProductDetail(api)
         self.order_management = OrderManagement(api)
         self.interactive_reports = InteractiveReports(api)
-
 
     @property
     def auth_token(self) -> str:
@@ -115,7 +110,9 @@ class UnfiApiClient:
             raise NonJsonResultError(f"Non-JSON API response for credit list request")
         return OrderList.parse_obj(response.data)
 
-    def get_product_result_by_product_code(self, product_code: str) -> Union[ProductResult, None]:
+    def get_product_result_by_product_code(
+        self, product_code: str
+    ) -> Union[ProductResult, None]:
         """
         product_code: 5 digit unique product code
         this is slow because the only way to get the other information for pulling a product is to search for it and get the listing.
@@ -136,15 +133,82 @@ class UnfiApiClient:
                 f"Non-JSON API response for product detail request"
             )
         result = ProductDetailIntId.parse_obj(
-            self.product_detail.get_product_detail_by_int_id(int_id)
+            response.data
         )
         return result
 
+    def get_product_attributes(self, int_id) -> Attributes:
+        result = self.products.get_product_attributes_by_int_id(int_id)
+        attributes = Attributes.parse_obj(result.data)
+        return attributes
+
+    def get_product_data(self, product_code: str) -> ProductData:
+        result = self.products.get_west_product_data(product_code)
+        product_data = ProductData.parse_obj(result.data)
+        return product_data
+
+    def get_product_nutrition(self, int_id: str) -> NutritionFacts:
+        result = self.products.get_product_nutrition_by_int_id(int_id)
+        if not result.data:
+            return None
+        product_nutrition = NutritionFacts.parse_obj(result.data)
+        return product_nutrition
+
+    def get_product_marketing(self, int_id: str) -> Marketing:
+        result = self.products.get_product_marketing_by_int_id(int_id)
+        product_marketing = Marketing.parse_obj(result.data)
+        return product_marketing
+
+    def get_product_ingredients(self, int_id: str) -> Ingredients:
+        result = self.products.get_product_ingredients_by_int_id(int_id)
+        product_ingredients = Ingredients.parse_obj(result.data)
+        return product_ingredients
+
+    def get_product_image(self, int_id: str) -> Union[bytes, None]:
+        result = self.products.get_product_image(int_id)
+        if not result["error"] and result["data"]:
+            return result["data"]
+        return None
+
+    def get_product_pricing(self, product_code) -> Pricing:
+        result = self.brands.get_product_pricing_detail(product_code)
+        product_pricing = Pricing.parse_obj(result.data)
+        return product_pricing
+
+    def get_product(self, product_result: ProductResult) -> UNFIProduct:
+        """
+        product_result: ProductResult
+        """
+        int_id = product_result.product_int_id
+        product_code = product_result.product_code
+        product_by_int_id = self.get_product_detail_by_int_id(int_id)
+        west_product_data = self.get_product_data(product_code)
+        ingredients = self.get_product_ingredients(int_id)
+        nutrition = self.get_product_nutrition(int_id)
+        marketing = self.get_product_marketing(int_id)
+        pricing = self.get_product_pricing(product_code)
+        pricing_info = pricing.costs_to_dict()
+        attributes = self.get_product_attributes(int_id)
+        attributes_info = attributes.get_attribute_flags()
+        product = UNFIProduct(
+                data_by_int_id=product_by_int_id,
+                data=west_product_data,
+                marketing=marketing,
+                pricing=pricing,
+                attributes=attributes,
+                listing=product_result,
+                nutrition=nutrition,
+                ingredients=ingredients,
+        )
+        return product
+
 
 def main():
-    api = UnfiAPI(os.environ["UNFI_USER"], os.environ["UNFI_PASS"], incapsula=False)
+    api = UnfiAPI(os.environ["UNFI_USER"], os.environ["UNFI_PASSWORD"], incapsula=False)
     client = UnfiApiClient(api)
     result = client.search("chocolate")
+    product = client.get_product(result.products[0])
+    print(product.flatten())
     pass
 
 

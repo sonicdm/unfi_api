@@ -75,6 +75,15 @@ class Attributes(BaseModel):
     #         if not isinstance(attribute, dict):
     #             raise ValueError(f'{attribute} is not a dict')
     #     return v
+
+    # def attributes(self) -> Dict[str,str]:
+    #     """
+    #     Get a dict of attribute names and "Y"
+    #     """
+    #     attribute_names: Dict[str,str] = {}
+    #     for attribute in self.__root__:
+    #         attribute_names[attribute.attribute_name] = "Y"
+    #     return attribute_names
             
     @property
     def attributes(self) -> List[Attribute]:
@@ -115,6 +124,15 @@ class Attributes(BaseModel):
         for attribute in self.attributes:
             attribute_names.append(attribute.attribute_name)
         return attribute_names
+
+    def get_attribute_flags(self) -> Dict[str,str]:
+        """
+        Get a dict of attribute names and "Y"
+        """
+        attribute_names: Dict[str,str] = {}
+        for attribute in self.attributes:
+            attribute_names[attribute.attribute_name] = "Y"
+        return attribute_names
     
     def count(self) -> int:
         """
@@ -133,21 +151,3 @@ class Attributes(BaseModel):
         Iterate through the attributes
         """
         return iter(self.attributes)
-
-    def __getitem__(self, index: int) -> Attribute:
-        """
-        Get an attribute by index
-        """
-        return self.attributes[index]
-
-    def __repr__(self) -> str:
-        """
-        Get a string representation of the attributes
-        """
-        return str(self.attributes)
-
-    def __str__(self) -> str:
-        """
-        Get a string representation of the attributes
-        """
-        return str(self.attributes)

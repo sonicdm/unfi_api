@@ -70,6 +70,11 @@ class UnfiAPI(APICore):
 
     def register_endpoint(self, endpoint: Endpoint):
         self.endpoints[endpoint.name] = endpoint
+        if not endpoint.name in self.__dict__:
+            setattr(self, endpoint.name, endpoint)
+        else:
+            setattr(self, endpoint.name+"_endpoint", endpoint)
+        
 
     def get(self, url: str, params: dict = None, **kwargs) -> requests.Response:
         return self.session.get(url, params=params, **kwargs)

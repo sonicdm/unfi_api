@@ -10,6 +10,7 @@ from unfi_api.api.response import APIResponse
 from ...utils.string import strings_to_numbers
 from unfi_api.utils.http import response_to_api_response, response_to_json
 from . import brands, categories, interactive_reports, order_history, product_detail
+
 from unfi_api import settings
 
 order_history_base_url = 'https://ordermanagement.unfi.com/api/OrderHistory/'
@@ -224,6 +225,15 @@ class OrderHistory(Endpoint):
 
 product_detail_endpoint = 'https://ordermanagement.unfi.com/api/ProductDetail/'
 
+class ProductDetailResponse(APIResponse):
+
+    @root_validator(pre=True)
+    def get_from_list(cls, values):
+        data = values['data']
+        if isinstance(data, list):
+            values['data'] = data[0]
+        return values
+
 
 class ProductDetail(Endpoint):
     """
@@ -253,7 +263,7 @@ class ProductDetail(Endpoint):
         }
 
         result = self.api.get(url, headers=header, params=params)
-        return response_to_json(result)
+        return response_to_api_response(result, ProductDetailResponse)
 
 
 def parse_invoice_html_to_json(page):

@@ -1,8 +1,13 @@
-import requests
 import urllib.parse
-from unfi_api.utils.http import response_to_json, response_to_api_response
+
+import requests
 from bs4 import BeautifulSoup
+from pydantic.class_validators import root_validator
 from unfi_api import settings
+from unfi_api.api.response import APIResponse
+from unfi_api.product.pricing import parse_pricing
+from unfi_api.utils.http import response_to_api_response, response_to_json
+
 brands_base_url = 'https://ordermanagement.unfi.com/api/Brands/'
 
 
@@ -151,6 +156,16 @@ def get_products_by_brand_id(session, token, account_number, user_id, warehouse,
     response = session.get(endpoint_url, headers=headers, params=params)
     return response_to_json(response)
 
+class PricingResponse(APIResponse):
+
+    @root_validator(pre=True)
+    def parse_pricing_data(cls, values):
+        data = values.get('data')
+        if data:
+            data = parse_pricing(data)
+            values['data'] = data
+        return values
+
 
 def get_product_details_from_service(session, token, product_code, account_number):
     """
@@ -198,7 +213,7 @@ def get_product_details_from_service(session, token, product_code, account_numbe
     #     "status": status,
     #     "data": results
     # }
-    return response_to_api_response(response)
+    return response_to_api_response(response, PricingResponse)
 
 
 def parse_pricing_table(page):

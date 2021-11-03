@@ -1,3 +1,5 @@
+from pydantic.class_validators import root_validator
+from unfi_api.api.response import APIResponse
 from .products import get_product_by_int_id, get_product_data, get_product_attributes_by_product_by_int_id
 import urllib.parse
 from unfi_api.utils.http import response_to_api_response, response_to_api_response
@@ -8,6 +10,16 @@ import random
 
 products_api_endpoint = r'https://products.unfi.com/api/Products/'
 
+class NutritionFactsResponse(APIResponse):
+
+    @root_validator
+    def make_nutrients_dict(cls, values):
+        # values['nutrients']
+        data = values['data']
+        if not data:
+            data = []
+        values['data'] = {"nutrients": data}
+        return values
 
 class Products(Endpoint):
     """
@@ -28,14 +40,14 @@ class Products(Endpoint):
         response = self.api.session.get(url)
         return response_to_api_response(response)
 
-    def get_product_attributes_by_product_by_int_id(self, product_int_id):
+    def get_product_attributes_by_int_id(self, product_int_id):
         endpoint = "attributes"
         product_url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id) + "/")
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
         return response_to_api_response(response)
 
-    def get_product_ingredients_by_product_by_int_id(self, product_int_id):
+    def get_product_ingredients_by_int_id(self, product_int_id):
         endpoint = "ingredients"
         product_url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id) + "/")
         url = urllib.parse.urljoin(product_url, endpoint)
@@ -43,7 +55,7 @@ class Products(Endpoint):
         # response = requests.get(url, cookies=self.api.session.cookies)
         return response_to_api_response(response)
 
-    def get_product_marketing_by_product_by_int_id(self, product_int_id):
+    def get_product_marketing_by_int_id(self, product_int_id):
         endpoint = "marketing"
         product_url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id) + "/")
         url = urllib.parse.urljoin(product_url, endpoint)
@@ -51,13 +63,13 @@ class Products(Endpoint):
         # response = requests.get(url, cookies=self.api.session.cookies)
         return response_to_api_response(response)
 
-    def get_product_nutrition_by_product_by_int_id(self, product_int_id):
+    def get_product_nutrition_by_int_id(self, product_int_id):
         endpoint = "nutrition"
         product_url = urllib.parse.urljoin('https://products.unfi.com/api/Products/', str(product_int_id) + "/")
         url = urllib.parse.urljoin(product_url, endpoint)
         response = self.api.session.get(url)
         # response = requests.get(url, cookies=self.api.session.cookies)
-        return response_to_api_response(response)
+        return response_to_api_response(response, NutritionFactsResponse)  
 
     def get_west_product_data(self, product_code):
         product_data_url = "https://products.unfi.com/api/Products/GetWestProductData"
@@ -127,10 +139,10 @@ class Products(Endpoint):
         if product_info and product_data:
             product_data_combined = product_info.copy()
             product_data_combined.update(product_data)
-            attribute_result = self.get_product_attributes_by_product_by_int_id(product_int_id)
-            ingredients_result = self.get_product_ingredients_by_product_by_int_id(product_int_id)
-            marketing_result = self.get_product_marketing_by_product_by_int_id(product_int_id)
-            nutrition_result = self.get_product_nutrition_by_product_by_int_id(product_int_id)
+            attribute_result = self.get_product_attributes_by_int_id(product_int_id)
+            ingredients_result = self.get_product_ingredients_by_int_id(product_int_id)
+            marketing_result = self.get_product_marketing_by_int_id(product_int_id)
+            nutrition_result = self.get_product_nutrition_by_int_id(product_int_id)
             pricing_result = self.api.brands.get_product_pricing_detail(product_code)
 
             if not nutrition_result['error']:

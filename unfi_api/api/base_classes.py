@@ -6,6 +6,7 @@ import requests
 class Endpoint:
     """Base for API Endpoint"""
     endpoint: str
+    name: str
 
 
 class APICore(ABC):

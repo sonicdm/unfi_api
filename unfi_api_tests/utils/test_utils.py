@@ -129,14 +129,15 @@ class TestRoundRetails(TestCase):
             123.99,
             ".01",
             "1¢",
-            .01,
-            .11,
+            0.01,
+            0.11,
             "34¢",
             1.03,
             1.08,
             1.98,
             1.33,
-            1.22
+            1.22,
+            2.12
         ]
 
         expected = [
@@ -152,7 +153,8 @@ class TestRoundRetails(TestCase):
             1.15,
             1.99,
             1.29,
-            1.19
+            1.19,
+            2.15
         ]
         
         for idx,retail in enumerate(retails_to_round):

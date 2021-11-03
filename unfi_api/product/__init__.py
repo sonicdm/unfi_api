@@ -2,12 +2,15 @@ from datetime import date, datetime
 from typing import Any, Dict, Optional
 from dateutil.parser import parse as date_parse
 from pydantic import BaseModel, Field, validator
+from pydantic.class_validators import root_validator
 
-from .attributes import Attributes
-from .marketing import Marketing
-from .ingredients import Ingredients
-from .nutrition import NutritionFacts
-from .pricing import Pricing
+from unfi_api.product.attributes import Attributes
+from unfi_api.product.marketing import Marketing
+from unfi_api.product.ingredients import Ingredients
+from unfi_api.product.nutrition import NutritionFacts
+from unfi_api.product.pricing import Pricing
+from unfi_api.search.result import ProductResult
+from unfi_api.utils.collections import flatten_dict_overwrite, normalize_dict
 
 
 class ProductData(BaseModel):
@@ -15,19 +18,19 @@ class ProductData(BaseModel):
     BaseModel for product details from the UNFIApi getwestproductdata endpoint
     """
 
-    product_id: str = Field(..., alias='productID')
-    effective_date: date = Field(..., alias='effectiveDate')
+    product_id: str = Field(..., alias="productID")
+    effective_date: date = Field(..., alias="effectiveDate")
     status: str
-    net_price: float = Field(..., alias='netPrice')
-    retail_price: float = Field(..., alias='retailPrice')
-    price_reason: str = Field(..., alias='priceReason')
+    net_price: float = Field(..., alias="netPrice")
+    retail_price: float = Field(..., alias="retailPrice")
+    price_reason: str = Field(..., alias="priceReason")
     margin: float
-    stock_oh: int = Field(..., alias='stockOh')
-    stock_avail: int = Field(..., alias='stockAvail')
+    stock_oh: int = Field(..., alias="stockOh")
+    stock_avail: int = Field(..., alias="stockAvail")
     allow: str
-    refers_to: str = Field(..., alias='refersTo')
-    buyer_notes: str = Field(..., alias='buyerNotes')
-    buyer_code: str = Field(..., alias='buyerCode')
+    refers_to: str = Field(..., alias="refersTo")
+    buyer_notes: str = Field(..., alias="buyerNotes")
+    buyer_code: str = Field(..., alias="buyerCode")
 
     @validator("effective_date", pre=True, allow_reuse=True)
     def validate_effective_date(cls, v):
@@ -44,86 +47,90 @@ class ProductData(BaseModel):
         """remove percent symbol and convert text representation of percent to actual percent"""
         margin = v.replace("%", "")
         margin = float(margin)
-        return margin/100
+        return margin / 100
 
 
 class ProductDetailIntId(BaseModel):
     """
     BaseModel for product details from the UNFIApi product detail by intid
     """
-    stock_avail: int = Field(..., alias='StockAvail')
-    stock_oh: int = Field(..., alias='StockOH')
-    per_unit_price: float = Field(..., alias='PerUnitPrice')
-    brand_id: int = Field(..., alias='BrandId')
-    brand_name: str = Field(..., alias='BrandName')
-    product_int_id: int = Field(..., alias='ProductIntID')
-    product_code: str = Field(..., alias='ProductCode')
-    product_name: str = Field(..., alias='ProductName')
-    discount: str = Field(..., alias='Discount')
-    upc: int = Field(..., alias='UPC')
-    pack_size: str = Field(..., alias='PackSize')
-    price: float = Field(..., alias='Price')
-    units_in_full_case: int = Field(..., alias='UnitsInFullCase')
-    minqty: int = Field(..., alias='MINQTY')
-    inner_case_upc: int = Field(..., alias='InnerCaseUPC')
-    master_case_upc: int = Field(..., alias='MasterCaseUPC')
-    plu: Any = Field(..., alias='PLU')
-    pv_label_code: str = Field(..., alias='PVLabelCode')
-    member_applicable_fee: float = Field(..., alias='MemberApplicableFee')
-    organic_code: str = Field(..., alias='OrganicCode')
-    sub_header: str = Field(..., alias='SubHeader')
-    category_id: int = Field(..., alias='CategoryID')
-    category_name: str = Field(..., alias='CategoryName')
-    country_of_origin_id: int = Field(..., alias='CountryOfOriginID')
-    country_of_origin_name: str = Field(..., alias='CountryOfOriginName')
-    warehouse_message: Any = Field(..., alias='WarehouseMessage')
-    is_new: bool = Field(..., alias='IsNew')
+
+    stock_avail: int = Field(..., alias="StockAvail")
+    stock_oh: int = Field(..., alias="StockOH")
+    per_unit_price: float = Field(..., alias="PerUnitPrice")
+    brand_id: int = Field(..., alias="BrandId")
+    brand_name: str = Field(..., alias="BrandName")
+    product_int_id: int = Field(..., alias="ProductIntID")
+    product_code: str = Field(..., alias="ProductCode")
+    product_name: str = Field(..., alias="ProductName")
+    discount: str = Field(..., alias="Discount")
+    upc: int = Field(..., alias="UPC")
+    pack_size: str = Field(..., alias="PackSize")
+    price: float = Field(..., alias="Price")
+    units_in_full_case: int = Field(..., alias="UnitsInFullCase")
+    minqty: int = Field(..., alias="MINQTY")
+    inner_case_upc: int = Field(..., alias="InnerCaseUPC")
+    master_case_upc: int = Field(..., alias="MasterCaseUPC")
+    plu: Any = Field(..., alias="PLU")
+    pv_label_code: str = Field(..., alias="PVLabelCode")
+    member_applicable_fee: float = Field(..., alias="MemberApplicableFee")
+    organic_code: str = Field(..., alias="OrganicCode")
+    sub_header: str = Field(..., alias="SubHeader")
+    category_id: int = Field(..., alias="CategoryID")
+    category_name: str = Field(..., alias="CategoryName")
+    country_of_origin_id: int = Field(..., alias="CountryOfOriginID")
+    country_of_origin_name: str = Field(..., alias="CountryOfOriginName")
+    warehouse_message: Any = Field(..., alias="WarehouseMessage")
+    is_new: bool = Field(..., alias="IsNew")
 
     @validator("upc", "inner_case_upc", "master_case_upc", pre=True)
     def validate_upc(cls, v):
         return int(v.replace("-", ""))
+    
+
 
 
 class ProductListing(BaseModel):
-    product_int_id: int = Field(..., alias='ProductIntID')
-    division_code: str = Field(..., alias='DivisionCode')
-    product_number: str = Field(..., alias='ProductNumber')
-    product_name: str = Field(..., alias='ProductName')
-    category_id: int = Field(..., alias='CategoryID')
-    brand_id: int = Field(..., alias='BrandID')
-    sub_header_id: int = Field(..., alias='SubHeaderID')
-    department_id: int = Field(..., alias='DepartmentID')
-    upc: float = Field(..., alias='UPC')
-    inner_case_upc: float = Field(..., alias='InnerCaseUPC')
-    master_case_upc: float = Field(..., alias='MasterCaseUPC')
-    plu: Any = Field(..., alias='PLU')
-    organic_code: str = Field(..., alias='OrganicCode')
-    speciality_flag: str = Field(..., alias='SpecialityFlag')
-    country_of_origin_id: int = Field(..., alias='CountryOfOriginID')
-    is_private_label: str = Field(..., alias='IsPrivateLabel')
-    product_owner: str = Field(..., alias='ProductOwner')
-    ingredients: str = Field(..., alias='Ingredients')
-    img_file_name: str = Field(..., alias='ImgFileName')
-    img_url: Optional[str] = Field(..., alias='ImgUrl')
-    is_image_available: bool = Field(..., alias='IsImageAvailable')
-    minimum_order_quantity: int = Field(..., alias='MinimumOrderQuantity')
-    substitute_number: Optional[str] = Field(..., alias='SubstituteNumber')
-    short_description: str = Field(..., alias='ShortDescription')
-    long_description: Optional[str] = Field(..., alias='LongDescription')
-    search_keywords: Any = Field(..., alias='SearchKeywords')
-    pack_size: str = Field(..., alias='PackSize')
-    units_in_full_case: int = Field(..., alias='UnitsInFullCase')
-    unit_type: Any = Field(..., alias='UnitType')
-    size: Any = Field(..., alias='Size')
-    created_by: int = Field(..., alias='CreatedBy')
-    created_date: datetime = Field(..., alias='CreatedDate')
-    modified_by: int = Field(..., alias='ModifiedBy')
-    modified_date: datetime = Field(..., alias='ModifiedDate')
-    is_active: bool = Field(..., alias='IsActive')
-    is_deleted: bool = Field(..., alias='IsDeleted')
-    private_lbl_dept: int = Field(..., alias='PrivateLblDept')
+    product_int_id: int = Field(..., alias="ProductIntID")
+    division_code: str = Field(..., alias="DivisionCode")
+    product_number: str = Field(..., alias="ProductNumber")
+    product_name: str = Field(..., alias="ProductName")
+    category_id: int = Field(..., alias="CategoryID")
+    brand_id: int = Field(..., alias="BrandID")
+    sub_header_id: int = Field(..., alias="SubHeaderID")
+    department_id: int = Field(..., alias="DepartmentID")
+    upc: float = Field(..., alias="UPC")
+    inner_case_upc: float = Field(..., alias="InnerCaseUPC")
+    master_case_upc: float = Field(..., alias="MasterCaseUPC")
+    plu: Any = Field(..., alias="PLU")
+    organic_code: str = Field(..., alias="OrganicCode")
+    speciality_flag: str = Field(..., alias="SpecialityFlag")
+    country_of_origin_id: int = Field(..., alias="CountryOfOriginID")
+    is_private_label: str = Field(..., alias="IsPrivateLabel")
+    product_owner: str = Field(..., alias="ProductOwner")
+    ingredients: str = Field(..., alias="Ingredients")
+    img_file_name: str = Field(..., alias="ImgFileName")
+    img_url: Optional[str] = Field(..., alias="ImgUrl")
+    is_image_available: bool = Field(..., alias="IsImageAvailable")
+    minimum_order_quantity: int = Field(..., alias="MinimumOrderQuantity")
+    substitute_number: Optional[str] = Field(..., alias="SubstituteNumber")
+    short_description: str = Field(..., alias="ShortDescription")
+    long_description: Optional[str] = Field(..., alias="LongDescription")
+    search_keywords: Any = Field(..., alias="SearchKeywords")
+    pack_size: str = Field(..., alias="PackSize")
+    units_in_full_case: int = Field(..., alias="UnitsInFullCase")
+    unit_type: Any = Field(..., alias="UnitType")
+    size: Any = Field(..., alias="Size")
+    created_by: int = Field(..., alias="CreatedBy")
+    created_date: datetime = Field(..., alias="CreatedDate")
+    modified_by: int = Field(..., alias="ModifiedBy")
+    modified_date: datetime = Field(..., alias="ModifiedDate")
+    is_active: bool = Field(..., alias="IsActive")
+    is_deleted: bool = Field(..., alias="IsDeleted")
+    private_lbl_dept: int = Field(..., alias="PrivateLblDept")
     requires_customer_authorization: bool = Field(
-        ..., alias='RequiresCustomerAuthorization')
+        ..., alias="RequiresCustomerAuthorization"
+    )
 
     @validator("upc", "inner_case_upc", "master_case_upc", pre=True)
     def validate_upc(cls, v):
@@ -133,6 +140,7 @@ class ProductListing(BaseModel):
     def validate_date(cls, v):
         return date_parse(v)
 
+
 """
 # class that combines
 # Attributes
@@ -141,6 +149,28 @@ class ProductListing(BaseModel):
 # NutritionFacts
 # Costs
 """
+
+
+class UNFIProduct(BaseModel):
+    data_by_int_id: ProductDetailIntId
+    data: ProductData
+    attributes: Optional[Attributes]
+    marketing: Optional[Marketing]
+    ingredients: Optional[Ingredients]
+    nutrition_facts: Optional[NutritionFacts]
+    pricing: Pricing
+    listing: ProductResult
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def normalize(self, **kwargs) -> dict:
+        """pass to base model dict method"""
+        return normalize_dict(self.dict(**kwargs))
+
+    def flatten(self, **kwargs) -> dict:
+        """pass to base model dict method"""
+        return flatten_dict_overwrite(self.dict(**kwargs))
 
 
 # class UNFIProduct(BaseModel):
