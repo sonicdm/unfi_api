@@ -56,6 +56,12 @@ class Nutrient(BaseModel):
         if isinstance(v, str):
             return date_parse(v).date()
 
+    @validator("*", pre=True)
+    def na_to_none(cls, v):
+        if v in ['NA', 'N/A']:
+            return None
+        return v
+
     @property
     def name(self):
         if self.nutrient_name:
@@ -82,8 +88,8 @@ class NutritionFacts(BaseModel):
     non member attributes are turned into nutrients
     """
     nutrients: Optional[List[Nutrient]]
-    calories: Optional[int]
-    calories_from_fat: Optional[int]
+    calories: Optional[Any]
+    calories_from_fat: Optional[Any]
     serving_size: Optional[str]
     servings_container: Optional[str]
 

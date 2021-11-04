@@ -19,8 +19,8 @@ class Ingredients(BaseModel):
 }
     """
 
-    ingredients: str
-    modified_date: date
+    ingredients: Optional[str]
+    modified_date: Optional[date]
 
     class Config:
         allow_population_by_field_name = True

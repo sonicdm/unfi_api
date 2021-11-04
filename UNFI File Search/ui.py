@@ -9,7 +9,6 @@ from tkinter import messagebox
             
 # three page ui for Search, Download Progress, Save/Run Again
 
-
 class MainContainer(tk.Tk):
     def __init__(self, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
@@ -31,6 +30,15 @@ class MainContainer(tk.Tk):
     def show_frame(self, cont):
         frame = self.frames[cont]
         frame.tkraise()
+
+    def register_frame(self, frame):
+        self.frames[frame] = frame
+
+    def unregister_frame(self, frame):
+        del self.frames[frame]
+
+    def run(self):
+        self.mainloop()
 
         
 class StartPage(tk.Frame):

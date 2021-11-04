@@ -417,7 +417,7 @@ class TestProduct(TestCase):
         result = Result.parse_obj(
             self.ordermanagement_files.brands_path_GetProductsByFullText_json
         )
-        top_product = result.products[0]
+        top_product = result.product_results[0]
 
         # result = TopProduct.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json["TopProducts"][0])
         # product_listing = ProductListing.parse_obj(self.ordermanagement_files.brands_path_GetProductsByFullText_json[0])

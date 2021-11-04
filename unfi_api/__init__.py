@@ -1,5 +1,5 @@
 import os
-from typing import Union
+from typing import Callable, Dict, List, Union
 
 from unfi_api import invoice
 from unfi_api.api.admin_backend import AdminBackend, Reports, User
@@ -12,8 +12,8 @@ from unfi_api.api.products import Products
 from unfi_api.api.response import APIResponse, NonJsonResultError
 from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
 from unfi_api.product import (Attributes, Ingredients, Marketing,
-                              NutritionFacts, ProductData, ProductDetailIntId, Pricing, UNFIProduct)
-from unfi_api.search.result import ProductResult, Result
+                              NutritionFacts, ProductData, ProductDetailIntId, Pricing, ProductIntID, UNFIProduct)
+from unfi_api.search.result import ProductResult, Result, Results
 
 
 class UnfiApiClient:
@@ -136,6 +136,9 @@ class UnfiApiClient:
             response.data
         )
         return result
+    def get_product_int_id(self, int_id) -> APIResponse:
+        result = self.products.get_product_by_int_id(int_id)
+        return result
 
     def get_product_attributes(self, int_id) -> Attributes:
         result = self.products.get_product_attributes_by_int_id(int_id)
@@ -161,8 +164,9 @@ class UnfiApiClient:
 
     def get_product_ingredients(self, int_id: str) -> Ingredients:
         result = self.products.get_product_ingredients_by_int_id(int_id)
-        product_ingredients = Ingredients.parse_obj(result.data)
-        return product_ingredients
+        if result.data:
+            return Ingredients.parse_obj(result.data)
+        return None
 
     def get_product_image(self, int_id: str) -> Union[bytes, None]:
         result = self.products.get_product_image(int_id)
@@ -181,7 +185,7 @@ class UnfiApiClient:
         """
         int_id = product_result.product_int_id
         product_code = product_result.product_code
-        product_by_int_id = self.get_product_detail_by_int_id(int_id)
+        product_detail_by_int_id = self.get_product_detail_by_int_id(int_id)
         west_product_data = self.get_product_data(product_code)
         ingredients = self.get_product_ingredients(int_id)
         nutrition = self.get_product_nutrition(int_id)
@@ -190,8 +194,10 @@ class UnfiApiClient:
         pricing_info = pricing.costs_to_dict()
         attributes = self.get_product_attributes(int_id)
         attributes_info = attributes.get_attribute_flags()
+        product_by_int_id = self.get_product_int_id(int_id)
+        product_int_id = ProductIntID.parse_obj(product_by_int_id.data)
         product = UNFIProduct(
-                data_by_int_id=product_by_int_id,
+                data_by_int_id=product_detail_by_int_id,
                 data=west_product_data,
                 marketing=marketing,
                 pricing=pricing,
@@ -199,18 +205,64 @@ class UnfiApiClient:
                 listing=product_result,
                 nutrition=nutrition,
                 ingredients=ingredients,
+                int_id=product_int_id
         )
         return product
 
+    def get_products(self, result: Union[Result,List[ProductResult]], callback: Callable=None) -> Dict[str, UNFIProduct]:
+        """
+        product_list: OrderList
+        """
+        products: Dict[str, UNFIProduct] = {}
+        if isinstance(result, Result):
+            results = result.product_results
+        elif isinstance(result, list):
+            results = result
+        for product in results:
+            products[product.product_code] = product.download(self)
+            if callback:
+                callback(products[product.product_code])
+        return products
+
+
+
 
 def main():
+    print("Connecting to api...")
     api = UnfiAPI(os.environ["UNFI_USER"], os.environ["UNFI_PASSWORD"], incapsula=False)
+    print("Connected!")
+    print("Creating Client...")
     client = UnfiApiClient(api)
-    result = client.search("chocolate")
-    product = client.get_product(result.products[0])
-    print(product.flatten())
-    pass
+    print("Client Created!")
+    print("Searching for products...")
+    result: Result = client.search("Julian's")
+    print(f"Found {result.total_hits} results.")
+    excel_dicts: Dict[str, dict] = {}
+    print(f"Downloading {result.total_hits} products...")
+    products: Dict[str, UNFIProduct] = result.download_products(client, lambda x: print(x.brand, x.description, x.upc))
+    for product_code, product in products.items():
+        products[product.product_code] = product
+        excel_dict = product.to_excel()
+        excel_dicts[product_code] = excel_dict
+    write_query_to_excel(excel_dicts)
 
+def write_query_to_excel(excel_dicts: Dict[str, dict]):
+    from openpyxl import Workbook
+    output_file = "F:\\pos\\unfi\\query_new.xlsx"
+    dict_keys: set = set()
+    for d in excel_dicts.values():
+        dict_keys.update(list(d.keys()))
+    header = list(dict_keys)
+    rows = [header]
+    for product_code, excel_dict in excel_dicts.items():
+        row = [excel_dict.get(key) for key in header]
+        rows.append(row)
+    wb = Workbook()
+    ws = wb.active
+    for row in rows:
+        ws.append(row)
+    wb.save(output_file)
 
 if __name__ == "__main__":
+
     main()

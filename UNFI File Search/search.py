@@ -23,7 +23,7 @@ def download_search_products(client: UnfiApiClient, result: Result):
     Get the search results from the Unifi File Search API.
     """
     products = []
-    top_products: List[ProductResult] = result.products
+    top_products: List[ProductResult] = result.product_results
     for product in top_products:
         product_data = {}
        

@@ -1,11 +1,10 @@
 import re
-from typing import Any, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
+# from unfi_api.product import UNFIProduct
 from unfi_api.utils.collections import normalize_dict
 from unfi_api.utils.upc import stripcheckdigit
-
-
 
 
 class ProductResult(BaseModel):
@@ -42,8 +41,18 @@ class ProductResult(BaseModel):
             raise ValueError("upc is required")
         upc_no_check = stripcheckdigit(upc)
         values["upc_no_check"] = upc_no_check
-        values['UPC'] = int(str(upc).replace("-", "").replace(" ", ""))
+        values["UPC"] = int(str(upc).replace("-", "").replace(" ", ""))
+
+        for k, v in values.items():
+            if isinstance(v, str):
+                values[k] = v.title()
         return values
+
+    def download(self, client, callback: Callable = None):
+        product = client.get_product(self)
+        if callback:
+            callback(product)
+        return product
 
 
 class Result(BaseModel):
@@ -51,29 +60,92 @@ class Result(BaseModel):
     top_product_ids: Optional[List[int]] = Field(None, alias="TopProductIds")
     category_ids: Optional[List[int]] = Field(None, alias="CategoryIds")
     brand_ids: Optional[List[int]] = Field(None, alias="BrandIds")
-    products: Optional[List[ProductResult]] = Field(None, alias="TopProducts")
+    product_results: Optional[List[ProductResult]] = Field(None, alias="TopProducts")
+    products: dict = {}
 
     def normalize(self):
         return normalize_dict(self.dict())
 
-    def get_product_by_product_code(
-        self, product_code: Union[str, int]
+    def get_product_result_by_product_code(
+            self, product_code: Union[str, int]
     ) -> Optional[ProductResult]:
         """
         product code must be int or str
         """
         product_code = str(product_code).zfill(5)
-        for product in self.products:
+        for product in self.product_results:
             if product.product_code == product_code:
                 return product
         return None
 
-    def get_product_by_upc_ean13(self, upc: Union[str, int]) -> Optional[ProductResult]:
+    def get_product_result_by_upc_ean13(self, upc: Union[str, int]) -> Optional[ProductResult]:
         """
         product code must be int or str
         """
         upc = str(upc).zfill(13)
-        for product in self.products:
+        for product in self.product_results:
             if product.upc == upc:
                 return product
         return None
+
+    def download_products(self, client, callback: Callable=None) -> List:
+        """
+        fetch products from api
+        """
+        products = client.get_products(self, callback=callback)
+        self.products.update(products)
+        return products
+
+
+class Results(BaseModel):
+
+    __root__: Optional[List[Result]] = []
+
+    @property
+    def total_hits(self) -> int:
+        return sum([r.total_hits for r in self.__root__])
+
+    @property
+    def top_product_ids(self) -> List[int]:
+        ids = []
+        for result in self.__root__:
+            ids.extend(result.top_product_ids)
+        return ids
+
+    @property
+    def brand_ids(self) -> List[int]:
+        ids = []
+        for result in self.__root__:
+            ids.extend(result.brand_ids)
+        return ids
+    
+    @property
+    def category_ids(self) -> List[int]:
+        ids = []
+        for result in self.__root__:
+            ids.extend(result.category_ids) 
+        return ids
+
+
+    @property
+    def product_results(self):
+        product_results = []
+        result_ids = []
+        for result in self.__root__:
+            for product_result in result.product_results:
+                if product_result.product_code not in result_ids:
+                    product_results.append(product_result)
+                    result_ids.append(product_result.product_code)
+        return product_results
+
+    def append_result(self, result: Result):
+        self.__root__.append(result)
+
+    def normalize(self):
+        return normalize_dict(self.dict())
+
+    def download_products(self, client, callback: Callable=None) -> Dict[str, Any]:
+        """
+        fetch products from api
+        """
+        products = client.get_products(self.product_results, callback=callback)
