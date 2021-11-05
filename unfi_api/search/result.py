@@ -1,4 +1,6 @@
+import concurrent.futures.thread
 import re
+from concurrent.futures import ThreadPoolExecutor, as_completed, wait
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field, root_validator, validator
@@ -67,7 +69,7 @@ class Result(BaseModel):
         return normalize_dict(self.dict())
 
     def get_product_result_by_product_code(
-            self, product_code: Union[str, int]
+        self, product_code: Union[str, int]
     ) -> Optional[ProductResult]:
         """
         product code must be int or str
@@ -78,7 +80,9 @@ class Result(BaseModel):
                 return product
         return None
 
-    def get_product_result_by_upc_ean13(self, upc: Union[str, int]) -> Optional[ProductResult]:
+    def get_product_result_by_upc_ean13(
+        self, upc: Union[str, int]
+    ) -> Optional[ProductResult]:
         """
         product code must be int or str
         """
@@ -88,11 +92,41 @@ class Result(BaseModel):
                 return product
         return None
 
-    def download_products(self, client, callback: Callable=None) -> List:
+    def download_products(
+        self, client, callback: Callable = None, threaded=False, thread_count=10
+    ) -> Dict[str, 'UNFIProduct']:
         """
         fetch products from api
         """
-        products = client.get_products(self, callback=callback)
+        if threaded:
+            products = {}
+            with ThreadPoolExecutor(max_workers=thread_count) as executor:
+                try:
+                    futures = [
+                        executor.submit(
+                            product.download, client
+                        ) for product in self.product_results
+                    ]
+                    # done, not_done = wait(futures, timeout=0)
+                    for future in as_completed(futures):
+                        try:
+                            product = future.result()
+                            products[product.product_code] = product
+                            callback(product)
+                            if all([future.done() for future in futures]):
+                                break
+                        except Exception as e:
+                            print(e)
+                            raise
+                        except KeyboardInterrupt:
+                            executor.shutdown(wait=False)
+                except KeyboardInterrupt:
+                    executor._threads.clear()
+                    concurrent.futures.thread._threads_queues.clear()
+                    raise
+           
+        else:
+            products = client.get_products(self, callback=callback)
         self.products.update(products)
         return products
 
@@ -118,14 +152,13 @@ class Results(BaseModel):
         for result in self.__root__:
             ids.extend(result.brand_ids)
         return ids
-    
+
     @property
     def category_ids(self) -> List[int]:
         ids = []
         for result in self.__root__:
-            ids.extend(result.category_ids) 
+            ids.extend(result.category_ids)
         return ids
-
 
     @property
     def product_results(self):
@@ -144,7 +177,9 @@ class Results(BaseModel):
     def normalize(self):
         return normalize_dict(self.dict())
 
-    def download_products(self, client, callback: Callable=None) -> Dict[str, Any]:
+    def download_products(
+        self, client, callback: Callable = None, threaded=False
+    ) -> Dict[str, Any]:
         """
         fetch products from api
         """

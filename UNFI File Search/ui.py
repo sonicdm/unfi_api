@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import Variable, ttk
 from tkinter import messagebox
+from settings import default_save_path
 
 
 
@@ -10,7 +11,7 @@ from tkinter import messagebox
 # three page ui for Search, Download Progress, Save/Run Again
 
 class MainContainer(tk.Tk):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, controller, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
         self.title("UNFI File Search")
         self.geometry("600x400")
@@ -103,7 +104,7 @@ class SavePage(tk.Frame):
         label.pack(pady=10, padx=10)
         # filename entry box defaults to "F:\POS\unfi\query.xlsx"
         self.filename_variable = tk.StringVar()
-        self.filename_variable.set("F:\POS\unfi\query.xlsx")
+        self.filename_variable.set(default_save_path)
         self.filename_entry = tk.Entry(self, width=50, textvariable=self.filename_variable)
         self.filename_entry.pack()
 
