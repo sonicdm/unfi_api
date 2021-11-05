@@ -235,7 +235,7 @@ def main():
     client = UnfiApiClient(api)
     print("Client Created!")
     print("Searching for products...")
-    result: Result = client.search("Julian's")
+    result: Result = client.search("walnut")
     print(f"Found {result.total_hits} results.")
     excel_dicts: Dict[str, dict] = {}
     print(f"Downloading {result.total_hits} products...")

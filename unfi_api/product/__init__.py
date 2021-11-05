@@ -30,7 +30,7 @@ class ProductIntID(BaseModel):
     plu: Any = Field(..., alias='PLU')
     organic_code: str = Field(..., alias='OrganicCode')
     speciality_flag: str = Field(..., alias='SpecialityFlag')
-    country_of_origin_id: int = Field(..., alias='CountryOfOriginID')
+    country_of_origin_id: Optional[int] = Field(..., alias='CountryOfOriginID')
     is_private_label: str = Field(..., alias='IsPrivateLabel')
     product_owner: str = Field(..., alias='ProductOwner')
     ingredients: Optional[str] = Field(..., alias='Ingredients')
@@ -56,6 +56,10 @@ class ProductIntID(BaseModel):
     requires_customer_authorization: bool = Field(
         ..., alias='RequiresCustomerAuthorization'
     )
+
+    @validator('is_image_available', pre=True)
+    def is_image_available_validator(cls, v):
+        return True if v else False
 
 
 class ProductData(BaseModel):
@@ -125,8 +129,8 @@ class ProductDetailIntId(BaseModel):
     member_applicable_fee: float = Field(..., alias="MemberApplicableFee")
     category_id: int = Field(..., alias="CategoryID")
     category_name: str = Field(..., alias="CategoryName")
-    country_of_origin_id: int = Field(..., alias="CountryOfOriginID")
-    country_of_origin_name: str = Field(..., alias="CountryOfOriginName")
+    country_of_origin_id: Optional[int] = Field(..., alias="CountryOfOriginID")
+    country_of_origin_name: Optional[str] = Field(..., alias="CountryOfOriginName")
     warehouse_message: Any = Field(..., alias="WarehouseMessage")
     is_new: bool = Field(..., alias="IsNew")
 
