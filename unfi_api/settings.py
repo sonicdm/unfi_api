@@ -1,3 +1,4 @@
+product_query_output_path = "F:\\pos\\unfi\\query_new.xlsx"
 beautiful_soup_parser = "html.parser"
 
 xdock_cust_num = "001016"

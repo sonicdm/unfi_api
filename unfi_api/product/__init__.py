@@ -1,4 +1,5 @@
 from datetime import date, datetime
+import re
 from typing import Any, Dict, Optional, Union
 
 from dateutil.parser import parse as date_parse
@@ -291,6 +292,7 @@ class UNFIProduct(BaseModel):
 
         # get description info
         description = data_by_int_id.product_name.replace("`", "'").replace("'S","'s")
+        description = re.sub(r" At Least \d+% Organic", "", description)
         brand = data_by_int_id.brand_name.title().replace("`", "'").replace("'S","'s")
         short_description = int_id.short_description
         long_description = int_id.long_description

@@ -1,7 +1,5 @@
-import os
 from typing import Callable, Dict, List, Union
 
-from unfi_api import invoice
 from unfi_api.api.admin_backend import AdminBackend, Reports, User
 from unfi_api.api.api import UnfiAPI
 from unfi_api.api.base_classes import APICore
@@ -12,7 +10,8 @@ from unfi_api.api.products import Products
 from unfi_api.api.response import APIResponse, NonJsonResultError
 from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
 from unfi_api.product import (Attributes, Ingredients, Marketing,
-                              NutritionFacts, ProductData, ProductDetailIntId, Pricing, ProductIntID, UNFIProduct)
+                              NutritionFacts, Pricing, ProductData,
+                              ProductDetailIntId, ProductIntID, UNFIProduct)
 from unfi_api.search.result import ProductResult, Result, Results
 
 
@@ -223,46 +222,3 @@ class UnfiApiClient:
             if callback:
                 callback(products[product.product_code])
         return products
-
-
-
-
-def main():
-    print("Connecting to api...")
-    api = UnfiAPI(os.environ["UNFI_USER"], os.environ["UNFI_PASSWORD"], incapsula=False)
-    print("Connected!")
-    print("Creating Client...")
-    client = UnfiApiClient(api)
-    print("Client Created!")
-    print("Searching for products...")
-    result: Result = client.search("walnut")
-    print(f"Found {result.total_hits} results.")
-    excel_dicts: Dict[str, dict] = {}
-    print(f"Downloading {result.total_hits} products...")
-    products: Dict[str, UNFIProduct] = result.download_products(client, lambda x: print(x.brand, x.description, x.upc))
-    for product_code, product in products.items():
-        products[product.product_code] = product
-        excel_dict = product.to_excel()
-        excel_dicts[product_code] = excel_dict
-    write_query_to_excel(excel_dicts)
-
-def write_query_to_excel(excel_dicts: Dict[str, dict]):
-    from openpyxl import Workbook
-    output_file = "F:\\pos\\unfi\\query_new.xlsx"
-    dict_keys: set = set()
-    for d in excel_dicts.values():
-        dict_keys.update(list(d.keys()))
-    header = list(dict_keys)
-    rows = [header]
-    for product_code, excel_dict in excel_dicts.items():
-        row = [excel_dict.get(key) for key in header]
-        rows.append(row)
-    wb = Workbook()
-    ws = wb.active
-    for row in rows:
-        ws.append(row)
-    wb.save(output_file)
-
-if __name__ == "__main__":
-
-    main()

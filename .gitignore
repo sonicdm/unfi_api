@@ -130,5 +130,4 @@ dmypy.json
 # vscode
 .vscode/
 HAR_FILES/
-test.xlsx
-*test.xlsx*
+*.xls*

@@ -227,3 +227,13 @@ def yesno(text, default=True):
             return yes
 
     return yes
+
+def ask_yesno(text, default=True):
+    """
+    Ask a yes/no question to the user
+    """
+    y = "Y" if default else "y"
+    n = "N" if not default else "n"
+    text = f"{text} [{y}/{n}]: "
+    response = input(text)
+    return yesno(response, default)
