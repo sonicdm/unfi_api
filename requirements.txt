@@ -1,8 +1,11 @@
 beautifulsoup4>=4.8.1
 bs4>=0.0.1
 requests>=2.18.4
-pandas
-numpy
-openpyxl
-xlrd
-pydantic
+pydantic~=1.8.2
+setuptools~=53.0.0
+selenium~=4.0.0a5
+python-dateutil~=2.8.1
+decorator~=4.4.2
+future~=0.18.2
+python-stdnum~=1.17
+devtools~=0.8.0
