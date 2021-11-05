@@ -1,13 +1,16 @@
 import concurrent.futures.thread
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, root_validator, validator
 # from unfi_api.product import UNFIProduct
 from unfi_api.utils.collections import normalize_dict
 from unfi_api.utils.upc import stripcheckdigit
 
+if TYPE_CHECKING:
+    from unfi_api.product import UNFIProduct
+    from unfi_api.client import UnfiApiClient
 
 class ProductResult(BaseModel):
     per_unit_price: Optional[float] = Field(..., alias="PerUnitPrice")
@@ -36,7 +39,7 @@ class ProductResult(BaseModel):
     is_new: bool = Field(..., alias="IsNew")
 
     @root_validator(pre=True)
-    def root_validator(cls, values):
+    def root_validator(cls, values)-> dict:
         # print(values)
         upc = values.get("UPC")
         if upc is None:
@@ -50,7 +53,7 @@ class ProductResult(BaseModel):
                 values[k] = v.title()
         return values
 
-    def download(self, client, callback: Callable = None):
+    def download(self, client:UnfiApiClient, callback: Callable = None) -> UNFIProduct:
         product = client.get_product(self)
         if callback:
             callback(product)
@@ -65,7 +68,7 @@ class Result(BaseModel):
     product_results: Optional[List[ProductResult]] = Field(None, alias="TopProducts")
     products: dict = {}
 
-    def normalize(self):
+    def normalize(self) -> dict:
         return normalize_dict(self.dict())
 
     def get_product_result_by_product_code(
@@ -93,8 +96,8 @@ class Result(BaseModel):
         return None
 
     def download_products(
-        self, client, callback: Callable = None, threaded=False, thread_count=10
-    ) -> Dict[str, 'UNFIProduct']:
+        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=10
+    ) -> Dict[str, UNFIProduct]:
         """
         fetch products from api
         """
@@ -161,7 +164,7 @@ class Results(BaseModel):
         return ids
 
     @property
-    def product_results(self):
+    def product_results(self) -> List[ProductResult]:
         product_results = []
         result_ids = []
         for result in self.__root__:
@@ -178,7 +181,7 @@ class Results(BaseModel):
         return normalize_dict(self.dict())
 
     def download_products(
-        self, client, callback: Callable = None, threaded=False
+        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False
     ) -> Dict[str, Any]:
         """
         fetch products from api
