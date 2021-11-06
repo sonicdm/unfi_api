@@ -1,8 +1,14 @@
+from __future__ import annotations
 import tkinter as tk
 from tkinter import Variable, ttk
 from tkinter import messagebox
+from typing import TYPE_CHECKING
 from settings import default_save_path
-
+from view import TkContainer
+from model import TkModel
+from controller import Controller
+if TYPE_CHECKING:
+    from unfi_product_search import SearchController
 
 
 
@@ -10,36 +16,14 @@ from settings import default_save_path
             
 # three page ui for Search, Download Progress, Save/Run Again
 
-class MainContainer(tk.Tk):
-    def __init__(self, controller, *args, **kwargs):
+class MainContainer(TkContainer):
+
+    def __init__(self, controller:Controller, *args, **kwargs):
         tk.Tk.__init__(self, *args, **kwargs)
-        self.title("UNFI File Search")
-        self.geometry("600x400")
-        self.resizable(False, False)
-        self.container = tk.Frame(self)
-        self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
-        self.frames = {}
-        for F in (StartPage, SearchPage, DownloadPage, SavePage):
-            frame = F(self.container, self)
-            self.frames[F] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+        self.base_title = "UNFI API Client"
 
-        self.show_frame(StartPage)
 
-    def show_frame(self, cont):
-        frame = self.frames[cont]
-        frame.tkraise()
 
-    def register_frame(self, frame):
-        self.frames[frame] = frame
-
-    def unregister_frame(self, frame):
-        del self.frames[frame]
-
-    def run(self):
-        self.mainloop()
 
         
 class StartPage(tk.Frame):
@@ -56,34 +40,37 @@ class StartPage(tk.Frame):
 
 
 class SearchPage(tk.Frame):
-    def __init__(self, parent, controller):
+    name: str = "search"
+    title: str = "Product Search"
+    def __init__(self, parent, controller: SearchController, model=None):
+        self.controller = controller
+        self.parent = parent
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Search", font=("Arial", 20))
         label.pack(pady=10, padx=10)
         # search entry box. multi line
-        self.search_entry = tk.Text(self, height=5, width=50)
+        self.search_variable = tk.StringVar()
+        self.search_entry = tk.Text(self, height=5, width=50, textvariable=self.search_variable)
         self.search_entry.pack()
-        button1 = ttk.Button(self, text="Back to Home", command=lambda: controller.show_frame(StartPage))
+        button1 = ttk.Button(self, text="Back to Home", command=lambda: controller.show_view(StartPage))
         button1.pack()
-        button2 = ttk.Button(self, text="Search", command=lambda: controller.show_frame(DownloadPage))
+        button2 = ttk.Button(self, text="Search", command=lambda: self.do_search)
         button2.pack()
-        button3 = ttk.Button(self, text="Save", command=lambda: controller.show_frame(SavePage))
+        button3 = ttk.Button(self, text="Save", command=lambda: controller.show_view(SavePage))
         button3.pack()
     
-    def do_search(self):
+    def do_search(self, x=None):
         # do search
-        pass
-
+        result = self.controller.search(self.search_variable.get)
 
 class DownloadPage(tk.Frame):
-    def __init__(self, parent, controller):
+    name: str = "download"
+    def __init__(self, parent, controller, model):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Download", font=("Arial", 20))
         label.pack(pady=10, padx=10)
         # progress bar to show product download progress
         # label progress bar as Download Progress %
-
-
 
         self.progress_bar = ttk.Progressbar(self, orient="horizontal", length=200, mode="determinate")
         self.progress_bar.pack()
@@ -98,7 +85,7 @@ class DownloadPage(tk.Frame):
     
 
 class SavePage(tk.Frame):
-    def __init__(self, parent, controller):
+    def __init__(self, parent, controller, model):
         tk.Frame.__init__(self, parent)
         label = tk.Label(self, text="Save", font=("Arial", 20))
         label.pack(pady=10, padx=10)
