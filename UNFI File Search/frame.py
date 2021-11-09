@@ -1,3 +1,4 @@
+from __future__ import annotations
 import tkinter as tk
 from typing import TYPE_CHECKING
 
@@ -8,7 +9,7 @@ if TYPE_CHECKING:
     from view import View
 
 class TkFrame(tk.Frame):
-    def __init__(self, view: View, container: TkContainer, controller: Controller=None):
+    def __init__(self, view: 'View', container: 'TkContainer', controller: 'Controller'=None):
         """
         controller: central controller for the application
         container: central container for the application
@@ -30,11 +31,11 @@ class TkFrame(tk.Frame):
     def store_tk_variable(self, name: str, value: str):
         self.model.store_tk_variable(name, value)
 
-    def get_controller(self) -> Controller:
+    def get_controller(self) -> 'Controller':
         return self.container.controller
 
-    def get_model(self) -> TkModel:
+    def get_model(self) -> 'TkModel':
         return self.model
 
-    def get_container(self) -> TkContainer:
+    def get_container(self) -> 'TkContainer':
         return self.container

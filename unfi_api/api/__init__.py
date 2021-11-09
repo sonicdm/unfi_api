@@ -1,1 +1,1 @@
-from api import UnfiAPI
+from unfi_api.api.api import UnfiAPI

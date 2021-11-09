@@ -8,7 +8,7 @@ if TYPE_CHECKING:
 
 
 class TkModel:
-    def __init__(self, controller: Controller):
+    def __init__(self, controller: 'Controller'):
         self.controller = controller
         self.variables: Dict[str, Variable] = {}
 

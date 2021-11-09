@@ -4,10 +4,10 @@ from tkinter.constants import ACTIVE
 from typing import TYPE_CHECKING, Dict, List, Optional
 from dataclasses import dataclass
 from pydantic.main import BaseModel
+from model import TkModel
 
 if TYPE_CHECKING:
     from controller import Controller
-    from model import TkModel
     from frame import TkFrame
     from container import TkContainer
 
@@ -26,9 +26,13 @@ class View:
     def init_view(self, container: TkContainer, controller: Controller=None, model: TkModel=None) -> None:
         if not controller:
             self.controller = container.controller
-        
-        self.model = self.model(controller=controller)
-        self.view = self.frame(container, self, controller)
+        if not isinstance(model, TkModel) and type(model) == TkModel:
+            self.model = model(controller=self.controller)
+        elif type(model) == TkModel:
+            self.model = model(self.controller)
+        else:
+            self.model = self.controller.model
+        self.view = self.frame(self, container, controller)
         self.initialized = True
 
     def get_model(self, controller: Controller=None) -> TkModel:
