@@ -62,6 +62,8 @@ def round_retails(price):
     else:
         if xtail in round_to_x5_tails:
             price = "{}.{}{}".format(whole, tenth, 5)
+        elif tail in round_to_15_tails:
+            price = "{}.{}".format(whole, "15")
         elif xtail in round_to_x5_tails:
             price = "{}.{}{}".format(whole, tenth, 5)
         elif xtail in round_to_x9_tails:
