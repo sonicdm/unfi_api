@@ -1,3 +1,4 @@
+from __future__ import annotations
 import concurrent.futures.thread
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
@@ -53,7 +54,7 @@ class ProductResult(BaseModel):
                 values[k] = v.title()
         return values
 
-    def download(self, client:UnfiApiClient, callback: Callable = None) -> UNFIProduct:
+    def download(self, client:'UnfiApiClient', callback: Callable = None) -> UNFIProduct:
         product = client.get_product(self)
         if callback:
             callback(product)
@@ -140,21 +141,21 @@ class Results(BaseModel):
 
     @property
     def total_hits(self) -> int:
-        return sum([r.total_hits for r in self.__root__])
+        return len(self.product_results)
 
     @property
     def top_product_ids(self) -> List[int]:
-        ids = []
+        ids = set()
         for result in self.__root__:
-            ids.extend(result.top_product_ids)
-        return ids
+            ids.update(result.top_product_ids)
+        return list(ids)
 
     @property
     def brand_ids(self) -> List[int]:
-        ids = []
+        ids = set()
         for result in self.__root__:
-            ids.extend(result.brand_ids)
-        return ids
+            ids.update(result.brand_ids)
+        return list(ids)
 
     @property
     def category_ids(self) -> List[int]:
@@ -177,8 +178,16 @@ class Results(BaseModel):
     def append_result(self, result: Result):
         self.__root__.append(result)
 
+    def append_results(self, results: List[Result]):
+        self.__root__.extend(results)
+
     def normalize(self):
         return normalize_dict(self.dict())
+
+    def extend_results(self, results: Results):
+        """append results from another results class. Ignorning duplicate product_codes"""
+        for result in results.__root__:
+            self.append_result(result)
 
     def download_products(
         self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False

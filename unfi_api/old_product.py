@@ -162,7 +162,7 @@ def parse_pricing(response_content):
     return pricing
 
 
-def get_product_info(product_id, product_code, token, xdock=False, callback=None, api=None):
+def get_product_info(product_id, product_code, token, xdock=False, callback=None, api: UnfiAPI=None):
     """
     Query and find all metadata for a given product.
     :type api: `unfi_api.api.api.UnfiAPI`
@@ -181,7 +181,7 @@ def get_product_info(product_id, product_code, token, xdock=False, callback=None
 
     # NEW API
     data_result = api.products.get_west_product_data(product_code).data
-    detail_result = api.order_management.product_detail.get_product_detail_by_int_id(product_id)['data'][0]
+    detail_result = api.order_management.product_detail.get_product_detail_by_int_id(product_id).data
 
     attribute_result = get_attributes(product_id, header, api=api)
     if attribute_result:
