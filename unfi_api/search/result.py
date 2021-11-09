@@ -1,3 +1,4 @@
+from __future__ import annotations
 import concurrent.futures.thread
 import re
 from concurrent.futures import ThreadPoolExecutor, as_completed, wait
@@ -53,7 +54,7 @@ class ProductResult(BaseModel):
                 values[k] = v.title()
         return values
 
-    def download(self, client:UnfiApiClient, callback: Callable = None) -> UNFIProduct:
+    def download(self, client:'UnfiApiClient', callback: Callable = None) -> UNFIProduct:
         product = client.get_product(self)
         if callback:
             callback(product)

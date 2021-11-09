@@ -1,9 +1,10 @@
 from urllib import parse
 import requests
 
-from unfi_api.utils.http import response_to_json
+from unfi_api.utils.http import response_to_api_response, response_to_json
 
 product_detail_endpoint = 'https://ordermanagement.unfi.com/api/ProductDetail/'
+
 
 
 def get_product_detail_by_int_id(session, token, product_int_id, region, account_number, warehouse, user_id):
@@ -21,5 +22,5 @@ def get_product_detail_by_int_id(session, token, product_int_id, region, account
     }
 
     result = session.get(url, headers=header, params=params)
-    return response_to_json(result)
+    return response_to_api_response(result)
 
