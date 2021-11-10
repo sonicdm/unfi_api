@@ -1,6 +1,11 @@
 import os
+<<<<<<< HEAD
 import re
 import sys
+=======
+import sys
+import re
+>>>>>>> aeb5ccd2d909610b4a5c2381c3f1307cdd2a2ceb
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox as mb
@@ -14,7 +19,11 @@ from unfi_api.exceptions import exception_retry_prompt
 from unfi_api.product import UNFIProduct, UNFIProducts
 from unfi_api.search.result import Result, Results
 from unfi_api.settings import IMAGE_OUTPUT_PATH, PRODUCT_QUERY_OUTPUT_PATH
+<<<<<<< HEAD
 from unfi_api.unfi_web_queries import make_query_list, run_query
+=======
+from unfi_api.unfi_web_queries import run_query, make_query_list
+>>>>>>> aeb5ccd2d909610b4a5c2381c3f1307cdd2a2ceb
 from unfi_api.utils.collections import divide_chunks
 
 # def uncaught_exception_handler(etype, value, tb):
@@ -146,6 +155,7 @@ def download_product_images(
                         img_file.write(image_data)
 
 
+<<<<<<< HEAD
 def save_wb(wb: Workbook, output_file=output_path) -> None:
     while True:
         try:
@@ -154,6 +164,16 @@ def save_wb(wb: Workbook, output_file=output_path) -> None:
             if mb.askyesno(
                 f"Permission Error",
                 f"Permission Error, could not write to:\n {output_file}. Retry?",
+=======
+def save_wb(wb, output_file=output_path) -> None:
+    while True:
+        try:
+            wb.save(output_path)
+        except PermissionError:
+            if mb.askyesno(
+                f"Permission Error",
+                "Permission Error, could not write to:\n {product_query_output_path}. Retry?",
+>>>>>>> aeb5ccd2d909610b4a5c2381c3f1307cdd2a2ceb
             ):
                 continue
             else:
