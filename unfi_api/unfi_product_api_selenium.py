@@ -7,7 +7,7 @@ from tkinter import simpledialog
 from openpyxl import Workbook
 
 from unfi_api import UnfiAPI, UnfiApiClient
-from unfi_api.settings import image_output_path
+from unfi_api.settings import IMAGE_OUTPUT_PATH
 from unfi_api.unfi_web_queries import run_query, make_query_list
 
 # def uncaught_exception_handler(etype, value, tb):
@@ -46,7 +46,7 @@ def main():
                 query = None
                 if fetch_images:
                     for upc, product in products.items():
-                        download_product_image(api, product, image_output_path)
+                        download_product_image(api, product, IMAGE_OUTPUT_PATH)
                 if mb.askyesno("Save Workbook", "Would you like to save the workbook?"):
                     save_workbook(products, fields)
                 search = mb.askyesno("Run again?", "Run another search?")
