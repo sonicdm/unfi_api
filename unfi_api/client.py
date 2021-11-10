@@ -1,17 +1,36 @@
+from __future__ import annotations
+
+import concurrent.futures.thread
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Dict, List, Union
 
 from unfi_api.api.admin_backend import AdminBackend, Reports, User
+from unfi_api.download import download_products
 from unfi_api.api.api import UnfiAPI
 from unfi_api.api.base_classes import APICore
-from unfi_api.api.order_management import (Brands, Categories,
-                                           InteractiveReports, OrderHistory,
-                                           OrderManagement, ProductDetail)
+from unfi_api.api.order_management import (
+    Brands,
+    Categories,
+    InteractiveReports,
+    OrderHistory,
+    OrderManagement,
+    ProductDetail,
+)
 from unfi_api.api.products import Products
 from unfi_api.api.response import APIResponse, NonJsonResultError
 from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
-from unfi_api.product import (Attributes, Ingredients, Marketing,
-                              NutritionFacts, Pricing, ProductData,
-                              ProductDetailIntId, ProductIntID, UNFIProduct)
+from unfi_api.product import (
+    Attributes,
+    Ingredients,
+    Marketing,
+    NutritionFacts,
+    Pricing,
+    ProductData,
+    ProductDetailIntId,
+    ProductIntID,
+    UNFIProduct,
+    UNFIProducts,
+)
 from unfi_api.search.result import ProductResult, Result, Results
 
 
@@ -131,10 +150,9 @@ class UnfiApiClient:
             raise NonJsonResultError(
                 f"Non-JSON API response for product detail request"
             )
-        result = ProductDetailIntId.parse_obj(
-            response.data
-        )
+        result = ProductDetailIntId.parse_obj(response.data)
         return result
+
     def get_product_int_id(self, int_id) -> APIResponse:
         result = self.products.get_product_by_int_id(int_id)
         return result
@@ -196,29 +214,38 @@ class UnfiApiClient:
         product_by_int_id = self.get_product_int_id(int_id)
         product_int_id = ProductIntID.parse_obj(product_by_int_id.data)
         product = UNFIProduct(
-                data_by_int_id=product_detail_by_int_id,
-                data=west_product_data,
-                marketing=marketing,
-                pricing=pricing,
-                attributes=attributes,
-                listing=product_result,
-                nutrition=nutrition,
-                ingredients=ingredients,
-                int_id=product_int_id
+            data_by_int_id=product_detail_by_int_id,
+            data=west_product_data,
+            marketing=marketing,
+            pricing=pricing,
+            attributes=attributes,
+            listing=product_result,
+            nutrition=nutrition,
+            ingredients=ingredients,
+            int_id=product_int_id,
         )
         return product
 
-    def get_products(self, result: Union[Result,List[ProductResult]], callback: Callable=None) -> Dict[str, UNFIProduct]:
+    def get_products(
+        self,
+        result: Union[Result, List[ProductResult]],
+        callback: Callable = None,
+        threaded=False,
+        thread_count=4,
+    ) -> UNFIProducts:
         """
         product_list: OrderList
         """
         products: Dict[str, UNFIProduct] = {}
-        if isinstance(result, Result):
+        if isinstance(result, (Result, Results)):
             results = result.product_results
         elif isinstance(result, list):
             results = result
-        for product in results:
-            products[product.product_code] = product.download(self)
-            if callback:
-                callback(products[product.product_code])
+        products = download_products(
+            self,
+            results,
+            callback,
+            threaded=threaded,
+            thread_count=thread_count,
+        )
         return products

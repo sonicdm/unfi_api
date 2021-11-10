@@ -199,7 +199,7 @@ def make_query_list(query):
         query_list.remove("")
     except ValueError:
         pass
-    return strings_to_numbers(query_list)
+    return query_list
 
 
 def run_query(query_list, token, xdock=False, api=None):
