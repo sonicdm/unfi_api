@@ -23,7 +23,7 @@ from unfi_api.product.nutrition import NutritionFacts, Nutrient
 from unfi_api.product.marketing import Marketing
 from unfi_api.product import ProductData
 from unfi_api.product import ProductDetailIntId
-from unfi_api.product import ProductListing
+from unfi_api.product.product import ProductListing
 
 
 class TestProductData(TestCase):

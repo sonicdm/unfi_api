@@ -2,15 +2,15 @@ import os
 from typing import Dict
 import tqdm
 
-from unfi_api.settings import product_query_output_path
+from unfi_api.settings import output_path
 from unfi_api.api.api import UnfiAPI
 from unfi_api.client import UnfiApiClient
-from unfi_api.product import UNFIProduct
+from unfi_api.product import UNFIProduct, UNFIProducts
 from unfi_api.exceptions import exception_retry_prompt
 
 from unfi_api.search.result import ProductResult, Result, Results
 
-product_query_output_path = "F:\\pos\\unfi\\query_new.xlsx"
+output_path = "F:\\pos\\unfi\\query_new.xlsx"
 
 def main():
     print("Connecting to api...")
@@ -40,16 +40,12 @@ def main():
     print(f"Downloading {result.total_hits} products...")
     with tqdm.tqdm(total=result.total_hits, unit=" products") as pbar:
         pbar.smoothing = 0.1
-        products: Dict[str, UNFIProduct] = result.download_products(
+        products:UNFIProducts = result.download_products(
             api_client, lambda x: pbar_callback(x, pbar), threaded=True, thread_count=4
         )
         # pbar.display(f"Downloaded {len(products)} products.")
 
-    for product_code, product in products.items():
-        products[product.product_code] = product
-        excel_dict = product.to_excel()
-        excel_dicts[product_code] = excel_dict
-    wb = create_excel_workbook(excel_dicts)
+    wb = create_excel_workbook(products)
     save_wb(wb)
 
 
@@ -59,8 +55,8 @@ def main():
     max_tries=3,
     message="Failed to write excel file (file may be in use).",
 )
-def save_wb(wb, output_file=product_query_output_path):
-    wb.save(product_query_output_path)
+def save_wb(wb, output_file=output_path):
+    wb.save(output_path)
 
 
 def pbar_callback(product: UNFIProduct, pbar: tqdm.tqdm):
@@ -68,9 +64,9 @@ def pbar_callback(product: UNFIProduct, pbar: tqdm.tqdm):
     pbar.update()
 
 
-def create_excel_workbook(excel_dicts: Dict[str, dict]):
+def create_excel_workbook(products: UNFIProducts):
     from openpyxl import Workbook
-
+    excel_dicts = products.to_excel()
     dict_keys: set = set()
     for d in excel_dicts.values():
         dict_keys.update(list(d.keys()))

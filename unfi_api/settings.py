@@ -1,4 +1,5 @@
-product_query_output_path = "F:\\pos\\unfi\\query_new.xlsx"
+PRODUCT_QUERY_OUTPUT_PATH = "F:\\pos\\unfi\\query_new.xlsx"
+IMAGE_OUTPUT_PATH = r"F:\Signs\product_images"
 beautiful_soup_parser = "html.parser"
 
 xdock_cust_num = "001016"
@@ -7,7 +8,7 @@ ridgefield_cust_num = "001014"
 ridgefield_warehouse = 6
 user_id = "34653"
 api_thread_limit = 8
-image_output_path = r"F:\Signs\product_images"
+IMAGE_OUTPUT_PATH = r"F:\Signs\product_images"
 unfi_invoice_list_xhr = 'https://ordermanagement.unfi.com/api/OrderHistory/GetGridItem?' \
                         'custNum={custnum}++++&' \
                         'UserId={userid}&' \
