@@ -1,6 +1,6 @@
 import os
-import sys
 import re
+import sys
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox as mb
@@ -14,7 +14,7 @@ from unfi_api.exceptions import exception_retry_prompt
 from unfi_api.product import UNFIProduct, UNFIProducts
 from unfi_api.search.result import Result, Results
 from unfi_api.settings import IMAGE_OUTPUT_PATH, PRODUCT_QUERY_OUTPUT_PATH
-from unfi_api.unfi_web_queries import run_query, make_query_list
+from unfi_api.unfi_web_queries import make_query_list, run_query
 from unfi_api.utils.collections import divide_chunks
 
 # def uncaught_exception_handler(etype, value, tb):
@@ -146,14 +146,14 @@ def download_product_images(
                         img_file.write(image_data)
 
 
-def save_wb(wb, output_file=output_path) -> None:
+def save_wb(wb: Workbook, output_file=output_path) -> None:
     while True:
         try:
-            wb.save(output_path)
+            wb.save(output_file)
         except PermissionError:
             if mb.askyesno(
                 f"Permission Error",
-                "Permission Error, could not write to:\n {product_query_output_path}. Retry?",
+                f"Permission Error, could not write to:\n {output_file}. Retry?",
             ):
                 continue
             else:
