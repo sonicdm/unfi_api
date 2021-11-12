@@ -7,7 +7,7 @@ from operator import itemgetter
 
 import psutil
 import tqdm
-from catalogboss.utils import strings_to_numbers, isnumber
+from unfi_api.utils.string import strings_to_numbers, isnumber
 
 
 def setpriority():

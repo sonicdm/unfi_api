@@ -9,8 +9,8 @@ from typing import List
 
 import requests
 from bs4 import BeautifulSoup
-from catalogboss.formatter import size_cols
-from catalogboss.utils import strings_to_numbers
+from unfi_api.utils.output import auto_size_worksheet_columns
+from unfi_api.utils.string import strings_to_numbers
 from openpyxl import Workbook
 from unfi_api import UnfiAPI, UnfiApiClient
 import unfi_api
@@ -158,7 +158,7 @@ def create_invoice_workbook(invoicedict, outputpath=None, invdate=None):
             ws = wb.create_sheet(invoice)
         for row in rows:
             ws.append(strings_to_numbers(row))
-        size_cols(ws)
+        auto_size_worksheet_columns(ws)
         for l in rows[3:]:
             l.insert(0, invoice[:-4])
             l.insert(1, invdate.strftime("%m/%d/%y"))
