@@ -5,7 +5,6 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Callable, Dict, List, Union
 
 from unfi_api.api.admin_backend import AdminBackend, Reports, User
-from unfi_api.download import download_products
 from unfi_api.api.api import UnfiAPI
 from unfi_api.api.base_classes import APICore
 from unfi_api.api.order_management import (
@@ -18,7 +17,15 @@ from unfi_api.api.order_management import (
 )
 from unfi_api.api.products import Products
 from unfi_api.api.response import APIResponse, NonJsonResultError
-from unfi_api.invoice import CREDIT, INVOICE, WEB_ORDER, Invoice, OrderList
+from unfi_api.download import download_products, download_invoices
+from unfi_api.invoice import (
+    CREDIT,
+    INVOICE,
+    WEB_ORDER,
+    Invoice,
+    OrderList,
+    OrderListing,
+)
 from unfi_api.product import (
     Attributes,
     Ingredients,
@@ -32,6 +39,7 @@ from unfi_api.product import (
     UNFIProducts,
 )
 from unfi_api.search.result import ProductResult, Result, Results
+from unfi_api.utils.threading import threader
 
 
 class UnfiApiClient:
@@ -63,6 +71,7 @@ class UnfiApiClient:
         category_ids="",
         page_number=1,
     ):
+
         result = self.brands.get_products_by_full_text(
             query,
             limit,
@@ -101,7 +110,34 @@ class UnfiApiClient:
             )
         return Invoice.parse_obj(response.data)
 
-    def get_invoice_list(self, limit=1000) -> OrderList:
+    def get_invoices(
+        self,
+        order_list: Union[OrderList, List[str], List[OrderListing]],
+        callback: Callable = None,
+        threaded=False,
+        thread_count=4,
+    ) -> List[Invoice]:
+        orders: List[Invoice] = []
+        invoice_numbers = []
+        for order in order_list:
+            if isinstance(order, OrderListing):
+                invoice_numbers.append(order.invoice_number)
+            elif isinstance(order, str):
+                invoice_numbers.append(order)
+            else:
+                raise ValueError(
+                    f"order_list must be a list of OrderListing or strings got {type(order)} instead."
+                )
+        orders = download_invoices(
+            self,
+            invoice_numbers,
+            callback=callback,
+            threaded=threaded,
+            thread_count=thread_count,
+        )
+        return orders
+
+    def get_invoice_list(self, limit=1000, page_number=1) -> OrderList:
         """
         invoice_id: invoice id
         """
@@ -111,7 +147,7 @@ class UnfiApiClient:
             req_by=None,
             invoice_no=None,
             page_size=limit,
-            page_number=1,
+            page_number=page_number,
             sort_expression=None,
             sort_direction=None,
         )
@@ -249,3 +285,6 @@ class UnfiApiClient:
             thread_count=thread_count,
         )
         return products
+
+    def set_account(self, account_id: str):
+        self.user.insert_selected_account_as_default(account_id)

@@ -1,16 +1,20 @@
+from __future__ import annotations
+
+from datetime import date
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
+
 from bs4 import BeautifulSoup
 from bs4.element import ResultSet
-from pydantic import BaseModel, validator, Field
-from datetime import date
-from typing import Any, Dict, List, Optional
-
+from pydantic import BaseModel, Field, validator
 from pydantic.class_validators import root_validator
-from .line_item import LineItem, LineItems
-
-from ..utils.collections import table_to_dicts, normalize_dict
-from ..utils.string import remove_escaped_characters
-from unfi_api.validators import currency_string_to_float, validate_date_input
 from unfi_api import settings
+from unfi_api.invoice.line_item import LineItem, LineItems
+from unfi_api.utils.collections import normalize_dict, table_to_dicts
+from unfi_api.utils.string import remove_escaped_characters
+from unfi_api.validators import currency_string_to_float, validate_date_input
+
+if TYPE_CHECKING:
+    from unfi_api import UnfiApiClient
 
 """
     1: Invoices
@@ -200,6 +204,12 @@ class Invoice(BaseModel):
         Normalize the invoice data.
         """
         return normalize_dict(self.dict())
+    
+    def __str__(self) -> str:
+        return f"Invoice(date: {self.invoice_date}, invoice_number: {self.invoice_number}, total_items: {len(self.line_items)}, Total: ${self.total})"
+    
+    def __repr__(self) -> str:
+        return str(self)
 
 
 class OrderListing(BaseModel):
@@ -223,7 +233,7 @@ class OrderListing(BaseModel):
 
 
 class OrderList(BaseModel):
-    __root__: Dict[str, OrderListing]
+    __root__: Optional[Dict[str, OrderListing]] = {}
 
     @root_validator(pre=True)
     def listing_to_dict(cls, values):
@@ -231,20 +241,43 @@ class OrderList(BaseModel):
         Convert the order listing to a dict.
         """
         listings = values.get("__root__")
+        if not listings:
+            return values
         new_dict = {}
+        if isinstance(listings, dict):
+            for key, value in listings.items():
+                if isinstance(value, OrderListing) and isinstance(key, str):
+                    new_dict[key] = value.dict()
+                elif isinstance(value, dict) and isinstance(key, str):
+                    new_dict[str(key)] = value
+                    
+                else:
+                    raise ValueError(
+                        "Invalid OrderListing object. "
+                        "Expected OrderListing or dict, got {}".format(type(value))
+                    )
+            return values
         for listing in listings:
-            invoice_number = listing.get("InvoiceNumber")
-            if not invoice_number:
-                continue
-            new_dict[invoice_number] = listing
+            if isinstance(listing, OrderListing):
+                new_dict[listing.invoice_number] = listing.dict()
+            else:
+                if "InvoiceNumber" in listing:
+                    new_dict[listing.get("InvoiceNumber")] = listing
+                elif "invoice_number" in listing:
+                    new_dict[listing.get("invoice_number")] = listing
+                    
         values["__root__"] = new_dict
         return values
 
     @property
-    def orders(self):
+    def total_orders(self):
+        return len(self.__root__)
+
+    @property
+    def orders(self) -> Dict[str, OrderListing]:
         return self.__root__
 
-    def orders_by_date(self):
+    def orders_by_date(self) -> Dict[date, List[OrderListing]]:
         """
         Return a dict indexed by invoice date
         """
@@ -256,12 +289,62 @@ class OrderList(BaseModel):
             invoices[invoice_date].append(listing)
         return invoices
 
-    def filter_by_date(self, start_date: date, end_date: date) -> List[OrderListing]:
+    def filter_by_date(self, start_date: date, end_date: date) -> OrderList:
         """
         Filter the order list by date.
         """
-        return {
-            number: order
-            for number, order in self.orders.items()
-            if start_date <= order.invoice_date <= end_date
-        }
+        orders = OrderList()
+        for order in self.orders.values():
+            if start_date <= order.invoice_date <= end_date:
+                orders.add_order(order)
+
+        return orders
+    
+    def add_order(self, order: Union[OrderListing,OrderList]):
+        """
+        Add an order to the order list.
+        """
+        if isinstance(order, OrderList):
+            self.__root__.update(order.orders)
+        
+        else:
+            self.__root__[order.invoice_number] = order    
+    
+    def download_orders(self, client: 'UnfiApiClient'):
+        """
+        Download the orders from the API.
+        """
+        ...
+        
+    def __iter__(self):
+        return iter(self.__root__.values())
+
+    def __getitem__(self, invoice_number):
+        return self.__root__[invoice_number]
+    
+    def values(self):
+        return self.__root__.values()
+    
+    def items(self):
+        return self.__root__.items()
+    
+    def keys(self):
+        return self.__root__.keys()
+    
+    def __add__(self, other):
+        # if other is not an OrderList, OrderListing,
+        # not list of OrderList, OrderListing or dicts, raise add not supported
+        if isinstance(other, OrderList):
+            self.__root__.update(other.__root__)
+        elif isinstance(other, OrderListing):
+            self.__root__[other.invoice_number] = other
+        elif isinstance(other, list):
+            if all(isinstance(item, OrderListing) for item in other) or all(isinstance(item, OrderList) for item in other):
+                for listing in other:
+                    self.add_order(listing)
+        else:
+            raise TypeError("unsupported operand type(s) for +: 'OrderList' and '{}'".format(type(other)))
+
+    def __len__(self):
+        return len(self.__root__)
+    

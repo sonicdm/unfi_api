@@ -1,6 +1,11 @@
-from . import reports, user
-from unfi_api.api.base_classes import Endpoint, APICore
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+from unfi_api.api.admin_backend import reports, user
+from unfi_api.api.base_classes import Endpoint, APICore
+if TYPE_CHECKING:
+    from unfi_api import UnfiAPI
+    
 
 class AdminBackend(Endpoint):
     """
@@ -23,9 +28,9 @@ class User(Endpoint):
     :type api: `unfi_api.api.UnfiAPI`
     """
 
-    def __init__(self, api: APICore):
+    def __init__(self, api: 'UnfiAPI'):
         self.name = "user"
-        self.api: APICore = api
+        self.api = api
         self.api.register_endpoint(self)
 
     def insert_selected_account_as_default(self, account_number):
@@ -35,6 +40,7 @@ class User(Endpoint):
         region = self.api.account_region
         warehouse = self.api.warehouse,
         account_result = user.insert_selected_account_as_default(token, user_id, account_number, region)
+        self.api.refresh_metadata()
         return account_result
 
     def get_users_data(self):
