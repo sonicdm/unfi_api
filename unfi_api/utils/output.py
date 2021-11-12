@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -20,8 +18,7 @@ def auto_size_worksheet_columns(ws: Worksheet, padding: int=0) -> None:
                 dims[cell.column] = max((dims.get(cell.column, 0), len(str(cell.value))))    
     for col, value in dims.items():
         ws.column_dimensions[col].width = value
-    
-=======
+
 # permission error retry decorator
 from openpyxl.utils import get_column_letter
 from unfi_api.utils.string import  isnumber
@@ -41,4 +38,3 @@ def size_cols(ws):
                 pass
         adjusted_width = (max_length + 1) * 1
         ws.column_dimensions[column].width = adjusted_width
->>>>>>> 7c6f6e894dfbedece01b705084783b88bdeb44f2
