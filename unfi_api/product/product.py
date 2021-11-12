@@ -379,7 +379,7 @@ class UNFIProducts:
             products = products.products_dict
         self.products_dict = products
         
-    def to_excel(self, exclude=None, include=None) -> List[dict]:
+    def to_excel(self, exclude=None, include=None) -> List[Dict[str,dict]]:
         """
         pass to base model to_excel method
         exclude and include are fields to exclude and include from the UnfiProduct model dict

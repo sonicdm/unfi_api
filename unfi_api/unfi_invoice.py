@@ -6,20 +6,24 @@ except ImportError:
     pass
 import datetime
 import os
+from pathlib import Path
 
 from openpyxl.formatting.rule import CellIsRule, FormulaRule
-from openpyxl.styles import PatternFill, Alignment
+from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
 
-from catalogboss.formatter import size_cols
-from catalogboss.catalog.products import Product
-from catalogboss.catalogio import read_workbook
-from catalogboss.utils import \
-    strings_to_numbers, find_most_common_member, sort_dict
-from catalogboss.utils.db import AbbrRepl
-from catalogboss.utils import index_header
-from catalogboss.utils.upc import stripcheckdigit, isnumber
+# from catalogboss.formatter import size_cols
+# from catalogboss.catalog.products import Product
+# from catalogboss.catalogio import read_workbook
+# from catalogboss.utils import \
+#     strings_to_numbers, find_most_common_member, sort_dict
+# from catalogboss.utils.db import AbbrRepl
+# from catalogboss.utils import index_header
+# from catalogboss.utils.upc import stripcheckdigit, isnumber
 from unfi_api.unfi_web_queries import create_invoice_workbook
+from unfi_api.utils import index_header
+from unfi_api.utils.string import AbbrRepl, isnumber, strings_to_numbers
+from unfi_api.utils.upc import stripcheckdigit
 
 YELLOW = 'FFFF00'
 ORANGE = 'FFA500'

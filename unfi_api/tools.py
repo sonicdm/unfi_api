@@ -7,8 +7,6 @@ from operator import itemgetter
 
 import psutil
 import tqdm
-from catalogboss.utils import strings_to_numbers, isnumber
-
 
 def setpriority():
     ps = psutil.Process(os.getpid())

@@ -59,7 +59,7 @@ class ProductResult(BaseModel):
 
 
 class Result(BaseModel):
-    total_hits: Optional[int] = Field(0, alias="TotalHits")
+    # total_hits: Optional[int] = Field(0, alias="TotalHits")
     top_product_ids: Optional[List[int]] = Field(None, alias="TopProductIds")
     category_ids: Optional[List[int]] = Field(None, alias="CategoryIds")
     brand_ids: Optional[List[int]] = Field(None, alias="BrandIds")
@@ -114,17 +114,29 @@ class Result(BaseModel):
         else:
             self.products.update(products)
         return products
+    
+    @property
+    def total_hits(self) -> int:
+        return len(self.product_results)
+    
+    
+    def __len__(self) -> int:
+        return len(self.product_results)
 
 
 class Results(BaseModel):
 
     results: List[Result]
+    product_results: List[ProductResult]
 
     
     @root_validator(pre=True)
     def root_validator(cls, values)-> dict:
         # print(values)
-
+        # results: List[ProductResult] = values.get("results")
+        # product_results = [res.dict(by_alias=True) for res in results]
+        # cls.product_results.extend(product_results)
+        # values['product_results'] = product_results
         return values
     @property
     def total_hits(self) -> int:
@@ -151,22 +163,25 @@ class Results(BaseModel):
             ids.extend(result.category_ids)
         return ids
 
-    @property
-    def product_results(self) -> List[ProductResult]:
-        product_results = []
-        result_ids = []
-        for result in self.results:
-            for product_result in result.product_results:
-                if product_result.product_code not in result_ids:
-                    product_results.append(product_result)
-                    result_ids.append(product_result.product_code)
-        return product_results
+    # @property
+    # def product_results(self) -> List[ProductResult]:
+    #     product_results = []
+    #     result_ids = []
+    #     for result in self.results:
+    #         for product_result in result.product_results:
+    #             if product_result.product_code not in result_ids:
+    #                 product_results.append(product_result)
+    #                 result_ids.append(product_result.product_code)
+    #     return product_results
 
     def append_result(self, result: Result):
+        for result in Result.product_results:
+            self.product_results.append(result)
         self.results.append(result)
 
     def append_results(self, results: List[Result]):
-        self.results.extend(results)
+        for result in results:
+            self.append_result(result)
 
     def normalize(self):
         return normalize_dict(self.dict())
@@ -177,12 +192,12 @@ class Results(BaseModel):
             self.append_result(result)
 
     def download_products(
-        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False
+        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4
     ) -> Dict[str, Any]:
         """
         fetch products from api
         """
-        products = client.get_products(self.product_results, callback=callback)
+        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count)
         return products
 
     def products(self):
