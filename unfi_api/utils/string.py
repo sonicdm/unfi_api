@@ -1,7 +1,55 @@
 import re
 from string import hexdigits
 from typing import Any, Iterable, Union
+top_package = __import__(__name__.split('.')[0])
 
+class AbbrRepl:
+    def __init__(self, abbrfile=None):
+        self.abbrs = {}
+        if not abbrfile:
+            self._filename = u'abbreviations.txt'
+            self.base_dir = BASE_DIR
+            self.file_path = os.path.join(BASE_DIR, self._filename)
+        else:
+            self.file_path = abbrfile
+        self._load_abbrs()
+
+    def _load_abbrs(self):
+        with open(self.file_path, 'r') as abrfile:
+            for abr in abrfile:
+                for k, v in [abr.strip('\n').split('=')]:
+                    self.abbrs[k.upper()] = v.upper()
+
+    def is_abbr(self, w: str) -> bool:
+        """Check if a string is an abbreviation"""
+        return w.upper() in self.abbrs
+
+    def abbr_repl(self, s):
+        """
+        :param s: text to replace abbrs in.
+        :type s: string
+        :return: string
+        """
+        if isinstance(s, (float, int)) or not s:
+            return s
+
+        matchwords = []
+        for word in filter(None, re.findall(r'\b\d*\w*\b', s)):
+            if self.is_abbr(word):
+                matchwords.append((word, self.get_repl(word)))
+        if len(matchwords) > 0:
+            for matchset in matchwords:
+                abbr, sub = matchset
+                s = re.sub(r'\b(\d*)%s\b' % abbr, r'\1' + sub, s)
+        return s
+
+    def get_repl(self, w):
+        """
+        Return the long version of a shortened word (1 word)
+        :param w: single word to get the abbreviation for
+        :type w: string
+        """
+        return self.abbrs.get(w.upper(), w).title()
 
 def clean_size_field(text: str) -> str:
     if not isinstance(text, str):

@@ -1,3 +1,19 @@
+from pathlib import Path
+
+config = {
+    # "username": "", # username for the api will use UNFI_USERNAME env variable if left unset
+    # "password": "", # password for the api will use UNFI_PASSWORD env variable if left unset
+    "query_output_path": "F:\\pos\\unfi\\query_new.xlsx", # Path to where the product search spreadsheet will be saved
+    "image_output_path": "F:\\signs\\product_images", # Path to the folder where the images will be saved
+    "abbreviations_path": "includes\\abbreviations.txt", # Path to abbreviations file
+    "max_threads": 10, # max number of threads to use
+    "log_level": "INFO", # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    "log_path": "logs\\unfi_api.log", # Path to where the log file will be saved
+}
+
+
+
+
 PRODUCT_QUERY_OUTPUT_PATH = "F:\\pos\\unfi\\query_new.xlsx"
 IMAGE_OUTPUT_PATH = r"F:\Signs\product_images"
 beautiful_soup_parser = "html.parser"

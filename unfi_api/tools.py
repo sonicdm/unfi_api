@@ -7,8 +7,11 @@ from operator import itemgetter
 
 import psutil
 import tqdm
-from catalogboss.utils import strings_to_numbers, isnumber
+<<<<<<< HEAD
+from unfi_api.utils.string import strings_to_numbers, isnumber
 
+=======
+>>>>>>> 7c6f6e894dfbedece01b705084783b88bdeb44f2
 
 def setpriority():
     ps = psutil.Process(os.getpid())

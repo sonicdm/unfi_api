@@ -96,7 +96,6 @@ class LineItems(BaseModel):
     # @classmethod
     @root_validator(pre=True)
     def validate_line_items(cls, values: dict):
-        print(values)
         if not isinstance(values['__root__'], list):
             raise ValueError('LineItems must be a list')
         new_list = []
@@ -111,3 +110,6 @@ class LineItems(BaseModel):
     @property
     def line_items(self):
         return self.__root__
+    
+    def __len__(self):
+        return len(self.__root__)
