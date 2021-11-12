@@ -90,11 +90,11 @@ def ask_query():
     return query
 
 
-def do_query(query, api):
+def do_query(query, client: UnfiApiClient):
     query_list = make_query_list(query)
-    token = api.auth_token
+    token = client.auth_token
     # products = {}
-    result = run_query(query_list, token, api=api)
+    result = run_query(client, query_list, token)
     # if result:
     #     products.update(result)
     return result

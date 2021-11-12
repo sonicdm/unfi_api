@@ -33,6 +33,11 @@ def get_products_by_full_text(session, token, query, account_number, user_id, re
     :param kwargs:
     :return:
     """
+    max_url_length = 2000
+    base_url_len = 263
+    if len(query) > max_url_length - base_url_len:
+        raise ValueError(f"query string too long: {len(query)}. Must not exceed {2000-263} characters.")
+
     endpoint = 'GetProductsByFullText'
     endpoint_url = urllib.parse.urljoin(brands_base_url, endpoint)
     headers = {

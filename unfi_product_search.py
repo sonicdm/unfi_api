@@ -1,109 +1,169 @@
+import logging
 import os
-import sys
 import re
+import sys
 import tkinter as tk
 from pathlib import Path
 from tkinter import messagebox as mb
 from tkinter import simpledialog
-from typing import Dict
+from typing import Dict, List
 
+import openpyxl.utils.exceptions
 from openpyxl import Workbook
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
+from openpyxl.utils.exceptions import IllegalCharacterError
+from tqdm import tqdm
 
 from unfi_api import UnfiAPI, UnfiApiClient
 from unfi_api.exceptions import exception_retry_prompt
 from unfi_api.product import UNFIProduct, UNFIProducts
 from unfi_api.search.result import Result, Results
 from unfi_api.settings import IMAGE_OUTPUT_PATH, PRODUCT_QUERY_OUTPUT_PATH
-from unfi_api.unfi_web_queries import run_query, make_query_list
+from unfi_api.unfi_web_queries import make_query_list, run_query
 from unfi_api.utils.collections import divide_chunks
+from unfi_api.utils.threading import threader
 
-# def uncaught_exception_handler(etype, value, tb):
-#     # print(etype, value, tb)
-#     traceback.print_exc()
-#     input("PROCESS FAILED PRESS ENTER TO QUIT")
+LOG_TO_CONSOLE = False
 
-
-# sys.excepthook = uncaught_exception_handler
-# output_path = r"F:\pos\unfi\query.xlsx"
+log_dir = r"C:\Scriptlogs"
+log_file_name = f"{log_dir}\\{Path(__file__).stem}.log"
 output_path = PRODUCT_QUERY_OUTPUT_PATH
 image_path = IMAGE_OUTPUT_PATH
 description_regex = re.compile(r"(?: at least.*| 100% Organic)", re.IGNORECASE)
 FETCH_IMAGES = True
+logging.basicConfig(
+    filename=log_file_name,
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(threadName)s %(name)s %(message)s",
+)
+logger = logging.getLogger(__name__)
+if LOG_TO_CONSOLE:
+    logger.addHandler(logging.StreamHandler())
+    logger.info("Logging to console.")
 
+query_length_limit = 1737
 
 def main():
+    logger.info("####################")
+    logger.info("Starting UNFI Product Search")
+    logger.info("####################")
     user = os.environ.get("UNFI_USER")
     password = os.environ.get("UNFI_PASSWORD")
     tkroot = tk.Tk()
     tkroot.withdraw()
     query = ask_query()
+    logger.debug(f"Searching for {query}")
 
     if query:
         api = init_api(user, password)
+        logger.info("Connected!")
         client = UnfiApiClient(api)
         search = True
         products = UNFIProducts()
         fields = set()
         while True:
             results: Results = search_products(query, client)
+            query = None
             if results:
+                logger.info(f"Found {results.total_hits} products")
                 products.update(download_products(results, client))
                 if FETCH_IMAGES:
+                    logger.info("Downloading missing images...")
                     download_product_images(client, products, image_path)
                 if len(products) > 0:
-                    if mb.askyesno(
+                    if mb.askyesno("Run again?", f"{len(products)} products downloaded. Run another search?"):
+                        query = ask_query()
+                        continue
+                    elif mb.askyesno(
                         "Save Workbook", "Would you like to save the workbook?"
                     ):
+                        logger.info("Creating workbook.")
+                        print("Creating workbook.")
                         wb = create_excel_workbook(products)
+                        print("Saving workbook.")
+                        logger.info("Saving workbook.")
                         save_wb(wb, output_path)
 
-                    if mb.askyesno("Run again?", "Run another search?"):
-                        continue
+                        if mb.askyesno("Workbook Saved.", f"Workbook saved to {output_path}.\n Would you like to do another search?"):
+                            query = ask_query()
+                            continue
+                        else:
+                            break
                     else:
+                        logger.info("Exiting.")
                         break
+                        
             else:
+                logging.info("No results found.")
                 if mb.askyesno(
                     "No Results Found", "No results found. Do another search?"
                 ):
                     query = ask_query()
+                else:
+                    break
 
-    mb.showinfo("Quit", "Process Ended.")
+    mb.showinfo("Exiting", "Product Search Complete")
+    logger.info("Exiting cleanly.")
 
 
 def init_api(user, password):
     print("Connecting to UNFI API")
+    logger.info("Connecting to UNFI API")
     api = UnfiAPI(user, password, incapsula_retry=False, incapsula=False)
     if api.logged_in:
+        logging.info("Logged in!")
         print("Connected!")
         return api
     else:
+        logger.error("Login Failed!")
         if mb.askretrycancel(
             "Login Error",
             f"Could not login to UNFI API with username: {user}.",
         ):
             init_api(user, password)
         else:
+            logger.error("Could not login to UNFI API. Exiting now.")
             mb.showerror("Login Error", "Could not login to UNFI API. Exiting now.")
             sys.exit(1)
 
+def query_chunks_by_character_limit(query: list, max_chars: int) -> List[str]:
+    chunks = []
+    chunk = []
+    for term in query:
+        chunk_str = " ".join(chunk)
+        if len(chunk_str + " " + term) > max_chars:
+            print(f"Chunk: {chunk_str}\nLength: {len(chunk_str)}")
+            chunks.append(chunk)
+            chunk = [term]
+        else:
+            chunk.append(term)
+            
+    if chunk:
+        chunks.append(chunk)    
+    return chunks
+    
 
 def do_search(query: str, client: UnfiApiClient) -> Results:
     def __search_chunk(chunk: list):
         print(f"Searching for {len(chunk)} terms...")
         result = client.search(" ".join(chunk))
         print(f"Search Complete! Found {result.total_hits} items matching the query")
+        nonlocal total_results
+        total_results += result.total_hits
         return result
-
-    from concurrent.futures import ThreadPoolExecutor, as_completed
-
+    total_results = 0
     query_list = make_query_list(query)
-    chunks = list(divide_chunks(query_list, 120))
-    results = []
-    with ThreadPoolExecutor(max_workers=len(chunks)) as executor:
-        futures = [executor.submit(__search_chunk, chunk) for chunk in chunks]
-        for future in as_completed(futures):
-            results.append(future.result())
-    return Results(results=results)
+    logging.debug(f"Query list: {query_list}")
+    print(f"Searching for a total of {len(query_list)} terms...")
+    chunks = query_chunks_by_character_limit(query_list, query_length_limit)
+    with tqdm(total=len(chunks), unit=" querys") as pbar:
+        pbar.smoothing = 0.1
+        results: List[Result] = threader(__search_chunk, chunks, max_threads=5, callback=lambda x: pbar.update())
+    product_results = []
+    for result in results:
+        product_results.extend(result.product_results)
+        
+    return Results(results=results, product_results=product_results)
 
 
 def search_products(query: str, client: UnfiApiClient) -> Results:
@@ -118,16 +178,15 @@ def search_products(query: str, client: UnfiApiClient) -> Results:
     if results.total_hits < 1:
         return None
     else:
-        return client.search(query)
+        return results
 
 
 def download_products(results: Results, client: UnfiApiClient) -> UNFIProducts:
-    from tqdm import tqdm
 
     with tqdm(total=results.total_hits, unit=" products") as pbar:
         pbar.smoothing = 0.1
         products: Dict[str, UNFIProduct] = results.download_products(
-            client, lambda x: pbar.update(), threaded=True, thread_count=4
+            client, lambda x: pbar.update(), threaded=True, thread_count=10
         )
 
     return products
@@ -140,20 +199,29 @@ def download_product_images(
         if product.image_available:
             filename = os.path.join(image_directory, f"{product.upc}.jpg")
             if not os.path.exists(filename):
+                logger.info(f"Downloading image for {product.brand} - {product.description}")
                 with open(filename, "wb") as img_file:
                     image_data = product.get_image(client)
                     if image_data:
                         img_file.write(image_data)
+            else:
+                logger.debug(f"Image already exists for {product.brand} - {product.description}")
+        
+        else:
+            logger.debug(f"No image available for {product.brand} - {product.description}")
 
 
-def save_wb(wb, output_file=output_path) -> None:
+def save_wb(wb: Workbook, output_file=output_path) -> None:
+    logger.info(f"Saving workbook to {output_file}")
     while True:
         try:
-            wb.save(output_path)
+            wb.save(output_file)
+            logger.info(f"Saved workbook to {output_file}")
         except PermissionError:
+            logger.error(f"Permission Error, could not write to: {output_file}.")
             if mb.askyesno(
                 f"Permission Error",
-                "Permission Error, could not write to:\n {product_query_output_path}. Retry?",
+                f"Permission Error, could not write to:\n {output_file}. Retry?",
             ):
                 continue
             else:
@@ -173,23 +241,44 @@ def ask_query():
 
 
 def create_excel_workbook(products: UNFIProducts):
-    from openpyxl import Workbook
 
-    excel_dicts = products.to_excel()
+    excel_dicts: List[Dict[str,dict]] = products.to_excel()
+    logger.debug(f"Creating rows list with {len(excel_dicts)} dicts.")
     dict_keys: set = set()
     for d in excel_dicts.values():
         dict_keys.update(list(d.keys()))
     header = list(dict_keys)
     rows = [header]
     for product_code, excel_dict in excel_dicts.items():
-        row = [excel_dict.get(key) for key in header]
+        row = []
+        logger.debug(f"Adding row for {product_code}")
+        logger.debug(f"Excel Dict: {excel_dict}")
+        for key in header:
+            cell = excel_dict.get(key, "")
+            if isinstance(cell, str):
+                cell = ILLEGAL_CHARACTERS_RE.sub("", cell)
+            row.append(cell)
         rows.append(row)
+    
+    # logger.debug("Rows: {}".format('\n'.join([",".join(str(c for c in row)) for row in rows])))
+        
+
     wb = Workbook()
     ws = wb.active
+    logger.debug(f"Writing {len(rows)} rows to workbook.")
     for row in rows:
-        ws.append(row)
+        try:
+            logger.debug(f"Writing row: {row}")
+            ws.append(row)
+        except Exception as e:
+            logger.exception(f"Something went wrong with {row}")
+            raise
     return wb
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception:
+        logger.exception("Something went wrong :(")
+        raise
