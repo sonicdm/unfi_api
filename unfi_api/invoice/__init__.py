@@ -199,15 +199,30 @@ class Invoice(BaseModel):
         "invoice_date", "delivery_date", "ordered_on", allow_reuse=True, pre=True
     )(validate_date_input)
 
-    def normalize(self):
+    def normalize(self) -> dict:
         """
         Normalize the invoice data.
         """
         return normalize_dict(self.dict())
-    
+
+    def dict(self, include=set(), exclude=set(), by_alias=True, exclude_unset=False,  exclude_defaults=False, exclude_none=False) -> Dict[str, Any]:
+        """
+        Return a dict representation of the invoice.
+        """
+        if not include:
+            include={'invoice_number', 'line_items', 'invoice_date'}
+        return super(Invoice,self).dict(
+            include=include,
+            exclude=exclude,
+            by_alias=by_alias,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+
     def __str__(self) -> str:
         return f"Invoice(date: {self.invoice_date}, invoice_number: {self.invoice_number}, total_items: {len(self.line_items)}, Total: ${self.total})"
-    
+
     def __repr__(self) -> str:
         return str(self)
 
@@ -215,17 +230,17 @@ class Invoice(BaseModel):
 class OrderListing(BaseModel):
     # total_rows: int = Field(..., alias='Total_Rows')
     # row_number: int = Field(..., alias='Row_Number')
-    invoice_number: str = Field(..., alias='InvoiceNumber')
-    invoice_date: date = Field(..., alias='InvoiceDate')
-    order_number: str = Field(..., alias='OrderNumber')
-    requested_date: date = Field(..., alias='RequestedDate')
-    requested_by: str = Field(..., alias='RequestedBy')
-    status: Optional[str] = Field(..., alias='Status')
-    po_number: str = Field(..., alias='PONumber')
-    pk_key: str = Field(..., alias='PKKey')
-    dollar_total: float = Field(..., alias='DollarTotal')
-    cases_shipped: float = Field(..., alias='CasesShipped')
-    weight_shipped: float = Field(..., alias='WeightShipped')
+    invoice_number: str = Field(..., alias="InvoiceNumber")
+    invoice_date: date = Field(..., alias="InvoiceDate")
+    order_number: str = Field(..., alias="OrderNumber")
+    requested_date: date = Field(..., alias="RequestedDate")
+    requested_by: str = Field(..., alias="RequestedBy")
+    status: Optional[str] = Field(..., alias="Status")
+    po_number: str = Field(..., alias="PONumber")
+    pk_key: str = Field(..., alias="PKKey")
+    dollar_total: float = Field(..., alias="DollarTotal")
+    cases_shipped: float = Field(..., alias="CasesShipped")
+    weight_shipped: float = Field(..., alias="WeightShipped")
 
     _date_validator = validator(
         "invoice_date", "requested_date", allow_reuse=True, pre=True
@@ -250,7 +265,7 @@ class OrderList(BaseModel):
                     new_dict[key] = value.dict()
                 elif isinstance(value, dict) and isinstance(key, str):
                     new_dict[str(key)] = value
-                    
+
                 else:
                     raise ValueError(
                         "Invalid OrderListing object. "
@@ -265,7 +280,7 @@ class OrderList(BaseModel):
                     new_dict[listing.get("InvoiceNumber")] = listing
                 elif "invoice_number" in listing:
                     new_dict[listing.get("invoice_number")] = listing
-                    
+
         values["__root__"] = new_dict
         return values
 
@@ -299,38 +314,38 @@ class OrderList(BaseModel):
                 orders.add_order(order)
 
         return orders
-    
-    def add_order(self, order: Union[OrderListing,OrderList]):
+
+    def add_order(self, order: Union[OrderListing, OrderList]):
         """
         Add an order to the order list.
         """
         if isinstance(order, OrderList):
             self.__root__.update(order.orders)
-        
+
         else:
-            self.__root__[order.invoice_number] = order    
-    
-    def download_orders(self, client: 'UnfiApiClient'):
+            self.__root__[order.invoice_number] = order
+
+    def download_orders(self, client: "UnfiApiClient"):
         """
         Download the orders from the API.
         """
         ...
-        
+
     def __iter__(self):
         return iter(self.__root__.values())
 
     def __getitem__(self, invoice_number):
         return self.__root__[invoice_number]
-    
+
     def values(self):
         return self.__root__.values()
-    
+
     def items(self):
         return self.__root__.items()
-    
+
     def keys(self):
         return self.__root__.keys()
-    
+
     def __add__(self, other):
         # if other is not an OrderList, OrderListing,
         # not list of OrderList, OrderListing or dicts, raise add not supported
@@ -339,12 +354,17 @@ class OrderList(BaseModel):
         elif isinstance(other, OrderListing):
             self.__root__[other.invoice_number] = other
         elif isinstance(other, list):
-            if all(isinstance(item, OrderListing) for item in other) or all(isinstance(item, OrderList) for item in other):
+            if all(isinstance(item, OrderListing) for item in other) or all(
+                isinstance(item, OrderList) for item in other
+            ):
                 for listing in other:
                     self.add_order(listing)
         else:
-            raise TypeError("unsupported operand type(s) for +: 'OrderList' and '{}'".format(type(other)))
+            raise TypeError(
+                "unsupported operand type(s) for +: 'OrderList' and '{}'".format(
+                    type(other)
+                )
+            )
 
     def __len__(self):
         return len(self.__root__)
-    

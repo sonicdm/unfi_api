@@ -116,7 +116,8 @@ class UnfiApiClient:
         callback: Callable = None,
         threaded=False,
         thread_count=4,
-    ) -> List[Invoice]:
+        get_results=True,
+    ) -> Union[List[Invoice],None]:
         orders: List[Invoice] = []
         invoice_numbers = []
         for order in order_list:

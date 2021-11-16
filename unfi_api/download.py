@@ -50,7 +50,8 @@ def download_invoices(
     callback: Callable=None,
     threaded: bool = False,
     thread_count: int = 4,
-) -> List[str]:
+    get_results = True,
+) -> Union[List[str],None]:
 
     if threaded:
         results = threader(client.get_invoice, invoices, callback, thread_count)
@@ -58,9 +59,10 @@ def download_invoices(
         results = []
         for invoice in invoices:
             result = client.get_invoice(invoice)
-            results.append(result)
+            if get_results:
+                results.append(result)
             if callback:
                 callback(result)
     
-
-    return results
+    if get_results:
+        return results

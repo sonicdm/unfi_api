@@ -28,7 +28,7 @@ def main():
     query = ask_query()
     if query:
         print("Loading UNFI Driver")
-        api = UnfiAPI("CapellaAPI", "CapellaAPI2489", incapsula_retry=True)
+        api = UnfiAPI("CapellaAPI", "CapellaAPI2489", incapsula_retry=True, incapsula=False)
         api_client = UnfiApiClient(api)
         search = True
         products = {}
@@ -94,7 +94,7 @@ def do_query(query, client: UnfiApiClient):
     query_list = make_query_list(query)
     token = client.auth_token
     # products = {}
-    result = run_query(client, query_list, token)
+    result = run_query(client, query_list, token, api=client.api)
     # if result:
     #     products.update(result)
     return result
