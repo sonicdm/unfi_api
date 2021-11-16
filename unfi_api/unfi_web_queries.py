@@ -10,30 +10,19 @@ from typing import List
 
 import requests
 from bs4 import BeautifulSoup
-<<<<<<< HEAD
-from unfi_api.utils.output import auto_size_worksheet_columns
-from unfi_api.utils.string import strings_to_numbers
-=======
->>>>>>> 7c6f6e894dfbedece01b705084783b88bdeb44f2
 from openpyxl import Workbook
 
 import unfi_api
 from unfi_api import UnfiAPI, UnfiApiClient
 from unfi_api.invoice import OrderList, OrderListing
 from unfi_api.old_product import product_info
-from unfi_api.settings import (
-    invoice_xhr,
-    ridgefield_cust_num,
-    ridgefield_warehouse,
-    search_url,
-    set_default_account_xhr,
-    user_id,
-    xdock_cust_num,
-    xdock_warehouse,
-)
+from unfi_api.settings import (invoice_xhr, ridgefield_cust_num,
+                               ridgefield_warehouse, search_url,
+                               set_default_account_xhr, user_id,
+                               xdock_cust_num, xdock_warehouse)
 from unfi_api.tools import Threading
 from unfi_api.utils.collections import divide_chunks
-from unfi_api.utils.output import size_cols
+from unfi_api.utils.output import auto_size_worksheet_columns, size_cols
 from unfi_api.utils.string import strings_to_numbers
 
 

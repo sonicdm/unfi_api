@@ -21,6 +21,11 @@ if __name__ == '__main__':
         invoices = client.get_invoices(filtered_invoice_list, threaded=True, callback=lambda x: pbar.update())
 
             # print(invoice.get_invoice_pdf())
+    invoice_dicts = {}
+    for invoice in invoices:
+        invoice_dicts.update({invoice.invoice_number: invoice.dict()['line_items']})
+        
+        
     print(invoices)
     input("Press Enter to continue...")
     pass
