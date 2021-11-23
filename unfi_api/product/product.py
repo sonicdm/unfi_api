@@ -239,6 +239,7 @@ class UNFIProduct(BaseModel):
     long_description: Optional[str]
     category: str
     organic_code: str
+    organic: str
     image_url: str
     image_available: bool
 
@@ -300,6 +301,7 @@ class UNFIProduct(BaseModel):
         long_description = int_id.long_description
         category = data_by_int_id.category_name
         organic_code = data_by_int_id.organic_code
+        organic = "Y" if organic_code in ['OG2', 'OG1'] else ""
         image_available = int_id.is_image_available
         image_url = "https://products.unfi.com/api/Images/"+str(product_int_id)
         ######
@@ -309,6 +311,7 @@ class UNFIProduct(BaseModel):
         supplemental_data_dict["long_description"] = long_description
         supplemental_data_dict["category"] = category
         supplemental_data_dict["organic_code"] = organic_code
+        supplemental_data_dict["organic"] = organic
         supplemental_data_dict["image_available"] = image_available
         supplemental_data_dict["image_url"] = image_url
 

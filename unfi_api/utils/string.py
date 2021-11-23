@@ -1,24 +1,23 @@
 import re
 from string import hexdigits
 from typing import Any, Iterable, Union
+from unfi_api.config import UnfiApiConfig as config
+import csv
 top_package = __import__(__name__.split('.')[0])
 
 class AbbrRepl:
     def __init__(self, abbrfile=None):
         self.abbrs = {}
         if not abbrfile:
-            self._filename = u'abbreviations.txt'
-            self.base_dir = BASE_DIR
-            self.file_path = os.path.join(BASE_DIR, self._filename)
+            self.file_path = config.abbreviations_path
         else:
             self.file_path = abbrfile
         self._load_abbrs()
 
     def _load_abbrs(self):
-        with open(self.file_path, 'r') as abrfile:
-            for abr in abrfile:
-                for k, v in [abr.strip('\n').split('=')]:
-                    self.abbrs[k.upper()] = v.upper()
+        with self.file_path.open('r') as f:
+            reader = csv.reader(f)
+            self.abbrs = {row[0].lower(): row[1].lower() for row in reader}
 
     def is_abbr(self, w: str) -> bool:
         """Check if a string is an abbreviation"""

@@ -5,7 +5,7 @@ config = {
     # "password": "", # password for the api will use UNFI_PASSWORD env variable if left unset
     "query_output_path": "F:\\pos\\unfi\\query_new.xlsx", # Path to where the product search spreadsheet will be saved
     "image_output_path": "F:\\signs\\product_images", # Path to the folder where the images will be saved
-    "abbreviations_path": "includes\\abbreviations.txt", # Path to abbreviations file
+    "abbreviations_path": r"F:\POS\script_assets\abbreviations.csv", # Path to abbreviations file
     "max_threads": 10, # max number of threads to use
     "log_level": "INFO", # DEBUG, INFO, WARNING, ERROR, CRITICAL
     "log_path": "logs\\unfi_api.log", # Path to where the log file will be saved
