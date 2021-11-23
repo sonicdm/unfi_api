@@ -11,6 +11,7 @@ from pathlib import Path
 from openpyxl.formatting.rule import CellIsRule, FormulaRule
 from openpyxl.styles import Alignment, PatternFill
 from openpyxl.utils import get_column_letter
+from openpyxl import load_workbook
 
 # from catalogboss.formatter import size_cols
 # from catalogboss.catalog.products import Product
