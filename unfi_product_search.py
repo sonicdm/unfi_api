@@ -71,24 +71,22 @@ def main():
                     logger.info("Downloading missing images...")
                     download_product_images(client, products, image_path)
                 if len(products) > 0:
-                    if mb.askyesno("Run again?", f"{len(products)} products downloaded. Run another search?"):
-                        query = ask_query()
-                        continue
-                    elif mb.askyesno(
-                        "Save Workbook", "Would you like to save the workbook?"
-                    ):
+                    # if mb.askyesno("Run again?", f"{len(products)} products downloaded. Run another search?"):
+                    if mb.askyesno("Save Workbook?", f"{len(products)} products downloaded. Save Workbook?"):
                         logger.info("Creating workbook.")
                         print("Creating workbook.")
                         wb = create_excel_workbook(products)
                         print("Saving workbook.")
                         logger.info("Saving workbook.")
                         save_wb(wb, output_path)
-
                         if mb.askyesno("Workbook Saved.", f"Workbook saved to {output_path}.\n Would you like to do another search?"):
                             query = ask_query()
                             continue
                         else:
                             break
+                    elif mb.askyesno("Run again?", f"{len(products)} products downloaded. Run another search?"):
+                        query = ask_query()
+                        continue
                     else:
                         logger.info("Exiting.")
                         break
