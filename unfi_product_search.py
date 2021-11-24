@@ -143,20 +143,31 @@ def query_chunks_by_character_limit(query: list, max_chars: int) -> List[str]:
 
 def do_search(query: str, client: UnfiApiClient) -> Results:
     def __search_chunk(chunk: list):
-        print(f"Searching for {len(chunk)} terms...")
+        # print(f"Searching for {len(chunk)} terms...\n")
         result = client.search(" ".join(chunk))
-        print(f"Search Complete! Found {result.total_hits} items matching the query")
+        # print(f"Search Complete! Found {result.total_hits} items matching the query")
         nonlocal total_results
+        nonlocal pbar
+        nonlocal total_searched
+        total_searched += len(chunk)
+        # pbar.desc(f"{total_searched}/{total_results}")
+        pbar.update(len(chunk))
+        pbar.set_description(f"{total_searched}/{len(query_list)}")
+        
         total_results += result.total_hits
         return result
+    
+    
+    total_searched = 0
     total_results = 0
     query_list = make_query_list(query)
     logging.debug(f"Query list: {query_list}")
     print(f"Searching for a total of {len(query_list)} terms...")
     chunks = query_chunks_by_character_limit(query_list, query_length_limit)
-    with tqdm(total=len(chunks), unit=" querys") as pbar:
+    with tqdm(total=len(query_list), unit=" querys") as pbar:
         pbar.smoothing = 0.1
-        results: List[Result] = threader(__search_chunk, chunks, max_threads=5, callback=lambda x: pbar.update())
+        pbar.set_description(f"0/{len(query_list)}")
+        results: List[Result] = threader(__search_chunk, chunks, max_threads=5)
     product_results = []
     for result in results:
         product_results.extend(result.product_results)
@@ -180,13 +191,19 @@ def search_products(query: str, client: UnfiApiClient) -> Results:
 
 
 def download_products(results: Results, client: UnfiApiClient) -> UNFIProducts:
-
+    total_dl = 0
+    def update_pbar():
+        nonlocal total_dl
+        total_dl += 1
+        pbar.set_description(f"{total_dl}/{len(results)}")
+        pbar.update(1)
+    print(f"Downloading {len(results.product_results)} products...")
     with tqdm(total=results.total_hits, unit=" products") as pbar:
+        pbar.set_description(f"0/{len(results)}")
         pbar.smoothing = 0.1
         products: Dict[str, UNFIProduct] = results.download_products(
-            client, lambda x: pbar.update(), threaded=True, thread_count=10
+            client, lambda x: update_pbar(), threaded=True, thread_count=10
         )
-
     return products
 
 
