@@ -12,11 +12,11 @@ if TYPE_CHECKING:
 class Controller:
     def __init__(self, title, container: "TkContainer", model: "TkModel" = None):
         self.title = title
-        self.model = model(self)
+        self.model: "TkModel" = model(self)
         self.container: "TkContainer" = container(self, title)
         self.home_frame: str = None
         self.models: dict[str, TkModel] = {}
-        self.ready = False
+        self.ready: bool = False
 
     def register_views(self, frames: List["View"]) -> None:
         self.container.setup(frames)
@@ -68,5 +68,9 @@ class Controller:
 
         self.container.run()
 
+    def quit(self) -> None:
+        self.container.destroy()
+        
+    
     def setup(self) -> None:
         ...

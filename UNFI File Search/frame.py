@@ -20,7 +20,7 @@ class TkFrame(tk.Frame):
         self.container = container
         self.controller = controller if controller else  container.controller
         self.view = view
-        self.create_widgets()
+        # self.create_widgets()
 
     def create_widgets(self):
         pass

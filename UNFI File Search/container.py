@@ -11,12 +11,13 @@ if TYPE_CHECKING:
 
 
 class TkContainer(tk.Tk):
+    base_title = "Tkinter Container"
     def __init__(self, controller: Controller, title: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.controller = controller
         self.title(self.base_title)
-        self.geometry("600x600")
-        self.resizable(False, False)
+        # self.geometry("600x600")
+        # self.resizable(False, False)
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
         self.container.grid_rowconfigure(0, weight=1)
@@ -24,16 +25,6 @@ class TkContainer(tk.Tk):
         self.views: Dict[str, View] = {}
         self.current_view: View = None
         self.ready = False
-        self.canvas = tk.Canvas(
-            self.container,
-            bg="#ffffff",
-            height=600,
-            width=600,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-        )
-        self.canvas.place(x=0, y=0)
 
     def show_view(self, view_name: str):
         if self.current_view:
