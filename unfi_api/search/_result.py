@@ -208,7 +208,8 @@ class Results(BaseModel):
                 if result.products:
                     products.update(result.products)
         
-
+    def __len__(self):
+        return len(self.product_results)
 
 def create_result(result_dict: dict=None) -> Result:
     result = Result(**result_dict)
