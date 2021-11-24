@@ -50,3 +50,8 @@ class StartPage(TkFrame):
 
 
 
+def make_and_grid_container(master, row, column, rowspan=1, columnspan=1, sticky="")-> tk.Frame:
+    frame = tk.Frame(master)
+    frame.grid(row=row, column=column, rowspan=rowspan, columnspan=columnspan, sticky=sticky)
+    frame.grid_rowconfigure(0, weight=1)
+    frame.grid_columnconfigure(0, weight=1)
