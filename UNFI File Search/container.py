@@ -17,11 +17,11 @@ class TkContainer(tk.Tk):
         self.controller = controller
         self.title(self.base_title)
         # self.geometry("600x600")
-        # self.resizable(False, False)
+        self.resizable(False, False)
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        self.container.rowconfigure(0, weight=1)
+        self.container.columnconfigure(0, weight=1)
         self.views: Dict[str, View] = {}
         self.current_view: View = None
         self.ready = False
