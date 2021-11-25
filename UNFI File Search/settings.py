@@ -2,17 +2,18 @@ import configparser
 import os
 
 from unfi_api.api.admin_backend import user
+
 # read config from settings.ini
 config = configparser.ConfigParser()
 settings_file = os.path.join(os.path.dirname(__file__), 'settings.ini')
 config.read(settings_file)
 
-username = config['DEFAULT']['username']
-password = config['DEFAULT']['password']
-auto_download = config['DEFAULT']['auto_download'] or False
-auto_save = config['DEFAULT']['auto_save'] or False
-auto_login = config['DEFAULT']['auto_login'] or False
-default_save_path = config['DEFAULT']['default_save_path'] or os.path.expanduser('~')+'\\Downloads'
+username = config.get('DEFAULT', 'username')
+password = config.get('DEFAULT', 'password')
+auto_download = config.getboolean('DEFAULT', "auto_download", fallback=False)
+auto_save = config.getboolean('DEFAULT', "auto_save", fallback=False)
+auto_login = config.getboolean('DEFAULT', "auto_login", fallback=False)
+default_save_path = config.get('DEFAULT', "default_save_path", fallback=os.path.join(os.path.expanduser('~'), 'Downloads'))
 
 
 search_chunk_size = config['SEARCH']['search_chunk_size']
@@ -27,11 +28,15 @@ session_defaults =  dict(
 )
 
 def save_settings():
-    config['DEFAULT']['auto_download'] = auto_download
-    config['DEFAULT']['auto_save'] = auto_save
-    config['DEFAULT']['auto_login'] = auto_login
-    config['SEARCH']['search_chunk_size'] = search_chunk_size
-    with open('settings.ini', 'w') as configfile:
+    config['DEFAULT']['auto_download'] = str(auto_download)
+    config['DEFAULT']['auto_save'] = str(auto_save)
+    config['DEFAULT']['auto_login'] = str(auto_login)
+    config['SEARCH']['search_chunk_size'] = str(search_chunk_size)
+    config['DEFAULT']['default_save_path'] = str(default_save_path)
+    config['DEFAULT']['username'] = str(username)
+    config['DEFAULT']['password'] = str(password)
+    
+    with open(settings_file, 'w') as configfile:
         config.write(configfile)
     configfile.close()
     
@@ -41,11 +46,16 @@ def reload_settings():
     global auto_save
     global auto_login
     global search_chunk_size
-    config.read('settings.ini')
-    auto_download = config['DEFAULT']['auto_download']
-    auto_save = config['DEFAULT']['auto_save']
-    auto_login = config['DEFAULT']['auto_login']
-    search_chunk_size = config['SEARCH']['search_chunk_size']
+    global username
+    global password
+    global default_save_path
+    config.read(settings_file)
+    username = config.get('DEFAULT', 'username', fallback=os.getenv('UNFI_USER'))
+    password = config.get('DEFAULT', 'password', fallback=os.getenv('UNFI_PASSWORD'))
+    auto_download = config.getboolean('DEFAULT', "auto_download", fallback=False)
+    auto_save = config.getboolean('DEFAULT', "auto_save", fallback=False)
+    auto_login = config.getboolean('DEFAULT', "auto_login", fallback=False)
+    default_save_path = config.get('DEFAULT', "default_save_path", fallback=os.path.join(os.path.expanduser('~'), 'Downloads'))
     
 def reset_to_default():
     global auto_download
@@ -85,6 +95,7 @@ def update_settings(settings:dict):
     default_save_path = settings.get('default_save_path', default_save_path)
     auto_login = settings.get('auto_login', auto_login)
     username = settings.get('username', username)
+    password = settings.get('password', password)
     
     
     
