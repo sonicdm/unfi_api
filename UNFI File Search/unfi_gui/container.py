@@ -2,7 +2,7 @@ from __future__ import annotations
 import tkinter as tk
 from tkinter import ttk
 from typing import TYPE_CHECKING, Dict, List
-from exceptions import ViewRequiredException
+from .exceptions import ViewRequiredException
 
 if TYPE_CHECKING:
     from controller import Controller
@@ -25,6 +25,7 @@ class TkContainer(tk.Tk):
         self.views: Dict[str, View] = {}
         self.current_view: View = None
         self.ready = False
+        self.cancel = False
 
     def show_view(self, view_name: str):
         if self.current_view:

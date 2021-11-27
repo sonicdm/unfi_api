@@ -11,15 +11,15 @@ from typing import Callable, Dict, List, Union
 # from unfi_api.search.result import Result, Results
 # from unfi_api.utils.collections import divide_chunks
 
-from container import TkContainer
-from controller import Controller
+from unfi_gui.container import TkContainer
+from unfi_gui.controller import Controller
 # from excel import create_workbook, save_workbook, write_worksheet_rows
-from exceptions import UnfiApiClientNotSetException
-from model import TkModel
-from settings import search_chunk_size
-from ui import MainContainer, StartPage
-from view import View
-from search import SearchController, SearchModel, SearchPage
+from unfi_gui.exceptions import UnfiApiClientNotSetException
+from unfi_gui.model import TkModel
+from unfi_gui.settings import search_chunk_size
+from unfi_gui.ui import MainContainer
+from unfi_gui.view import View
+from unfi_gui.search import SearchController, SearchModel, SearchPage, DownloadModel
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
@@ -31,9 +31,11 @@ def main():
     client = "client"
     search_model = SearchModel
     search_model.set_client(client)
+    download_model = DownloadModel
+    download_model.set_client(client)
     model = TkModel
     container = MainContainer
-    controller = SearchController(container, model, search_model)
+    controller = SearchController(container, model, search_model, download_model)
     search_view = View(
         name="search", frame=SearchPage, controller=controller, model=search_model
     )

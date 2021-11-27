@@ -193,7 +193,7 @@ class Results(BaseModel):
 
     def download_products(
         self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4
-    ) -> Dict[str, Any]:
+    ) -> UNFIProducts:
         """
         fetch products from api
         """

@@ -1,11 +1,15 @@
 import configparser
 import os
-
+from pathlib import Path
 from unfi_api.api.admin_backend import user
 
 # read config from settings.ini
 config = configparser.ConfigParser()
-settings_file = os.path.join(os.path.dirname(__file__), 'settings.ini')
+settings_module_dir = os.path.dirname(__file__)
+# parent folder
+main_folder = os.path.dirname(settings_module_dir)
+# settings file is located in relative path ../settings.ini
+settings_file = os.path.join(main_folder, 'settings.ini')
 config.read(settings_file)
 
 username = config.get('DEFAULT', 'username')
