@@ -4,6 +4,7 @@ import os
 import time
 import tkinter as tk
 import tkinter.ttk as ttk
+import threading
 from re import S, search
 from tkinter import Listbox, filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
@@ -135,6 +136,7 @@ class SearchPage(TkFrame):
         self.action_buttons_frame = tk.Frame(self)
         self.action_buttons_frame.grid(row=4, column=0, sticky="s", pady=10)
 
+        self.threads = {}       
         self.create_widgets()
 
     ### progress frame functions ###
@@ -194,6 +196,9 @@ class SearchPage(TkFrame):
 
     def do_search(self, event=None, entry=None, search_button: tk.Button = None, listbox: tk.Listbox = None):
         job_id = 'search'
+        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
+        
+        
         
         def __search_callback(result, pb_value, pb_max, found_count):
             message = f"Searched {pb_value}/{pb_max} terms.\nFound {found_count} results."
@@ -231,8 +236,8 @@ class SearchPage(TkFrame):
         if "poop" in query:
             results = []
         else:
-            results = self.search_model.search(query_list, progress_callback=__search_callback, job_id=job_id)
-        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
+            self.search_model.search(query_list, progress_callback=__search_callback, job_id=job_id)
+            results = self.search_model.results
         
         self.listbox_frame.list_box_delete_all(listbox=listbox)
         if len(results) < 1:
@@ -248,10 +253,15 @@ class SearchPage(TkFrame):
             
         if self.auto_download_variable.get():
             self.do_download()
+        self.cancel_button.config(state=tk.DISABLED)
 
-        # self.next_button.config(state=tk.NORMAL)
-
-    def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None):
+    def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None, after=False):
+        if not after:
+            # re-run function after in a thread
+            thread = threading.Thread(target=self.do_download, args=(listbox, download_button, search_button, True))
+            thread.start()
+            return    
+                
         # self.model.download()
         job_id = 'download'
         if not listbox:
@@ -261,6 +271,7 @@ class SearchPage(TkFrame):
         if not search_button:
             search_button = self.search_frame.search_button
         search_button.config(state=tk.DISABLED)
+        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
         selection = listbox.curselection()
         selection_items = [listbox.get(i) for i in selection]
         messagebox.showinfo("Download", "Downloading:\n" + "\n".join(selection_items))

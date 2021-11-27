@@ -1,3 +1,4 @@
+from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Union
 import tkinter as tk
 import tkinter.ttk as ttk
@@ -20,7 +21,7 @@ class Controller:
         self.jobs = []
         self.cancel = []
         self.cancel_all = False
-
+        self.thread_pool: Dict[str, Thread] = {}
     
     def register_views(self, frames: List["View"]) -> None:
         self.container.setup(frames)
@@ -101,4 +102,8 @@ class Controller:
     def cancel_all_jobs(self) -> None:
         self.cancel_all = True
         self.stop_all_jobs()
-        
+    
+    def stop_thread(self, thread_id: Union[str, int]) -> None:
+        if thread_id in self.thread_pool:
+            self.thread_pool[thread_id].join()
+            del self.thread_pool[thread_id]

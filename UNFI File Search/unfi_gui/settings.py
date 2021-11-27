@@ -20,7 +20,7 @@ auto_login = config.getboolean('DEFAULT', "auto_login", fallback=False)
 default_save_path = config.get('DEFAULT', "default_save_path", fallback=os.path.join(os.path.expanduser('~'), 'Downloads'))
 
 
-search_chunk_size = config['SEARCH']['search_chunk_size']
+search_chunk_size = config.getint('SEARCH', 'search_chunk_size', fallback=1700)
 
 
 session_defaults =  dict(
