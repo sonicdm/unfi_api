@@ -58,6 +58,8 @@ class View:
             self.view.pack_forget()
             self.active = False
         self.view.destroy()
+    
+    
 
 
 

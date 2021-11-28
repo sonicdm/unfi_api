@@ -192,12 +192,12 @@ class Results(BaseModel):
             self.append_result(result)
 
     def download_products(
-        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4
+        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4, job_id: str = None
     ) -> UNFIProducts:
         """
         fetch products from api
         """
-        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count)
+        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count, job_id=job_id)
         return products
 
     def products(self):

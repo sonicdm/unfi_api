@@ -1,7 +1,9 @@
 from __future__ import annotations
+
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from typing import TYPE_CHECKING, Dict, List
+
 from .exceptions import ViewRequiredException
 
 if TYPE_CHECKING:
@@ -72,6 +74,18 @@ class TkContainer(tk.Tk):
                 # default to first view
                 self.main_view = self.get_view(views[0].name)
 
+    
+    def show_message(self, message_type: str, title:str, message: str):
+        message_types = ["info", "warning", "error"]
+        if message_type not in message_types:
+            raise ValueError(f"message_type must be one of {message_types} not {message_type}")
+        if message_type == "error":
+            messagebox.showerror(title, message)
+        if message_type == "warning":
+            messagebox.showwarning(title, message)
+        if message_type == "info":
+            messagebox.showinfo(title, message)
+    
     def run(self):
         if not self.views:
             raise ViewRequiredException("No views registered")

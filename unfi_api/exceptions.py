@@ -48,3 +48,12 @@ def exception_retry_prompt(
             default_prompt_response=default_prompt_response,
         )
     return exception_retry_prompt_decorator
+
+
+class CancelledJobException(Exception):
+    def __init__(self, message=None, *args: object) -> None:
+        super().__init__(message, *args) 
+        
+class JobRunningException(Exception):
+    def __init__(self, message=None, *args: object) -> None:
+        super().__init__(message, *args)

@@ -24,11 +24,12 @@ def download_products(
     callback=None,
     threaded: bool = False,
     thread_count: int = 4,
+    job_id: str = None,
 ) -> Dict[str, UNFIProduct]:
     products = {}
     logger.debug(f"Downloading {len(product_results)} products...", end=" ")
     if threaded:
-        result: List[UNFIProduct] = threader(client.get_product, product_results, callback, thread_count)
+        result: List[UNFIProduct] = threader(client.get_product, product_results, callback, thread_count, job_id=job_id)
         for res in result:
             products[res.product_code] = res
 

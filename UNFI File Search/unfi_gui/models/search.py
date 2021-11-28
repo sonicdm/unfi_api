@@ -21,7 +21,7 @@ class SearchModel(TkModel):
     client: UnfiApiClient = None
 
     def __init__(self, controller: Controller, client: UnfiApiClient = None):
-        self.event_types = ["onSearch", "onSearchComplete", "onSearchError", "onCancel"]
+        self.event_types = ["onSearch", "onSearchComplete", "onSearchError", "onCancel", "onSearchStart"]
         super().__init__(controller)
         if not self.get_client() and not client:
             raise UnfiApiClientNotSetException("Client not set")
@@ -33,7 +33,7 @@ class SearchModel(TkModel):
         self.controller = controller
         self.results: Results = []
         self.search_chunk_size = search_chunk_size
-        self.register_event_handler("onSearchComplete", lambda x: controller.stop_cancelled_jobs())
+        # self.register_event_handler("onSearchComplete", lambda x: controller.stop_cancelled_jobs())
 
     
     @classmethod
@@ -81,7 +81,7 @@ class SearchModel(TkModel):
     def search(self, query_list: List[str], limit: int = None, threaded: bool = False, callback: Callable = None,
                progress_callback=None, job_id="search") -> Results:
         
-        self.trigger_event("onSearch", (query_list, limit, threaded, callback, progress_callback))
+        self.trigger_event("onSearchStart", (query_list, limit, threaded, callback, progress_callback, job_id))
         def search_chunk(chunk):
             nonlocal searched_count
             nonlocal found_count
@@ -91,7 +91,7 @@ class SearchModel(TkModel):
                 progress_callback(result, searched_count, total_terms, found_count)
             if callback:
                 callback(result)
-            self.trigger_event("onSearchComplete", result)
+            self.trigger_event("onSearch", result)
             return result
 
         query_str = " ".join(query_list)
@@ -105,7 +105,7 @@ class SearchModel(TkModel):
         total_terms = reduce(lambda count, element: count + len(element), self.search_terms, 0)
         found_count = 0
         if threaded:
-            results = threader(search_chunk, self.search_terms, limit=limit, callback=callback)
+            results = threader(search_chunk, self.search_terms, limit=limit, callback=callback, job_id=job_id)
             self.search_terms = []
         else:
             while self.search_terms:
@@ -114,9 +114,9 @@ class SearchModel(TkModel):
                 result = search_chunk(query_chunk)
                 self.results.extend(result)
                 self.trigger_event("onSearchComplete", result)
-                if self.controller.cancel_all or job_id in self.controller.cancel:
+                if self.controller.get_job_status(job_id) == "cancelled":
                     break
-                
+        self.trigger_event("onSearchComplete", results)
     def get_description_mapped_results(self) -> Dict[str,ProductListing]:
         return {f"{product.product_code}: {product.brand} - {product.description}": product for product in self.products}
 

@@ -11,6 +11,7 @@ from tkinter.scrolledtext import ScrolledText
 from typing import Callable, Dict, List, Union
 
 from unfi_api import UnfiAPI, UnfiApiClient
+from unfi_api.exceptions import CancelledJobException
 from unfi_api.product.product import UNFIProduct, UNFIProducts
 from unfi_api.search.result import ProductResult, Result, Results
 from unfi_api.utils.collections import divide_chunks, lower_case_keys
@@ -138,7 +139,26 @@ class SearchPage(TkFrame):
 
         self.threads = {}       
         self.create_widgets()
-
+        self.buttons: Dict[str,tk.Button] = {
+            'download': self.listbox_frame.download_button,
+            'cancel': self.cancel_button,
+            'save': self.save_button,
+            'exit': self.exit_button,
+            'search': self.search_frame.search_button,
+        }
+        
+    def set_button_state(self, name:str, state: str):
+        self.buttons[name].config(state=state)
+    
+    def set_button_command(self, name: str, command: Callable):
+        self.buttons[name].config(command=command)
+    
+    def disable_button(self, name: str):
+        self.set_button_state(name, tk.DISABLED)
+    
+    def enable_button(self, name: str):
+        self.set_button_state(name, tk.NORMAL)
+    
     ### progress frame functions ###
     def create_progress_frame_widgets(self):
         progress_frame_container = tk.Frame(self.progress_bar_frame)
@@ -158,7 +178,7 @@ class SearchPage(TkFrame):
         self.progress_bar.grid(row=1, column=0, columnspan=5, sticky="")
         
         self.cancel_button.grid(row=2, column=0, sticky="", pady=10)
-        self.cancel_button.config(state=tk.DISABLED)
+        self.cancel_button.config(state=tk.DISABLED, command=self.controller.cancel_all_jobs)
                                 
     def create_action_buttons_frame_widgets(self):
         action_buttons_frame_container = tk.Frame(self.action_buttons_frame)
@@ -193,7 +213,8 @@ class SearchPage(TkFrame):
         if message:
             self.progress_label_variable.set(message)
         self.progress_bar.update()
-
+            
+    
     def do_search(self, event=None, entry=None, search_button: tk.Button = None, listbox: tk.Listbox = None):
         job_id = 'search'
         self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
@@ -255,15 +276,16 @@ class SearchPage(TkFrame):
             self.do_download()
         self.cancel_button.config(state=tk.DISABLED)
 
-    def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None, after=False):
-        if not after:
-            # re-run function after in a thread
+    def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None, threaded=False):
+        if not threaded:
+            # re-run function in a thread
             thread = threading.Thread(target=self.do_download, args=(listbox, download_button, search_button, True))
             thread.start()
             return    
                 
         # self.model.download()
         job_id = 'download'
+        self.controller.add_job(job_id)
         if not listbox:
             listbox = self.listbox_frame.results_listbox
         if not download_button:
@@ -271,7 +293,7 @@ class SearchPage(TkFrame):
         if not search_button:
             search_button = self.search_frame.search_button
         search_button.config(state=tk.DISABLED)
-        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
+        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.set_job_status(job_id=job_id, status="cancelled"))
         selection = listbox.curselection()
         selection_items = [listbox.get(i) for i in selection]
         messagebox.showinfo("Download", "Downloading:\n" + "\n".join(selection_items))
@@ -282,15 +304,25 @@ class SearchPage(TkFrame):
             f"Downloaded: {downloaded}/{len(selection_items)}"
         )
         model = self.download_model
-        for i in selection_items:
-            time.sleep(1)
-            downloaded += 1
-            self.update_progress_bar(downloaded, len(selection_items),
-                                     f"Downloaded: {downloaded}/{len(selection_items)}")
-
-        self.progress_label_variable.set(
-            f"Downloading {len(selection_items)} products complete!"
-        )
+        def __download():
+            nonlocal downloaded
+            for i in selection_items:
+                try:
+                    time.sleep(1)
+                    downloaded += 1
+                    self.update_progress_bar(downloaded, len(selection_items),
+                                            f"Downloaded: {downloaded}/{len(selection_items)}")
+                    status = self.controller.get_job_status(job_id)
+                    if status == 'cancelled':
+                        raise CancelledJobException()
+                except CancelledJobException:
+                    break
+            self.progress_label_variable.set(
+                f"Downloading {len(selection_items)} products complete!"
+            )
+        
+        job = self.controller.create_job(job_id=job_id, job_fn=__download)
+        res = job.start()
 
         if self.auto_save_variable.get():
             self.save_wb()

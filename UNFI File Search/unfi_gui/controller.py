@@ -2,12 +2,13 @@ from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Union
 import tkinter as tk
 import tkinter.ttk as ttk
-from unfi_api.utils.threading import stop_job, stop_all_jobs
-
+from unfi_api.utils import threading
+from unfi_api.utils.jobs import Job, Jobs
 if TYPE_CHECKING:
     from model import TkModel
     from view import View
     from container import TkContainer
+    
 
 
 class Controller:
@@ -18,7 +19,7 @@ class Controller:
         self.home_frame: str = None
         self.models: dict[str, TkModel] = {}
         self.ready: bool = False
-        self.jobs = []
+        self.jobs: Jobs = threading.jobs
         self.cancel = []
         self.cancel_all = False
         self.thread_pool: Dict[str, Thread] = {}
@@ -80,30 +81,27 @@ class Controller:
     def setup(self) -> None:
         ...
     
-    def add_job_id(self, job_id: Union[str, int]) -> None:
-        self.jobs.append(job_id)
-    
-    def stop_job(self, job_id: Union[str, int]) -> None:
-        if job_id in self.jobs:
-            stop_job(job_id)
-
-    def stop_all_jobs(self) -> None:
-        for job_id in self.jobs:
-            stop_job(job_id)
-    
-    def stop_cancelled_jobs(self) -> None:
-        for job_id in self.cancel:
-            stop_job(job_id)
-            self.cancel.remove(job_id)
-    
-    def cancel_job(self, job_id: Union[str, int]) -> None:
-        self.cancel.append(job_id)
+    def set_job_status(self, job_id, status: str) -> None:
+        self.jobs.set_job_status(job_id, status)
+        
+    def cancel_job(self, job_id: str) -> None:
+        self.jobs.cancel_job(job_id)
+        return self.jobs.get_job_status(job_id)
     
     def cancel_all_jobs(self) -> None:
-        self.cancel_all = True
-        self.stop_all_jobs()
+        for job in self.jobs.get_jobs().values():
+            job.cancel()
     
-    def stop_thread(self, thread_id: Union[str, int]) -> None:
-        if thread_id in self.thread_pool:
-            self.thread_pool[thread_id].join()
-            del self.thread_pool[thread_id]
+    def finish_job(self, job_id: str) -> None:
+        self.jobs.set_job_status(job_id, "finished")
+    
+    def get_job_status(self, job_id: str) -> str:
+        if job_id in self.jobs:
+            return self.jobs.get_job_status(job_id)
+    
+    def create_job(self, job_id: str = None, job_fn=None, executor=None) -> Job:
+        job = self.jobs.create_job(job_id, job_fn, executor)
+        return job
+    
+    def show_message(self, message_type, message: str, title: str = "Message") -> None:
+        self.container.show_message(message_type, title, message)
