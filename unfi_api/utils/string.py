@@ -1,6 +1,6 @@
 import re
 from string import hexdigits
-from typing import Any, Iterable, Union
+from typing import Any, Iterable, List, Union
 from unfi_api.config import UnfiApiConfig as config
 import csv
 top_package = __import__(__name__.split('.')[0])
@@ -234,3 +234,30 @@ def remove_escaped_characters(s: str) -> str:
     Remove newlines and tabs and returns from a string.
     """
     return re.sub(r'([\n\t\r]|[\\]+(n|t|r))', '', s)
+
+
+def divide_list_into_chunks_by_character_limit(query: List[str], max_chars: int) -> List[List[str]]:
+    """
+    Divides a list into chunks of max_chars length.
+
+    Args:
+        query (list): a list of strings
+        max_chars (int): number to divide the list into
+
+    Returns:
+        List[List[str]]: a list of lists of strings limited to max_chars length
+    """
+    chunks = []
+    chunk = []
+    for term in query:
+        chunk_str = " ".join(chunk)
+        if len(chunk_str + " " + term) > max_chars:
+            print(f"Chunk: {chunk_str}\nLength: {len(chunk_str)}")
+            chunks.append(chunk)
+            chunk = [term]
+        else:
+            chunk.append(term)
+            
+    if chunk:
+        chunks.append(chunk)    
+    return chunks

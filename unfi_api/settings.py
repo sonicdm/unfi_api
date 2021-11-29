@@ -9,6 +9,7 @@ config = {
     "max_threads": 10, # max number of threads to use
     "log_level": "INFO", # DEBUG, INFO, WARNING, ERROR, CRITICAL
     "log_path": "logs\\unfi_api.log", # Path to where the log file will be saved
+    "url_length_limit": 2000, # max length of url to send to the api
 }
 
 

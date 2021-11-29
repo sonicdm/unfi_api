@@ -267,8 +267,9 @@ class UnfiApiClient:
         self,
         result: Union[Result, List[ProductResult]],
         callback: Callable = None,
-        threaded=False,
-        thread_count=4,
+        threaded: bool=False,
+        thread_count: int=4,
+        job_id:str=None,
     ) -> UNFIProducts:
         """
         product_list: OrderList
@@ -284,6 +285,7 @@ class UnfiApiClient:
             callback,
             threaded=threaded,
             thread_count=thread_count,
+            job_id=job_id,
         )
         return products
 

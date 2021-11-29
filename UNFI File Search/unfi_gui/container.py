@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import tkinter as tk
-from tkinter import ttk
+from tkinter import messagebox, ttk
 from typing import TYPE_CHECKING, Dict, List
-from exceptions import ViewRequiredException
+
+from .exceptions import ViewRequiredException
 
 if TYPE_CHECKING:
     from controller import Controller
@@ -11,29 +13,21 @@ if TYPE_CHECKING:
 
 
 class TkContainer(tk.Tk):
+    base_title = "Tkinter Container"
     def __init__(self, controller: Controller, title: str, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.controller = controller
         self.title(self.base_title)
-        self.geometry("600x600")
+        # self.geometry("600x600")
         self.resizable(False, False)
         self.container = tk.Frame(self)
         self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        self.container.rowconfigure(0, weight=1)
+        self.container.columnconfigure(0, weight=1)
         self.views: Dict[str, View] = {}
         self.current_view: View = None
         self.ready = False
-        self.canvas = tk.Canvas(
-            self.container,
-            bg="#ffffff",
-            height=600,
-            width=600,
-            bd=0,
-            highlightthickness=0,
-            relief="ridge",
-        )
-        self.canvas.place(x=0, y=0)
+        self.cancel = False
 
     def show_view(self, view_name: str):
         if self.current_view:
@@ -80,6 +74,18 @@ class TkContainer(tk.Tk):
                 # default to first view
                 self.main_view = self.get_view(views[0].name)
 
+    
+    def show_message(self, message_type: str, title:str, message: str):
+        message_types = ["info", "warning", "error"]
+        if message_type not in message_types:
+            raise ValueError(f"message_type must be one of {message_types} not {message_type}")
+        if message_type == "error":
+            messagebox.showerror(title, message)
+        if message_type == "warning":
+            messagebox.showwarning(title, message)
+        if message_type == "info":
+            messagebox.showinfo(title, message)
+    
     def run(self):
         if not self.views:
             raise ViewRequiredException("No views registered")

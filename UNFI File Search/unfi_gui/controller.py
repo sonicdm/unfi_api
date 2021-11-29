@@ -1,23 +1,29 @@
+from threading import Thread
 from typing import TYPE_CHECKING, Dict, List, Union
 import tkinter as tk
 import tkinter.ttk as ttk
-
-
+from unfi_api.utils import threading
+from unfi_api.utils.jobs import Job, Jobs
 if TYPE_CHECKING:
     from model import TkModel
     from view import View
     from container import TkContainer
+    
 
 
 class Controller:
     def __init__(self, title, container: "TkContainer", model: "TkModel" = None):
         self.title = title
-        self.model = model(self)
+        self.model: "TkModel" = model(self)
         self.container: "TkContainer" = container(self, title)
         self.home_frame: str = None
         self.models: dict[str, TkModel] = {}
-        self.ready = False
-
+        self.ready: bool = False
+        self.jobs: Jobs = threading.jobs
+        self.cancel = []
+        self.cancel_all = False
+        self.thread_pool: Dict[str, Thread] = {}
+    
     def register_views(self, frames: List["View"]) -> None:
         self.container.setup(frames)
         self.setup = True
@@ -68,5 +74,34 @@ class Controller:
 
         self.container.run()
 
+    def quit(self) -> None:
+        self.container.destroy()
+        
+    
     def setup(self) -> None:
         ...
+    
+    def set_job_status(self, job_id, status: str) -> None:
+        self.jobs.set_job_status(job_id, status)
+        
+    def cancel_job(self, job_id: str) -> None:
+        self.jobs.cancel_job(job_id)
+        return self.jobs.get_job_status(job_id)
+    
+    def cancel_all_jobs(self) -> None:
+        for job in self.jobs.get_jobs().values():
+            job.cancel()
+    
+    def finish_job(self, job_id: str) -> None:
+        self.jobs.set_job_status(job_id, "finished")
+    
+    def get_job_status(self, job_id: str) -> str:
+        if job_id in self.jobs:
+            return self.jobs.get_job_status(job_id)
+    
+    def create_job(self, job_id: str = None, job_fn=None, executor=None) -> Job:
+        job = self.jobs.create_job(job_id, job_fn, executor)
+        return job
+    
+    def show_message(self, message_type, message: str, title: str = "Message") -> None:
+        self.container.show_message(message_type, title, message)
