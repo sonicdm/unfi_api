@@ -50,10 +50,25 @@ def exception_retry_prompt(
     return exception_retry_prompt_decorator
 
 
-class CancelledJobException(Exception):
-    def __init__(self, message=None, *args: object) -> None:
-        super().__init__(message, *args) 
+class JobException(Exception):
+    def __init__(self, message=None, job_id=None,  job=None) -> None:
+        self.job_id = job_id
+        self.job = job
+        super().__init__(message)
+
+class CancelledJobException(JobException):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs) 
         
-class JobRunningException(Exception):
-    def __init__(self, message=None, *args: object) -> None:
-        super().__init__(message, *args)
+        
+class JobRunningException(JobException):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs) 
+        
+class PausedJobException(JobException):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs) 
+        
+class JobErrorException(JobException):
+    def __init__(self, *args, **kwargs) -> None:
+        super().__init__(*args, **kwargs)
