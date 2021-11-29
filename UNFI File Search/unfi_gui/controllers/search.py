@@ -20,10 +20,10 @@ from unfi_api.utils.collections import divide_chunks
 
 if TYPE_CHECKING:
     from unfi_api.search.result import Result, Results
-    from ..models.search import SearchModel
+    from ..models.search_model import SearchModel
     from ..download import DownloadModel
     from ..model import TkModel
-    from ..search import SearchPage
+    from ..search_page import SearchPage
     
     
 class SearchController(Controller):

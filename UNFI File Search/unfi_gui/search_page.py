@@ -38,7 +38,7 @@ from .settings import (
 from .ui import QueryFrame, ProductListFrame, OptionsFrame
 from .view import View
 from .download import DownloadModel
-from .models.search import SearchModel
+from .models.search_model import SearchModel
 
 
 class SearchPage(TkFrame):
@@ -101,7 +101,9 @@ class SearchPage(TkFrame):
             "results_listbox_variable", self.results_listbox_variable
         )
         self.controller.store_tk_variable("list_box_selected", self.list_box_selected)
-
+        # self.controller.store_tk_widget("search_entry", self.search_entry)
+        # self.controller.store_tk_widget("results_listbox", self.results_listbox)
+        # self.controller.store_tk_widget("progress_bar", self.progress_bar)
         self.listbox_map: Dict[str, UNFIProduct] = {}
 
         self.download_button = None
@@ -233,31 +235,15 @@ class SearchPage(TkFrame):
         if not search_button:
             search_button = self.search_frame.search_button
         query = entry.get("1.0", tk.END)
-
-        # update listbox
-        listbox.delete(0, tk.END)
         self.search_variable.set(query)
-        search_button.config(state=tk.DISABLED)
+
+        # disable search button
+        self.disable_button('search')
         auto_download = self.auto_download_variable.get()
-        listbox_parent = listbox.master
-        messagebox.showinfo(
-            "Search",
-            "Searching for: " + query + "\nAuto Download: " + str(auto_download),
-        )
-        query_split = list(filter(lambda x: str(x).strip() != "", query.split()))
-        query_split = list(set(query_split))
-        query_list = self.search_model.remove_already_searched_terms(query_split)
-        duplicate_count = len(query_split) - len(query_list)
-        if duplicate_count > 0:
-            messagebox.showinfo("Duplicates Removed", f"Removed {duplicate_count} terms already searched.")
-        if len(query_list) < 1:
-            messagebox.showinfo("Search", "No new terms to search for.")
-            return
-        self.progress_label_variable.set(f"Searching for: {len(query_list)} terms...")
         if "poop" in query:
             results = []
         else:
-            self.search_model.search(query_list, progress_callback=__search_callback, job_id=job_id)
+            self.search_model.search(query, progress_callback=__search_callback, job_id=job_id)
             results = self.search_model.results
         
         self.listbox_frame.list_box_delete_all(listbox=listbox)
@@ -271,10 +257,11 @@ class SearchPage(TkFrame):
             list_val = result + " unfi product description"
             self.listbox_map[list_val] = result
             listbox.insert(tk.END, list_val)
-            
-        if self.auto_download_variable.get():
+        # select all items in listbox
+        self.listbox_frame.list_box_select_all(listbox=listbox)
+        self.disable_button('cancel')
+        if auto_download:
             self.do_download()
-        self.cancel_button.config(state=tk.DISABLED)
 
     def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None, threaded=False):
         if not threaded:
@@ -285,7 +272,6 @@ class SearchPage(TkFrame):
                 
         # self.model.download()
         job_id = 'download'
-        self.controller.add_job(job_id)
         if not listbox:
             listbox = self.listbox_frame.results_listbox
         if not download_button:
@@ -296,7 +282,7 @@ class SearchPage(TkFrame):
         self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.set_job_status(job_id=job_id, status="cancelled"))
         selection = listbox.curselection()
         selection_items = [listbox.get(i) for i in selection]
-        messagebox.showinfo("Download", "Downloading:\n" + "\n".join(selection_items))
+        # messagebox.showinfo("Download", "Downloading:\n" + "\n".join(selection_items))
         downloaded = 0
         # run through items and update progress bar
         self.progress_bar.config(maximum=len(selection_items))
@@ -316,7 +302,9 @@ class SearchPage(TkFrame):
                     if status == 'cancelled':
                         raise CancelledJobException()
                 except CancelledJobException:
-                    break
+                    self.update_progress_bar(0, 0, "Cancelled")
+                    self.cancel_button.config(state=tk.DISABLED)
+                    return
             self.progress_label_variable.set(
                 f"Downloading {len(selection_items)} products complete!"
             )
@@ -361,6 +349,18 @@ class SearchPage(TkFrame):
 
 
 
+
+def prepare_query(query: str, search_model: SearchModel):
+        query_split = list(filter(lambda x: str(x).strip() != "", query.split()))
+        query_split = list(set(query_split))
+        query_list = search_model.remove_already_searched_terms(query_split)
+        duplicate_count = len(query_split) - len(query_list)
+        if duplicate_count > 0:
+            messagebox.showinfo("Duplicates Removed", f"Removed {duplicate_count} terms already searched.")
+        if len(query_list) < 1:
+            messagebox.showinfo("Search", "No new terms to search for.")
+            return
+        return query_list
 
 
 
