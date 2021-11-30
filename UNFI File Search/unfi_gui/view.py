@@ -4,12 +4,12 @@ from tkinter.constants import ACTIVE
 from typing import TYPE_CHECKING, Dict, List, Optional
 from dataclasses import dataclass
 from pydantic.main import BaseModel
-from model import TkModel
+from .model import TkModel
 
 if TYPE_CHECKING:
-    from controller import Controller
-    from frame import TkFrame
-    from container import TkContainer
+    from .controller import Controller
+    from .frame import TkFrame
+    from .container import TkContainer
 
 
 @dataclass
@@ -58,6 +58,8 @@ class View:
             self.view.pack_forget()
             self.active = False
         self.view.destroy()
+    
+    
 
 
 

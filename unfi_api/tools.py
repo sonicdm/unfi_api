@@ -5,13 +5,8 @@ import traceback
 from concurrent.futures import as_completed, ProcessPoolExecutor, ThreadPoolExecutor
 from operator import itemgetter
 
-import psutil
 import tqdm
 from unfi_api.utils.string import strings_to_numbers, isnumber
-
-def setpriority():
-    ps = psutil.Process(os.getpid())
-    ps.nice(16384)
 
 
 def clear_target(directory, mask='*.jpg'):
@@ -149,7 +144,7 @@ class Threading:
         if max_workers:
             self.max_workers = max_workers
         else:
-            self.max_workers = psutil.cpu_count()
+            self.max_workers = 10
 
     def thread_with_progressbar(self, func, iterable, *args, **kwargs):
         """

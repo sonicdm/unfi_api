@@ -126,8 +126,8 @@ class Result(BaseModel):
 
 class Results(BaseModel):
 
-    results: List[Result]
-    product_results: List[ProductResult]
+    results: Optional[List[Result]]
+    product_results: Optional[List[ProductResult]]
 
     
     @root_validator(pre=True)
@@ -192,12 +192,12 @@ class Results(BaseModel):
             self.append_result(result)
 
     def download_products(
-        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4
-    ) -> Dict[str, Any]:
+        self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4, job_id: str = None
+    ) -> UNFIProducts:
         """
         fetch products from api
         """
-        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count)
+        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count, job_id=job_id)
         return products
 
     def products(self):
@@ -208,7 +208,8 @@ class Results(BaseModel):
                 if result.products:
                     products.update(result.products)
         
-
+    def __len__(self):
+        return len(self.product_results)
 
 def create_result(result_dict: dict=None) -> Result:
     result = Result(**result_dict)

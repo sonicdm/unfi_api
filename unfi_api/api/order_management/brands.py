@@ -33,7 +33,7 @@ def get_products_by_full_text(session, token, query, account_number, user_id, re
     :param kwargs:
     :return:
     """
-    max_url_length = 2000
+    max_url_length = settings.config['url_length_limit']
     base_url_len = 263
     if len(query) > max_url_length - base_url_len:
         raise ValueError(f"query string too long: {len(query)}. Must not exceed {2000-263} characters.")
