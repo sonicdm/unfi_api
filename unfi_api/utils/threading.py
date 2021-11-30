@@ -47,8 +47,8 @@ def threader(
     executor_options:  The thread options to be sent to the executor.
     executor:          The executor to be used. will ignore type, executor_options and max_workers.
     """
-
-    executor_options["max_workers"] = max_workers
+    if not executor_options:
+        executor_options = dict(max_workers=max_workers)    
     results = []
     if not executor:   
         if executor_type == "thread":
@@ -59,7 +59,10 @@ def threader(
             raise ValueError(
                 f"Invalid executor type: {executor_type} must be either 'thread' or 'process'."
             )
-    results = run_executor(executor, func, args, fn_args, fn_kwargs, callback, job)
+    try:
+        results = run_executor(executor, func, args, fn_args, fn_kwargs, callback, job)
+    except CancelledJobException:
+        return results
     if finished_callback:
         finished_callback(results)
     executor.shutdown(wait=True)
@@ -97,6 +100,9 @@ def run_executor(
                     results.append(result)
                     if job:
                         job.job_output.append(result)
+                        if job.cancelled():
+                            raise CancelledJobException(message=f"Job: '{job.job_id}' cancelled", job_id=job.job_id, job=job)
+                        
                     # if job:
                     #     if job.cancelled():
                     #         message = f"Job {job.job_id} was cancelled."
@@ -106,7 +112,11 @@ def run_executor(
                     #         print(job.exceptions)
                     #         raise JobErrorException(message, job=job, job_id=job.job_id)
                         
-                except CancelledJobException:
+                except CancelledJobException as e:
+                    executor.shutdown(wait=False)
+                    executor._threads.clear()
+                    concurrent.futures.thread._threads_queues.clear()
+                    raise e
                     break
                 except JobErrorException:
                     break
@@ -135,6 +145,8 @@ def get_executor(executor_type="thread", executor_options=dict()):
     """
     This function returns an executor.
     """
+    if not executor_options:
+        executor_options = dict(max_workers=10)
     if executor_type == "thread":
         return ThreadPoolExecutor(**executor_options)
     elif executor_type == "process":

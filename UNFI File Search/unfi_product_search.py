@@ -5,21 +5,25 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 from typing import Callable, Dict, List, Union
 
+from unfi_gui.controllers.search import SearchController
+# from excel import create_workbook, save_workbook, write_worksheet_rows
+from unfi_gui.model import TkModel
+from unfi_gui.models.download_model import DownloadModel
+from unfi_gui.models.search_model import SearchModel
+from unfi_gui.search_page import SearchPage
+from unfi_gui.ui import MainContainer
+from unfi_gui.view import View
+
+import logging
+job_logger = logging.getLogger('jobs')
+job_logger.disabled = False
+job_logger.level = logging.DEBUG
+
 # from unfi_api.api import UnfiAPI
 # from unfi_api.client import UnfiApiClient
 # from unfi_api.product import UNFIProduct
 # from unfi_api.search.result import Result, Results
 # from unfi_api.utils.collections import divide_chunks
-
-from unfi_gui.container import TkContainer
-from unfi_gui.controller import Controller
-# from excel import create_workbook, save_workbook, write_worksheet_rows
-from unfi_gui.exceptions import UnfiApiClientNotSetException
-from unfi_gui.model import TkModel
-from unfi_gui.settings import search_chunk_size
-from unfi_gui.ui import MainContainer
-from unfi_gui.view import View
-from unfi_gui.search import SearchController, SearchModel, SearchPage, DownloadModel
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

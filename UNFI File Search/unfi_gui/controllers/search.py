@@ -21,7 +21,7 @@ from unfi_api.utils.collections import divide_chunks
 if TYPE_CHECKING:
     from unfi_api.search.result import Result, Results
     from ..models.search_model import SearchModel
-    from ..download import DownloadModel
+    from ..models.download_model import DownloadModel
     from ..model import TkModel
     from ..search_page import SearchPage
     
@@ -71,6 +71,9 @@ class SearchController(Controller):
         
     def set_button_command(self, button: str, command: Callable) -> None:
         self.search_frame.set_button_command(button, command)
+    
+    def set_progress_bar_message(self, message: str) -> None:
+        self.get_tk_variable("progress_label").set(message)
     
     def run(self) -> None:
         super().run()

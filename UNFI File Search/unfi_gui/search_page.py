@@ -37,7 +37,7 @@ from .settings import (
 )
 from .ui import QueryFrame, ProductListFrame, OptionsFrame
 from .view import View
-from .download import DownloadModel
+from .models.download_model import DownloadModel
 from .models.search_model import SearchModel
 
 
@@ -46,11 +46,11 @@ class SearchPage(TkFrame):
     title: str = "Product Search"
 
     def __init__(
-            self,
-            view: View,
-            container: TkContainer,
-            controller: SearchController,
-            model=None,
+        self,
+        view: View,
+        container: TkContainer,
+        controller: SearchController,
+        model=None,
     ):
         super().__init__(view, container, controller)
         self.columnconfigure(0, weight=1)
@@ -72,9 +72,7 @@ class SearchPage(TkFrame):
         self.progress_bar: ttk.Progressbar = None
 
         # tkinter variables
-        self.results_listbox_variable = tk.StringVar(
-            container, value="Found Products:"
-        )
+        self.results_listbox_variable = tk.StringVar(container, value="Found Products:")
         self.list_box_selected = tk.StringVar(container)
         self.search_variable = tk.StringVar(container)
         self.list_box_label = tk.StringVar(container)
@@ -101,13 +99,17 @@ class SearchPage(TkFrame):
             "results_listbox_variable", self.results_listbox_variable
         )
         self.controller.store_tk_variable("list_box_selected", self.list_box_selected)
+        self.controller.store_tk_variable("list_box_label", self.list_box_label)
+        self.controller.store_tk_variable(
+            "progress_label", self.progress_label_variable
+        )
         # self.controller.store_tk_widget("search_entry", self.search_entry)
         # self.controller.store_tk_widget("results_listbox", self.results_listbox)
         # self.controller.store_tk_widget("progress_bar", self.progress_bar)
         self.listbox_map: Dict[str, UNFIProduct] = {}
 
         self.download_button = None
-        
+
         ### create frames ###
 
         # container for the search entry box and results listbox columns
@@ -120,7 +122,9 @@ class SearchPage(TkFrame):
         self.search_frame: QueryFrame = QueryFrame(self, self.column_container)
         self.search_frame.grid(row=0, column=0, sticky="ns", pady=10)
         ### results listbox frame ###
-        self.listbox_frame: ProductListFrame = ProductListFrame(self, self.column_container)
+        self.listbox_frame: ProductListFrame = ProductListFrame(
+            self, self.column_container
+        )
         self.listbox_frame.grid(row=0, column=1, sticky="ns", pady=10)
 
         # options frame
@@ -130,7 +134,9 @@ class SearchPage(TkFrame):
         # progress bar frame
         self.progress_bar_frame = tk.Frame(self)
         self.progress_bar_frame.grid(row=3, column=0, sticky="", pady=10)
-        self.cancel_button = tk.Button(self.progress_bar_frame, text="Cancel", command=controller.cancel_all_jobs)
+        self.cancel_button = tk.Button(
+            self.progress_bar_frame, text="Cancel", command=controller.cancel_all_jobs
+        )
 
         # action buttons frame
         self.save_exit_button: tk.Button = None
@@ -139,28 +145,28 @@ class SearchPage(TkFrame):
         self.action_buttons_frame = tk.Frame(self)
         self.action_buttons_frame.grid(row=4, column=0, sticky="s", pady=10)
 
-        self.threads = {}       
+        self.threads = {}
         self.create_widgets()
-        self.buttons: Dict[str,tk.Button] = {
-            'download': self.listbox_frame.download_button,
-            'cancel': self.cancel_button,
-            'save': self.save_button,
-            'exit': self.exit_button,
-            'search': self.search_frame.search_button,
+        self.buttons: Dict[str, tk.Button] = {
+            "download": self.listbox_frame.download_button,
+            "cancel": self.cancel_button,
+            "save": self.save_button,
+            "exit": self.exit_button,
+            "search": self.search_frame.search_button,
         }
-        
-    def set_button_state(self, name:str, state: str):
+
+    def set_button_state(self, name: str, state: str):
         self.buttons[name].config(state=state)
-    
+
     def set_button_command(self, name: str, command: Callable):
         self.buttons[name].config(command=command)
-    
+
     def disable_button(self, name: str):
         self.set_button_state(name, tk.DISABLED)
-    
+
     def enable_button(self, name: str):
         self.set_button_state(name, tk.NORMAL)
-    
+
     ### progress frame functions ###
     def create_progress_frame_widgets(self):
         progress_frame_container = tk.Frame(self.progress_bar_frame)
@@ -178,24 +184,35 @@ class SearchPage(TkFrame):
             length=800,
         )
         self.progress_bar.grid(row=1, column=0, columnspan=5, sticky="")
-        
+
         self.cancel_button.grid(row=2, column=0, sticky="", pady=10)
-        self.cancel_button.config(state=tk.DISABLED, command=self.controller.cancel_all_jobs)
-                                
+        self.cancel_button.config(
+            state=tk.DISABLED, command=self.controller.cancel_all_jobs
+        )
+
     def create_action_buttons_frame_widgets(self):
         action_buttons_frame_container = tk.Frame(self.action_buttons_frame)
         action_buttons_frame_container.grid(row=1, column=0, sticky="e")
         # save button, exit button, save and exit button
-        self.save_button = tk.Button(action_buttons_frame_container, text="Save",
-                                     command=lambda: self.save_wb(end=False))
+        self.save_button = tk.Button(
+            action_buttons_frame_container,
+            text="Save",
+            command=lambda: self.save_wb(end=False),
+        )
         self.save_button.grid(row=0, column=0, sticky="e")
         self.save_button.config(state=tk.DISABLED)
-        self.save_exit_button = tk.Button(action_buttons_frame_container, text="Save and Exit",
-                                          command=lambda: self.save_wb(end=True))
+        self.save_exit_button = tk.Button(
+            action_buttons_frame_container,
+            text="Save and Exit",
+            command=lambda: self.save_wb(end=True),
+        )
         self.save_exit_button.grid(row=0, column=1, sticky="e")
         self.save_exit_button.config(state=tk.DISABLED)
-        self.exit_button = tk.Button(action_buttons_frame_container, text="Exit",
-                                     command=lambda: self.controller.quit())
+        self.exit_button = tk.Button(
+            action_buttons_frame_container,
+            text="Exit",
+            command=lambda: self.controller.quit(),
+        )
         self.exit_button.grid(row=0, column=2, sticky="e")
 
     def create_widgets(self):
@@ -215,16 +232,37 @@ class SearchPage(TkFrame):
         if message:
             self.progress_label_variable.set(message)
         self.progress_bar.update()
-            
-    
-    def do_search(self, event=None, entry=None, search_button: tk.Button = None, listbox: tk.Listbox = None):
-        job_id = 'search'
-        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id))
-        
-        
-        
+
+    def do_search(
+        self,
+        event=None,
+        entry=None,
+        search_button: tk.Button = None,
+        listbox: tk.Listbox = None,
+        in_thread=False,
+    ):
+        if not in_thread:
+            thread = threading.Thread(
+                target=self.do_search,
+                kwargs={
+                    "event": event,
+                    "entry": entry,
+                    "search_button": search_button,
+                    "listbox": listbox,
+                    "in_thread": True,
+                },
+            )
+            thread.start()
+            return
+        job_id = "search"
+        self.cancel_button.config(
+            state=tk.NORMAL, command=lambda: self.controller.cancel_job(job_id)
+        )
+
         def __search_callback(result, pb_value, pb_max, found_count):
-            message = f"Searched {pb_value}/{pb_max} terms.\nFound {found_count} results."
+            message = (
+                f"Searched {pb_value}/{pb_max} terms.\nFound {found_count} results."
+            )
             self.update_progress_bar(pb_value, pb_max, message)
 
         # do search
@@ -238,40 +276,53 @@ class SearchPage(TkFrame):
         self.search_variable.set(query)
 
         # disable search button
-        self.disable_button('search')
+        self.disable_button("search")
         auto_download = self.auto_download_variable.get()
         if "poop" in query:
             results = []
         else:
-            self.search_model.search(query, progress_callback=__search_callback, job_id=job_id)
+            self.search_model.search(
+                query, progress_callback=__search_callback, job_id=job_id
+            )
             results = self.search_model.results
-        
+
         self.listbox_frame.list_box_delete_all(listbox=listbox)
         if len(results) < 1:
-            retry = messagebox.showinfo(
-                "Search", "No results found..."
-            )
+            retry = messagebox.showinfo("Search", "No results found...")
             search_button.config(state=tk.NORMAL)
-            
+        insert_count = 0
         for result in self.search_model.results:
             list_val = result + " unfi product description"
+            # self.listbox_map = self.search_model.get_description_mapped_results()
             self.listbox_map[list_val] = result
             listbox.insert(tk.END, list_val)
+            insert_count += 1
         # select all items in listbox
         self.listbox_frame.list_box_select_all(listbox=listbox)
-        self.disable_button('cancel')
+        self.disable_button("cancel")
+        self.enable_button("search")
         if auto_download:
             self.do_download()
+        
 
-    def do_download(self, listbox=None, download_button: tk.Button = None, search_button: tk.Button = None, threaded=False):
-        if not threaded:
+    def do_download(
+        self,
+        listbox=None,
+        download_button: tk.Button = None,
+        search_button: tk.Button = None,
+        in_thread=False,
+    ):
+        if not in_thread:
             # re-run function in a thread
-            thread = threading.Thread(target=self.do_download, args=(listbox, download_button, search_button, True))
+            thread = threading.Thread(
+                target=self.do_download,
+                args=(listbox, download_button, search_button, True),
+            )
             thread.start()
-            return    
-                
+            return
+
         # self.model.download()
-        job_id = 'download'
+        job_id = "download"
         if not listbox:
             listbox = self.listbox_frame.results_listbox
         if not download_button:
@@ -279,39 +330,46 @@ class SearchPage(TkFrame):
         if not search_button:
             search_button = self.search_frame.search_button
         search_button.config(state=tk.DISABLED)
-        self.cancel_button.config(state=tk.NORMAL, command=lambda: self.controller.set_job_status(job_id=job_id, status="cancelled"))
+        self.cancel_button.config(
+            state=tk.NORMAL,
+            command=lambda: self.controller.set_job_status(
+                job_id=job_id, status="cancelled"
+            ),
+        )
         selection = listbox.curselection()
-        selection_items = [listbox.get(i) for i in selection]
+        items = [listbox.get(i) for i in selection]
         # messagebox.showinfo("Download", "Downloading:\n" + "\n".join(selection_items))
         downloaded = 0
         # run through items and update progress bar
-        self.progress_bar.config(maximum=len(selection_items))
+        self.progress_bar.config(maximum=len(items))
         self.progress_label_variable.set(
-            f"Downloaded: {downloaded}/{len(selection_items)}"
+            f"Downloaded: {downloaded}/{len(items)}"
         )
         model = self.download_model
-        def __download():
+        import random
+        def __download(products):
             nonlocal downloaded
-            for i in selection_items:
-                try:
-                    time.sleep(1)
-                    downloaded += 1
-                    self.update_progress_bar(downloaded, len(selection_items),
-                                            f"Downloaded: {downloaded}/{len(selection_items)}")
-                    status = self.controller.get_job_status(job_id)
-                    if status == 'cancelled':
-                        raise CancelledJobException()
-                except CancelledJobException:
-                    self.update_progress_bar(0, 0, "Cancelled")
-                    self.cancel_button.config(state=tk.DISABLED)
-                    return
-            self.progress_label_variable.set(
-                f"Downloading {len(selection_items)} products complete!"
-            )
-        
-        job = self.controller.create_job(job_id=job_id, job_fn=__download)
-        res = job.start()
 
+            time.sleep(random.uniform(0.1, 0.5))
+            downloaded += 1
+            self.update_progress_bar(
+                downloaded,
+                len(items),
+                f"Downloaded: {downloaded}/{len(items)}",
+            )
+            status = self.controller.get_job_status(job_id)
+            if status == "cancelled":
+                raise CancelledJobException()
+
+            return
+
+        job = self.controller.create_job(job_id=job_id, job_fn=__download, job_data=items,threaded=True)
+        res = job.start()
+        if job.cancelled():
+            pb_val = self.progress_label_variable.get()
+            self.controller.set_progress_bar_message(pb_val + " ...cancelled")
+            self.cancel_button.config(state=tk.DISABLED)
+            self.enable_button("download")
         if self.auto_save_variable.get():
             self.save_wb()
         search_button.config(state=tk.NORMAL)
@@ -346,22 +404,16 @@ class SearchPage(TkFrame):
         messagebox.showinfo("Settings Saved", "Settings saved")
 
 
-
-
-
-
 def prepare_query(query: str, search_model: SearchModel):
-        query_split = list(filter(lambda x: str(x).strip() != "", query.split()))
-        query_split = list(set(query_split))
-        query_list = search_model.remove_already_searched_terms(query_split)
-        duplicate_count = len(query_split) - len(query_list)
-        if duplicate_count > 0:
-            messagebox.showinfo("Duplicates Removed", f"Removed {duplicate_count} terms already searched.")
-        if len(query_list) < 1:
-            messagebox.showinfo("Search", "No new terms to search for.")
-            return
-        return query_list
-
-
-
-
+    query_split = list(filter(lambda x: str(x).strip() != "", query.split()))
+    query_split = list(set(query_split))
+    query_list = search_model.remove_already_searched_terms(query_split)
+    duplicate_count = len(query_split) - len(query_list)
+    if duplicate_count > 0:
+        messagebox.showinfo(
+            "Duplicates Removed", f"Removed {duplicate_count} terms already searched."
+        )
+    if len(query_list) < 1:
+        messagebox.showinfo("Search", "No new terms to search for.")
+        return
+    return query_list

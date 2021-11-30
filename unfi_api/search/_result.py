@@ -126,8 +126,8 @@ class Result(BaseModel):
 
 class Results(BaseModel):
 
-    results: List[Result]
-    product_results: List[ProductResult]
+    results: Optional[List[Result]]
+    product_results: Optional[List[ProductResult]]
 
     
     @root_validator(pre=True)

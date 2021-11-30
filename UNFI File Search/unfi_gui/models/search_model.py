@@ -1,5 +1,6 @@
 from re import search
-from typing import Callable, Dict, List
+from threading import Thread
+from typing import TYPE_CHECKING, Callable, Dict, List
 from functools import reduce
 from unfi_api import UnfiApiClient
 from unfi_api.product import UNFIProduct
@@ -12,8 +13,11 @@ from ..settings import search_chunk_size
 from ..controller import Controller
 from ..exceptions import UnfiApiClientNotSetException
 from ..model import TkModel
+import time
+import random
 
-
+if TYPE_CHECKING:
+    from ..controllers.search import SearchController
 class SearchModel(TkModel):
     """
     usage:
@@ -39,7 +43,7 @@ class SearchModel(TkModel):
         self.search_terms = []
         self.searched_terms = []
         self.query_length_limit = search_chunk_size
-        self.controller = controller
+        self.controller: SearchController = controller
         self.results: Results = []
         self.search_chunk_size = search_chunk_size
         # self.register_event_handler("onSearchComplete", lambda x: controller.stop_cancelled_jobs())
@@ -77,16 +81,14 @@ class SearchModel(TkModel):
 
     def search(
         self,
-        query: List[str],
-        limit: int = None,
-        threaded: bool = False,
+        query: str,
+        threaded: bool = True,
         callback: Callable = None,
         progress_callback=None,
         job_id="search",
     ) -> Results:
         params = dict(
             query_list=query,
-            limit=limit,
             threaded=threaded,
             callback=callback,
             progress_callback=progress_callback,
@@ -96,11 +98,17 @@ class SearchModel(TkModel):
         self.trigger_event("onSearchStart", params)
 
         searched_count = 0
+        found_count = 0
+        total_terms = 0
         results = []
         def search_chunk(chunk):
             nonlocal searched_count
             nonlocal found_count
             self.trigger_event("onSearch", chunk)
+            searched_count += len(chunk)
+            found_count += len(chunk)
+            # sleep for random float interval between 0.5 and 1 seconds
+            time.sleep(random.uniform(0.5, 1))
             result = chunk
             if progress_callback:
                 progress_callback(result, searched_count, total_terms, found_count)
@@ -109,27 +117,41 @@ class SearchModel(TkModel):
             return result
 
         query_chunks = self.prepare_query(query)
-        self.search_terms.extend(query_chunks)
-        total_terms = reduce(
-            lambda count, element: count + len(element), self.search_terms, 0
+        # flatten query_chunks and extend self.search_terms
+        for chunk in query_chunks:
+            self.search_terms.extend(chunk)
+        
+        # self.search_terms.extend(query_chunks)
+        total_terms += reduce(
+            lambda count, element: count + len(element), query_chunks, 0
         )
-        found_count = 0
-        search_job = Job(
+        search_job: Job = self.controller.create_job(
             job_id=job_id,
             job_fn=search_chunk,
-            job_data=self.search_terms,
-            callback=lambda x: self.trigger_event("onJobRun", x),
+            job_data=query_chunks,
+            callback=lambda x: self.trigger_event("onSearch", x),
             threaded=threaded,
-            max_threads=limit,
+        )
+        self.controller.set_progress_bar_message(
+            f"Searching for {total_terms} terms"
         )
         search_job.start()
         if search_job.errored():
-            self.trigger_event("onSearchError", search_job.error)
+            self.trigger_event("onSearchError", search_job)
+        if search_job.cancelled():
+            self.trigger_event("onCancel", search_job)
+            pb_message = self.controller.get_variable_value("progress_label")
+            self.controller.set_progress_bar_message(pb_message + ": Cancelled search...")
         if search_job.job_output:
+            self.search_terms.extend(self.search_terms)
             results = search_job.job_output
+            reduce(lambda x, y: self.results.extend(y), results, [])
+            found_count = len(self.results)
+            # self.add_results(results)
             self.trigger_event("onSearchComplete", results)
         else:
-            self.trigger_event("noResults",  query_chunks)
+            self.trigger_event("noResults",  query)
+            
 
     def get_description_mapped_results(self) -> Dict[str, ProductListing]:
         return {

@@ -26,6 +26,8 @@ from unfi_api.utils.threading import threader
 LOG_TO_CONSOLE = False
 
 log_dir = r"C:\Scriptlogs"
+if not os.path.exists(log_dir):
+    os.makedirs(log_dir)
 log_file_name = f"{log_dir}\\{Path(__file__).stem}.log"
 output_path = PRODUCT_QUERY_OUTPUT_PATH
 image_path = IMAGE_OUTPUT_PATH
@@ -167,7 +169,7 @@ def do_search(query: str, client: UnfiApiClient) -> Results:
     with tqdm(total=len(query_list), unit=" querys") as pbar:
         pbar.smoothing = 0.1
         pbar.set_description(f"0/{len(query_list)}")
-        results: List[Result] = threader(__search_chunk, chunks, max_threads=5)
+        results: List[Result] = threader(__search_chunk, chunks, max_workers=5)
     product_results = []
     for result in results:
         product_results.extend(result.product_results)

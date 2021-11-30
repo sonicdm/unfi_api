@@ -29,7 +29,7 @@ def download_products(
     products = {}
     logger.debug(f"Downloading {len(product_results)} products...", end=" ")
     if threaded:
-        result: List[UNFIProduct] = threader(client.get_product, product_results, callback, thread_count, job_id=job_id)
+        result: List[UNFIProduct] = threader(client.get_product, product_results, callback=callback, max_workers=thread_count)
         for res in result:
             products[res.product_code] = res
 

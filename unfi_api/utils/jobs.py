@@ -25,8 +25,14 @@ RUNNING_STATUSES = ["running"]
 jobs: Jobs = None
 
 logger = logging.getLogger(__name__)
+
+logger.setLevel(logging.DEBUG)
+# log to stdout
+logger.addHandler(logging.StreamHandler())
+
 # disable logging for this module
-logger.disabled = True
+# logger.disabled = True
+
 
 class status(Enum):
     """
@@ -82,6 +88,8 @@ def run_job(
         for data in fn_data:
             logger.debug(f"Running job {job.job_id} with data {data}")
             logger.debug(f"Job Status: {job.job_status}")
+            if job.cancelled():
+                break
             result = fn(data, *args)
             job.job_output.append(result)
             output.append(result)
@@ -95,43 +103,44 @@ def run_job(
 @dataclass
 class Job:
     """
-    This class defines a job.
-    possible statuses:
-    - pending
-    - running
-    - finished
-    - cancelled
-    - error
-    Arguments:
-    job_data:         data to be passed to the function
-    job_fn:           function to be run
-    job_args:         arguments to be passed to the function
-    job_kwargs:       keyword arguments to be passed to the function
-    suppress_errors:  suppress exceptions in the job function and store to job_exceptions
-    threading:        True/False run the job in a thread pool
-    executor:         executor to be used for the job,
-                        you can provide an executor to run the job in a thread using a defined executor
-    executor_options: options to be passed to the threader if no executor is set (see threading.threader)
+        This class defines a job.
+        possible statuses:
+        - pending
+        - running
+        - finished
+        - cancelled
+        - error
+        Arguments:
+        job_data:         data to be passed to the function
+        job_fn:           function to be run
+        job_args:         arguments to be passed to the function
+        job_kwargs:       keyword arguments to be passed to the function
+        callback:         callback function to be run after each iteration
+        suppress_errors:  suppress exceptions in the job function and store to job_exceptions
+        threading:        True/False run the job in a thread pool
+        executor:         executor to be used for the job,
+                            you can provide an executor to run the job in a thread using a defined executor
+        executor_options: options to be passed to the threader if no executor is set (see threading.threader)
 
-    Properties:
-    job_status:      current status of the job
-    job_id:          id of the job
-    job_output:      output of the job
-    job_exceptions:  store of exceptions logged by the job
-    
-    Usage Example:
-    Define the job:
-    job = Job(job_data, job_fn, job_args, job_kwargs, threading=True, executor_options=executor_options)
-    Start the job:
-    job.start()
-    Get the job output if needed:
-    output_data = job.output_data
-    
-    Cancel the job:
-    job.cancel() # raises CancelledJobException and cleanly shuts down all threads attached to the job. Saving any output that has been generated. 
-    
-    Check status of the job:
-    job.cancelled() # True 
+        Properties:
+        job_status:      current status of the job
+        job_id:          id of the job
+        job_output:      output of the job
+        job_exceptions:  store of exceptions logged by the job
+
+        Usage Example:
+        Define the job:
+        job = Job(job_data, job_fn, job_args, job_kwargs, threading=True, executor_options=executor_options)
+        Start the job:
+        job.start()
+        Get the job output if needed:
+        output_data = job.output_data
+
+        Cancel the job:
+        job.cancel() # raises CancelledJobException and cleanly shuts down all threads attached to the job. Saving any output that has been generated.
+
+        Check status of the job:
+        job.cancelled() # True
     """
 
     job_id: Union[str, int]
@@ -141,11 +150,12 @@ class Job:
     job_args: Iterable = field(default_factory=tuple)
     job_kwargs: dict = field(default_factory=dict)
     job_output: Any = field(default=None)
+    callback: Callable = field(default=None)
     threaded: bool = field(default=False)
     executor_options: dict = field(default_factory=dict)
     executor: Union[ThreadPoolExecutor, ProcessPoolExecutor] = field(default=None)
     suppress_errors: bool = field(default=False)
-    thread_type = field(default="thread")
+    thread_type: str = field(default="thread")
 
     # dict containing the index of the failed arguments, the exception and the values
     job_exceptions: Dict[int, List[Tuple[JobErrorException, Any]]] = field(
@@ -220,12 +230,13 @@ class Job:
             self.job_data,
             fn_args=self.job_args,
             fn_kwargs=self.job_kwargs,
+            callback=self.callback,
             job=self,
             threaded=self.threaded,
             executor_options=self.executor_options,
             executor=self.executor,
         )
-        if not self.errored():
+        if not self.errored() and not self.cancelled():
             self.finish()
 
     def end(self, status="finished") -> None:
@@ -235,6 +246,7 @@ class Job:
         if self.running():
             if self.executor:
                 self.executor.shutdown(wait=False)
+                del self.executor
                 self.executor = None
         self.set_status(status)
 
@@ -243,6 +255,10 @@ class Job:
         Get the function.
         """
         try:
+            if self.cancelled():
+                raise CancelledJobException(
+                    f"Job {self.job_id} is cancelled.", job=self, job_id=self.job_id
+                )
             self.run_count += 1
             return self.job_fn(*args, **kwargs)
         except CancelledJobException:
@@ -309,23 +325,18 @@ class Jobs:
 
     def create_job(
         self,
-        job_id: Union[str, int],
-        job_fn: Callable,
-        job_data: Iterable,
-        job_args: Iterable = tuple(),
-        job_kwargs: dict = dict(),
-        threaded: bool = False,
-        thread_options: dict = dict(),
-        executor: Union[ThreadPoolExecutor, ProcessPoolExecutor] = None,
-    ) -> Job:
-        if job_id in self.jobs:
-            job = self.jobs.get(job_id)
-            if job.ended():
-                del self.jobs[job_id]
-            elif job.running():
-                raise JobRunningException(
-                    f"Job: {job_id} exists and status is: {job.job_status}"
-                )
+        job_id,
+        job_fn,
+        job_data,
+        job_args=None,
+        job_kwargs=None,
+        callback=None,
+        threaded=False,
+        executor_options=None,
+        executor=None,
+        suppress_errors=False,
+        thread_type="thread",
+    ):
 
         job = Job(
             job_id=job_id,
@@ -333,9 +344,12 @@ class Jobs:
             job_fn=job_fn,
             job_args=job_args,
             job_kwargs=job_kwargs,
-            executor_options=thread_options,
+            callback=callback,
             threaded=threaded,
+            executor_options=executor_options,
             executor=executor,
+            suppress_errors=suppress_errors,
+            thread_type=thread_type,
         )
         self.add_job(job)
         return job
@@ -346,21 +360,27 @@ class Jobs:
         """
         self.jobs[job.job_id] = job
 
+    def start_job(self, job_id: str) -> None:
+        """
+        Start a job.
+        """
+        self.jobs[job_id].start()
+
     def cancel_job(self, job_id: Union[str, int]) -> None:
         """
-        Cancel the job.
+        Cancel a job.
         """
         self.jobs[job_id].cancel()
 
     def get_job(self, job_id: Union[str, int]) -> Job:
         """
-        Get the job.
+        Get a job.
         """
         return self.jobs[job_id]
 
     def delete_job(self, job_id: Union[str, int]) -> None:
         """
-        Delete the job.
+        Delete a job.
         """
         del self.jobs[job_id]
 
@@ -393,6 +413,9 @@ class Jobs:
         get dict of jobs that failed
         """
         return {job_id: job for job_id, job in self.jobs.items() if job.errored()}
+
+    def get_cancelled_jobs(self) -> Dict[str, Job]:
+        return {job_id: job for job_id, job in self.jobs.items() if job.cancelled()}
 
     def get_jobs(self) -> Dict[str, Job]:
         """

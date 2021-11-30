@@ -27,8 +27,10 @@ def main():
     tkroot.withdraw()
     query = ask_query()
     if query:
+        USER = os.getenv("UNFI_USER")
+        PASSWORD = os.getenv("UNFI_PASSWORD")
         print("Loading UNFI Driver")
-        api = UnfiAPI("CapellaAPI", "CapellaAPI2489", incapsula_retry=True, incapsula=False)
+        api = UnfiAPI(USER,PASSWORD, incapsula_retry=True, incapsula=False)
         api_client = UnfiApiClient(api)
         search = True
         products = {}
