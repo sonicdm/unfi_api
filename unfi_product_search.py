@@ -1,3 +1,4 @@
+from concurrent.futures import thread
 import logging
 import os
 import re
@@ -169,7 +170,7 @@ def do_search(query: str, client: UnfiApiClient) -> Results:
     with tqdm(total=len(query_list), unit=" querys") as pbar:
         pbar.smoothing = 0.1
         pbar.set_description(f"0/{len(query_list)}")
-        results: List[Result] = threader(__search_chunk, chunks, max_workers=5)
+        results: List[Result] = threader(__search_chunk, chunks,executor_options={"max_workers": 4})
     product_results = []
     for result in results:
         product_results.extend(result.product_results)
@@ -212,20 +213,37 @@ def download_products(results: Results, client: UnfiApiClient) -> UNFIProducts:
 def download_product_images(
     client: UnfiApiClient, products: UNFIProducts, image_directory: str
 ):
-    for product in products:
-        if product.image_available:
+    print(f"Downloading product images...")
+    products_with_images = [x for x in products if x.image_available]
+    max_len = max([len(f"Downloading image for {product.brand} - {product.description}") for product in products_with_images])
+    fetched = 0
+    with tqdm(total=len(products_with_images), unit=" products",position=0, leave=True) as pbar:
+        pbar.set_description(f"Downloading Images for {len(products_with_images)} products...")        
+        def _img_fetch(product: UNFIProduct):
             filename = os.path.join(image_directory, f"{product.upc}.jpg")
             if not os.path.exists(filename):
-                logger.info(f"Downloading image for {product.brand} - {product.description}")
+                info = f"Downloading image for {product.brand} - {product.description}"
+                logger.info(info)
+                # pbar.write(info)
+                pbar.set_description(info+" "*(max_len-len(info)))
                 with open(filename, "wb") as img_file:
                     image_data = product.get_image(client)
                     if image_data:
                         img_file.write(image_data)
+                    nonlocal fetched
+                    fetched += 1
             else:
-                logger.debug(f"Image already exists for {product.brand} - {product.description}")
+                info = f"Image for {product.brand} - {product.description} already exists."
+                pbar.write(info)
+                logger.debug(info)
+            pbar.update(1)
+            # tqdm.write(info)
+            
         
-        else:
-            logger.debug(f"No image available for {product.brand} - {product.description}")
+        threader(_img_fetch, products_with_images, executor_options={"max_workers": 4})
+    logger.info(f"Downloaded {fetched} images.")
+    print(f"Downloaded {fetched} images...")
+            
 
 
 def save_wb(wb: Workbook, output_file=output_path) -> None:
