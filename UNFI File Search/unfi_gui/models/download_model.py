@@ -2,12 +2,11 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Callable
 
 from unfi_api.product.product import UNFIProducts
-
-from .model import TkModel
+from ..model import TkModel
 from unfi_api import UnfiApiClient
 from unfi_api.search.result import Results
 if TYPE_CHECKING:
-    from .controller import Controller
+    from ..controller import Controller
 
 class DownloadModel(TkModel):
     client: UnfiApiClient = None

@@ -12,11 +12,11 @@ from .frame import TkFrame
 from .view import View
 
 if TYPE_CHECKING:
-    from .search import SearchModel, SearchController
+    from .search_page import SearchModel, SearchController
 
 if TYPE_CHECKING:
     from unfi_product_search import SearchController
-    from search import SearchPage
+    from search_page import SearchPage
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 

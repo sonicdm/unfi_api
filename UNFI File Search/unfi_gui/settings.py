@@ -18,6 +18,7 @@ auto_download = config.getboolean('DEFAULT', "auto_download", fallback=False)
 auto_save = config.getboolean('DEFAULT', "auto_save", fallback=False)
 auto_login = config.getboolean('DEFAULT', "auto_login", fallback=False)
 default_save_path = config.get('DEFAULT', "default_save_path", fallback=os.path.join(os.path.expanduser('~'), 'Downloads'))
+thread_type = config.get('DEFAULT', 'thread_type', fallback='thread')
 
 
 search_chunk_size = config.getint('SEARCH', 'search_chunk_size', fallback=1700)
