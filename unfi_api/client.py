@@ -90,7 +90,7 @@ class UnfiApiClient:
         product code: 5 digit unique product code
         """
         response: APIResponse = (
-            self._order_management.brands.get_product_pricing_detail(product_code)
+            self.order_management.brands.get_product_pricing_detail(product_code)
         )
         if not response.data:
             raise NonJsonResultError(
