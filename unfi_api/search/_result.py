@@ -57,6 +57,9 @@ class ProductResult(BaseModel):
             callback(product)
         return product
 
+    def __str__(self) -> str:
+        return f"{self.product_code} - {self.brand_name} - {self.product_name} - {self.pack_size} - ({self.upc})"
+
 
 class Result(BaseModel):
     # total_hits: Optional[int] = Field(0, alias="TotalHits")
@@ -122,12 +125,16 @@ class Result(BaseModel):
     
     def __len__(self) -> int:
         return len(self.product_results)
+    
+    def __str__(self) -> str:
+        desc = f"Result: {self.total_hits} products"
+        return desc
 
 
 class Results(BaseModel):
 
-    results: Optional[List[Result]]
-    product_results: Optional[List[ProductResult]]
+    results: Optional[List[Result]] = Field([])
+    product_results: Optional[List[ProductResult]] = Field([])
 
     
     @root_validator(pre=True)
@@ -175,7 +182,7 @@ class Results(BaseModel):
     #     return product_results
 
     def append_result(self, result: Result):
-        for result in Result.product_results:
+        for result in result.product_results:
             self.product_results.append(result)
         self.results.append(result)
 
@@ -210,6 +217,14 @@ class Results(BaseModel):
         
     def __len__(self):
         return len(self.product_results)
+    
+    def clear(self):
+        self.results = []
+        self.product_results = []
+    
+    def remove_product_result(self, product_result: ProductResult):
+        if product_result in self.product_results:
+            self.product_results.remove(product_result)
 
 def create_result(result_dict: dict=None) -> Result:
     result = Result(**result_dict)
