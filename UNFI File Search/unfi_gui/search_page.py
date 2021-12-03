@@ -10,7 +10,7 @@ from tkinter import Listbox, filedialog, messagebox
 from tkinter.scrolledtext import ScrolledText
 from typing import Callable, Dict, List, Union
 
-from unfi_api import UnfiAPI, UnfiApiClient
+from unfi_api import UnfiAPI, UnfiApiClient, product
 from unfi_api.exceptions import CancelledJobException
 from unfi_api.product.product import UNFIProduct, UNFIProducts
 from unfi_api.search.result import ProductResult, Result, Results
@@ -119,11 +119,11 @@ class SearchPage(TkFrame):
         )
         # column container frames
         ### search entry frame ###
-        self.search_frame: QueryFrame = QueryFrame(self, self.column_container)
+        self.search_frame: QueryFrame = QueryFrame(self, self.column_container, controller)
         self.search_frame.grid(row=0, column=0, sticky="ns", pady=10)
         ### results listbox frame ###
         self.listbox_frame: ProductListFrame = ProductListFrame(
-            self, self.column_container
+            self, self.column_container, controller
         )
         self.listbox_frame.grid(row=0, column=1, sticky="ns", pady=10)
 
@@ -146,6 +146,7 @@ class SearchPage(TkFrame):
         self.action_buttons_frame.grid(row=4, column=0, sticky="s", pady=10)
 
         self.threads = {}
+        self.controller.search_frame = self
         self.create_widgets()
         self.buttons: Dict[str, tk.Button] = {
             "download": self.listbox_frame.download_button,
@@ -291,10 +292,10 @@ class SearchPage(TkFrame):
             retry = messagebox.showinfo("Search", "No results found...")
             search_button.config(state=tk.NORMAL)
         insert_count = 0
-        for result in self.search_model.results:
-            list_val = result + " unfi product description"
+        for product_result in results.product_results:
+            list_val = str(product_result)
             # self.listbox_map = self.search_model.get_description_mapped_results()
-            self.listbox_map[list_val] = result
+            self.listbox_map[list_val] = product_result
             listbox.insert(tk.END, list_val)
             insert_count += 1
         # select all items in listbox

@@ -24,6 +24,7 @@ if TYPE_CHECKING:
     from ..models.download_model import DownloadModel
     from ..model import TkModel
     from ..search_page import SearchPage
+    from ..ui import ProductListFrame
     
     
 class SearchController(Controller):
@@ -35,12 +36,10 @@ class SearchController(Controller):
         super().__init__("unfi_api_search", container, model)
         # self.search_view = self.container.get_view("search")
         self.search_frame: SearchPage = None
+        self.list_box_frame: ProductListFrame = None
 
     def search(self, query: str, callback: Callable = None) -> Results:
-        client = self.search_model.get_client()
-        results = []
-        for chunk in list(divide_chunks(query, search_chunk_size)):
-            self.search_model.search(chunk)
+        self.search_model.search(query, callback=callback)
 
     def download_products(
             self, result: Union[Results, Result], callback=None
@@ -74,7 +73,13 @@ class SearchController(Controller):
     
     def set_progress_bar_message(self, message: str) -> None:
         self.get_tk_variable("progress_label").set(message)
+        
+    def delete_results(self) -> None:
+        for product_result in self.search_model.results.product_results:
+            del product_result
+            
+    def get_result_by_list_box_description(self, index: int) -> Result:
+        result = self.search_model.list_box_results[index]
     
     def run(self) -> None:
         super().run()
-        self.search_frame = self.container.get_view("search").view

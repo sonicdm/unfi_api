@@ -19,20 +19,17 @@ job_logger = logging.getLogger('jobs')
 job_logger.disabled = False
 job_logger.level = logging.DEBUG
 
-# from unfi_api.api import UnfiAPI
-# from unfi_api.client import UnfiApiClient
-# from unfi_api.product import UNFIProduct
-# from unfi_api.search.result import Result, Results
-# from unfi_api.utils.collections import divide_chunks
+from unfi_api.api import UnfiAPI
+from unfi_api.client import UnfiApiClient
 
 ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
 
 def main():
     user = os.environ["UNFI_USER"]
     password = os.environ["UNFI_PASSWORD"]
-    # unfi_api = UnfiAPI(user, password, incapsula=False)
-    # client = UnfiApiClient(unfi_api)
-    client = "client"
+    unfi_api = UnfiAPI(user, password, incapsula=False)
+    client = UnfiApiClient(unfi_api)
+    # client = "client"
     search_model = SearchModel
     search_model.set_client(client)
     download_model = DownloadModel
