@@ -31,9 +31,10 @@ class MainContainer(TkContainer):
 
 
 class QueryFrame(tk.Frame):
-    def __init__(self, parent: SearchPage, container: tk.Frame):
+    def __init__(self, parent: SearchPage, container: tk.Frame, controller: SearchController):
         super().__init__(container)
         self.parent = parent
+        self.controller = controller
         self.search_entry = parent.search_entry
         self.search_entry_label = parent.search_entry_label
         self.auto_download_variable = parent.auto_download_variable
@@ -102,9 +103,10 @@ class QueryFrame(tk.Frame):
 
 
 class ProductListFrame(tk.Frame):
-    def __init__(self, parent: SearchPage, container: tk.Frame):
+    def __init__(self, parent: SearchPage, container: tk.Frame, controller: SearchController=None):
         super().__init__(container)
         self.parent: SearchPage = parent
+        self.controller: SearchController = controller
         self.results_listbox_variable: tk.StringVar = parent.results_listbox_variable
         self.results_listbox_label_variable: tk.StringVar = tk.StringVar(self, value="Results:")
         self.save_path_variable: tk.StringVar = parent.save_path_variable
@@ -194,10 +196,13 @@ class ProductListFrame(tk.Frame):
 
     def list_box_delete_all(self, listbox: tk.Listbox):
         self.download_button.config(state=tk.DISABLED)
+        # self.parent.search_model.results.clear()
         listbox.delete(0, tk.END)
 
     def list_box_delete_selection(self, listbox: tk.Listbox):
         for i in listbox.curselection():
+            desc = listbox.get(i)
+            
             listbox.delete(i)
         if self.results_listbox.size() < 1:
             self.download_button.config(state=tk.DISABLED)
