@@ -135,6 +135,7 @@ class Results(BaseModel):
 
     results: Optional[List[Result]] = Field([])
     product_results: Optional[List[ProductResult]] = Field([])
+    downloaded_products: Optional[UNFIProducts] = Field(None)
 
     
     @root_validator(pre=True)
@@ -202,16 +203,31 @@ class Results(BaseModel):
         self, client:UnfiApiClient, callback: Callable = None, threaded: bool=False, thread_count=4, job_id: str = None
     ) -> UNFIProducts:
         """
-        fetch products from api
+        fetch products from api. Skipping products that have already been downloaded previously. 
         """
-        products = client.get_products(self.product_results, callback=callback, threaded=threaded, thread_count=thread_count, job_id=job_id)
-        return products
+        product_results = []
+        if self.downloaded_products:
+            for product_result in self.product_results:
+                    if product_result.product_code in self.downloaded_products.product_codes:
+                        continue
+                    product_results.append(product_result) 
+        else:
+            product_results = self.product_results    
+        
+        if not product_results:
+            return self.downloaded_products
+        products = client.get_products(product_results, callback=callback, threaded=threaded, thread_count=thread_count, job_id=job_id)
+        if not self.downloaded_products:
+            self.downloaded_products = products
+        else:
+            self.downloaded_products.update(products)
+        return self.downloaded_products
 
     def products(self):
         from unfi_api.product import UNFIProducts
         products = UNFIProducts()
         for result in self.results:
-            for product in result.products:
+            for _ in result.products:
                 if result.products:
                     products.update(result.products)
         
@@ -225,6 +241,17 @@ class Results(BaseModel):
     def remove_product_result(self, product_result: ProductResult):
         if product_result in self.product_results:
             self.product_results.remove(product_result)
+            
+    def undownloaded_results(self):
+        results = Results()
+        if not self.downloaded_products:
+            return self
+        for product_result in self.product_results:
+            if product_result.product_code not in self.downloaded_products.product_codes():
+                results.product_results.append(product_result)
+        if len(results.product_results) < 1:
+            return None
+        return results
 
 def create_result(result_dict: dict=None) -> Result:
     result = Result(**result_dict)

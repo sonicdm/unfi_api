@@ -64,12 +64,15 @@ def main():
         search = True
         products = UNFIProducts()
         fields = set()
+        results = Results()
         while True:
-            results: Results = search_products(query, client)
+            search_results = search_products(query, client)
+            results.append_results(search_results.results)
             query = None
-            if results:
-                logger.info(f"Found {results.total_hits} products")
-                products.update(download_products(results, client))
+            undownloaded_results = results.undownloaded_results()
+            if undownloaded_results:
+                logger.info(f"Found {undownloaded_results.total_hits} products")
+                products.update(download_products(undownloaded_results, client))
                 if FETCH_IMAGES:
                     logger.info("Downloading missing images...")
                     download_product_images(client, products, image_path)
@@ -95,9 +98,9 @@ def main():
                         break
                         
             else:
-                logging.info("No results found.")
+                logging.info("No new results found.")
                 if mb.askyesno(
-                    "No Results Found", "No results found. Do another search?"
+                    "No New Results Found", "No new results found. Do another search?"
                 ):
                     query = ask_query()
                 else:
@@ -215,6 +218,8 @@ def download_product_images(
 ):
     print(f"Downloading product images...")
     products_with_images = [x for x in products if x.image_available]
+    if not products_with_images:
+        return
     max_len = max([len(f"Downloading image for {product.brand} - {product.description}") for product in products_with_images])
     fetched = 0
     with tqdm(total=len(products_with_images), unit=" products",position=0, leave=True) as pbar:
