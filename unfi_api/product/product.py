@@ -15,8 +15,10 @@ from unfi_api.utils.collections import flatten_dict_overwrite, lower_case_keys, 
 from unfi_api.utils.upc import stripcheckdigit
 from unfi_api.utils.string import clean_size_field
 from unfi_api.search.result import ProductResult
+
 if TYPE_CHECKING:
     from unfi_api import UnfiApiClient
+
 
 class ProductIntID(BaseModel):
     product_int_id: int = Field(..., alias='ProductIntID')
@@ -60,6 +62,10 @@ class ProductIntID(BaseModel):
         ..., alias='RequiresCustomerAuthorization'
     )
 
+    @validator('category_id', 'department_id', pre=True)
+    def none_to_int_zero(cls, v):
+        return 0 if v is None else v
+
     @validator('is_image_available', pre=True)
     def is_image_available_validator(cls, v):
         return True if v else False
@@ -83,7 +89,6 @@ class ProductData(BaseModel):
     refers_to: str = Field(..., alias="refersTo")
     buyer_notes: str = Field(..., alias="buyerNotes")
     buyer_code: str = Field(..., alias="buyerCode")
-
 
     @validator("effective_date", pre=True, allow_reuse=True)
     def validate_effective_date(cls, v):
@@ -146,6 +151,11 @@ class ProductDetailIntId(BaseModel):
         #             values[k] = v.title()
         return values
 
+    @validator("category_id", pre=True)
+    def none_to_int_zero(cls, v):
+        """convert None to 0"""
+        return 0 if v is None else v
+
     @validator("upc", "inner_case_upc", "master_case_upc", pre=True)
     def validate_upc(cls, v):
         return int(v.replace("-", ""))
@@ -157,8 +167,6 @@ class ProductDetailIntId(BaseModel):
     @property
     def unit_size(self):
         return clean_size_field(self.pack_size)
-    
-
 
 
 class ProductListing(BaseModel):
@@ -223,7 +231,6 @@ class ProductListing(BaseModel):
 
 
 class UNFIProduct(BaseModel):
-    
     # ID's
     upc: int
     upc_no_check: int
@@ -242,7 +249,6 @@ class UNFIProduct(BaseModel):
     organic: str
     image_url: str
     image_available: bool
-
 
     # retail pricing
     case_price: float
@@ -264,7 +270,6 @@ class UNFIProduct(BaseModel):
     nutrition_facts: Optional[NutritionFacts]
     pricing: Pricing
     listing: ProductResult
-    
 
     class Config:
         arbitrary_types_allowed = True
@@ -294,16 +299,16 @@ class UNFIProduct(BaseModel):
         supplemental_data_dict["inner_case_upc"] = inner_case_upc
 
         # get description info
-        description = data_by_int_id.product_name.replace("`", "'").replace("'S","'s")
+        description = data_by_int_id.product_name.replace("`", "'").replace("'S", "'s")
         description = re.sub(r"( At Least \d+% Organic| 100% Organic)", "", description)
-        brand = data_by_int_id.brand_name.title().replace("`", "'").replace("'S","'s")
+        brand = data_by_int_id.brand_name.title().replace("`", "'").replace("'S", "'s")
         short_description = int_id.short_description
         long_description = int_id.long_description
         category = data_by_int_id.category_name
         organic_code = data_by_int_id.organic_code
         organic = "Y" if organic_code in ['OG2', 'OG1'] else ""
         image_available = int_id.is_image_available
-        image_url = "https://products.unfi.com/api/Images/"+str(product_int_id)
+        image_url = "https://products.unfi.com/api/Images/" + str(product_int_id)
         ######
         supplemental_data_dict["description"] = description
         supplemental_data_dict["brand"] = brand
@@ -344,7 +349,7 @@ class UNFIProduct(BaseModel):
 
         values.update(supplemental_data_dict)
         return values
-        
+
     def normalize(self, **kwargs) -> dict:
         """pass to base model dict method"""
         return normalize_dict(self.dict(**kwargs))
@@ -353,7 +358,6 @@ class UNFIProduct(BaseModel):
         """pass to base model dict method"""
         return flatten_dict_overwrite(self.dict(**kwargs))
 
-    
     def to_excel(self, exclude=None, include=None) -> dict:
         """pass to base model dict method"""
         if not exclude:
@@ -365,32 +369,31 @@ class UNFIProduct(BaseModel):
         out_dict.update(prices)
         out_dict = lower_case_keys(out_dict)
         return flatten_dict_overwrite(out_dict)
-    
+
     def get_image(self, client: 'UnfiApiClient'):
         if self.image_available:
             return client.get_product_image(self.int_id)
         else:
             return None
-            
-
 
 
 class UNFIProducts:
-    
-    def __init__(self, products: Dict[str, UNFIProduct]={}) -> None:
+
+    def __init__(self, products: Dict[str, UNFIProduct] = {}) -> None:
         if isinstance(products, UNFIProducts):
             products = products.products_dict
         self.products_dict = products
-        
-    def to_excel(self, exclude=None, include=None) -> List[Dict[str,dict]]:
+
+    def to_excel(self, exclude=None, include=None) -> List[Dict[str, dict]]:
         """
         pass to base model to_excel method
         exclude and include are fields to exclude and include from the UnfiProduct model dict
         """
 
-        products = {product.product_code: product.to_excel(exclude=exclude, include=include) for product in self.products_dict.values()}
+        products = {product.product_code: product.to_excel(exclude=exclude, include=include) for product in
+                    self.products_dict.values()}
         return products
-    
+
     def product_codes(self) -> List[str]:
         """generator of product codes"""
         for code in self.products_dict.keys():
@@ -400,23 +403,23 @@ class UNFIProducts:
         """generator of products"""
         for product in self.products_dict.values():
             yield product
-            
+
     def __iter__(self) -> Iterator[UNFIProduct]:
         """pass to base model __iter__ method"""
         return self.products()
-    
+
     def __getitem__(self, key: str) -> UNFIProduct:
         """pass to base model __getitem__ method"""
         return self.products_dict[key]
-    
+
     def __len__(self) -> int:
         """pass to base model __len__ method"""
         return len(self.products_dict)
-    
+
     def __repr__(self) -> str:
         """pass to base model __repr__ method"""
         return f"<UNFIProducts: {len(self.products_dict)} products>"
-    
+
     def update(self, products: Union[Dict[str, UNFIProduct], UNFIProducts]) -> None:
         """pass to base model update method"""
         if isinstance(products, UNFIProducts):
