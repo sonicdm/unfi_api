@@ -30,7 +30,7 @@ class ProductResult(BaseModel):
     stock_oh: int = Field(..., alias="StockOH")
     units_in_full_case: int = Field(..., alias="UnitsInFullCase")
     minqty: int = Field(..., alias="MINQTY")
-    category_id: int = Field(..., alias="CategoryID")
+    category_id: int = Field(0, alias="CategoryID")
     plu: Any = Field(..., alias="PLU")
     search_rank: int = Field(..., alias="SearchRank")
     warehouse_message: Any = Field(..., alias="WarehouseMessage")
@@ -50,6 +50,10 @@ class ProductResult(BaseModel):
             if isinstance(v, str):
                 values[k] = v.title()
         return values
+
+    @validator("category_id", pre=True)
+    def none_to_int(cls, v: Union[int, None]) -> int:
+        return 0 if v is None else v
 
     def download(self, client:'UnfiApiClient', callback: Callable = None) -> UNFIProduct:
         product = client.get_product(self)
